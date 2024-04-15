@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Excel to JSON Parser</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            border: 2px solid #ddd;
+            /* Border color */
+            width: 100%;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            /* Border color */
+        }
+
+        th {
+            background-color: #f2f2f2;
+            /* Header background color */
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Upload Excel File</h2>
+    <p> <input type="file" id="excel-file-input" accept=".xlsx, .xls">
+    </p>
+    <p>
+        <button onclick="parseExcel()">Parse</button>
+    </p>
+
+    <p>
+        <button id="download-btn" onclick="downloadExcel()">Download Excel</button>
+    </p>
+
+    <div id="checkboxes"></div>
+    <div id="table-container"></div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+        var jsonData = null;
+
+        function parseExcel() {
+            var fileInput = document.getElementById('excel-file-input');
+            var checkboxesDiv = document.getElementById('checkboxes');
+            var tableContainer = document.getElementById('table-container');
+
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, { type: 'array' });
+                var sheetName = workbook.SheetNames[0];
+                var sheet = workbook.Sheets[sheetName];
+                jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                // Create checkboxes for each header
+                checkboxesDiv.innerHTML = '';
+                jsonData[0].forEach(function (header, index) {
+                    var checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = 'checkbox-' + index;
+                    checkbox.checked = true; // By default, all columns are shown
+                    checkbox.setAttribute('onclick', 'toggleColumn(' + index + ')');
+
+                    var label = document.createElement('label');
+                    label.htmlFor = 'checkbox-' + index;
+                    label.textContent = header;
+
+                    checkboxesDiv.appendChild(checkbox);
+                    checkboxesDiv.appendChild(label);
+                    checkboxesDiv.appendChild(document.createElement('br'));
+                });
+
+                // Display the data table with all columns initially
+                renderDataTable(jsonData);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function toggleColumn(index) {
+            var table = document.getElementById('data-table');
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+            var columnIndex = index + 1; // Excel columns are 1-indexed
+            var isVisible = checkboxes[index].checked;
+
+            for (var i = 0; i < table.rows.length; i++) {
+                var row = table.rows[i];
+                if (isVisible) {
+                    row.cells[columnIndex].style.display = '';
+                } else {
+                    row.cells[columnIndex].style.display = 'none';
+                }
+            }
+        }
+
+        function renderDataTable(data) {
+            var tableContainer = document.getElementById('table-container');
+            tableContainer.innerHTML = '';
+
+            var table = document.createElement('table');
+            table.id = 'data-table';
+
+            // Create header row
+            var headerRow = table.insertRow();
+            data[0].forEach(function (header) {
+                var cell = headerRow.insertCell();
+                cell.textContent = header;
+            });
+
+            // Create data rows
+            for (var i = 1; i < data.length; i++) {
+                var rowData = data[i];
+                var row = table.insertRow();
+                rowData.forEach(function (cellData) {
+                    var cell = row.insertCell();
+                    cell.textContent = cellData;
+                });
+            }
+
+            tableContainer.appendChild(table);
+        }
+
+        function downloadExcel() {
+            if (!jsonData) {
+                alert('Please upload an Excel file first.');
+                return;
+            }
+
+            var filteredData = [];
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(function (checkbox, index) {
+                if (checkbox.checked) {
+                    var columnIndex = index + 1;
+                    var header = jsonData[0][index];
+                    var columnData = [header]; // Initialize with header
+                    for (var i = 1; i < jsonData.length; i++) {
+                        if (jsonData[i][index] !== undefined) { // Check for undefined values
+                            columnData.push(jsonData[i][index]);
+                        } else {
+                            columnData.push(''); // Add empty string for undefined values
+                        }
+                    }
+                    filteredData.push(columnData);
+                }
+            });
+
+            var worksheet = XLSX.utils.aoa_to_sheet(filteredData);
+
+            var workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet);
+
+            // Save workbook as Excel file
+            var wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            var blob = new Blob([wbout], { type: 'application/octet-stream' });
+            var fileName = 'filtered_data.xlsx';
+
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blob, fileName);
+            } else {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+        }
+    </script>
+</body>
+
+</html>
