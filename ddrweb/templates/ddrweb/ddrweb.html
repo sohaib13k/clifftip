@@ -6,6 +6,14 @@
     <title>Directors Daily Report</title>
 </head>
 <body>
-    <h1>Hello</h1>
+
+    <ul>
+
+        {%for report in reports %}
+        <li>
+            <a href="{% url 'ddrweb-viewReport' report %}">{{report}}</a>
+        </li>
+        {% endfor%}
+    </ul>
 </body>
 </html>
