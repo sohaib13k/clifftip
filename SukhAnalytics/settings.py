@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['localhost', 'sohaib13k.pythonanywhere.com']
 INSTALLED_APPS = [
     # custom apps
     'home.apps.HomeConfig',
-    'ddrweb.apps.DdrwebConfig',
+    'ddr.apps.DdrConfig',
     'utilities.apps.UtilitiesConfig',
 
     # default apps

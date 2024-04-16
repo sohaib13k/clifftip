@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class DdrwebConfig(AppConfig):
+class DdrConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'ddrweb'
+    name = 'ddr'
