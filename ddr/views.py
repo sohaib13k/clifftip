@@ -38,16 +38,25 @@ def view_report(request, report):
 
         average = numerical_value / total_entries
 
+
+        
+        df = pd.read_excel(report, header=None).drop(index=[0,1,2])
+        report_excel = df.to_html(classes='table table-striped', index=False, header=False)
+        print(type(report_excel))
+        print(report_excel)
+
         if average < threshhold:
             result = "Sales average low that the set threshhold"
         return render(
             request,
             "ddr/view_report.html",
             {
+                "report": report,
                 "total": total,
                 "threshhold": threshhold,
                 "result": result,
                 "average": average,
+                "report_excel": report_excel
             },
         )
     except KeyError as e:

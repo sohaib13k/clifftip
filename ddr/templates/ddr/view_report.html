@@ -6,22 +6,16 @@
     <title>Document</title>
 </head>
 <body>
-    <div>
-        Threshhold: {{ threshhold }}
+    <h2>Summary</h2>
+    <div>Report name: {{ report }}</div>
+    <div> Threshhold: {{ threshhold }} </div>
+    <div> Total: {{ total}} </div>
+    <div> Average: {{ average }} </div>
+    <div style="color: red;"> Result: {{ result}} </div>
 
-    </div>
-    <div>
-        Total: {{ total}}
-
-    </div>
-    <div>
-
-        Average: {{ average }}
-    </div>
-    <div style="color: red;">
-        Result: {{ result}}
-
-    </div>
-    
+    <h2>Excel Data</h2>
+    <div class="table-responsive">
+    {{ report_excel|safe }}
+</div>
 </body>
 </html>
