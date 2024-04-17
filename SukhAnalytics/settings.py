@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'ddr.apps.DdrConfig',
     'utilities.apps.UtilitiesConfig',
+    'account.apps.AccountConfig',
 
     # default apps
     'django.contrib.admin',
