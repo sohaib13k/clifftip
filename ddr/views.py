@@ -1,24 +1,20 @@
 from django.shortcuts import render
 from django.conf import settings
+from pathlib import Path
 import pandas as pd
 import os
 import re
 
 
 def ddr(request):
-    directory_path = os.path.join(settings.BASE_DIR, "reports")
-
-    reports = [
-        report
-        for report in os.listdir(directory_path)
-        if os.path.isfile(os.path.join(directory_path, report))
-    ]
+    directory_path = settings.BASE_DIR + "reports"
+    reports = [report.name for report in directory_path.iterdir() if report.is_file()]
 
     return render(request, "ddr/ddr.html", {"reports": reports})
 
 
 def view_report(request, report):
-    report = os.path.join(settings.BASE_DIR, "reports", report)
+    report = settings.BASE_DIR / "reports" / report
     df = pd.read_excel(report, header=3, index_col=0)
 
     try:
@@ -38,12 +34,10 @@ def view_report(request, report):
 
         average = numerical_value / total_entries
 
-
-        
-        df = pd.read_excel(report, header=None).drop(index=[0,1,2])
-        report_excel = df.to_html(classes='table table-striped', index=False, header=False)
-        print(type(report_excel))
-        print(report_excel)
+        df = pd.read_excel(report, header=None).drop(index=[0, 1, 2])
+        report_excel = df.to_html(
+            classes="table table-striped", index=False, header=False
+        )
 
         if average < threshhold:
             result = "Sales average low that the set threshhold"
@@ -56,7 +50,7 @@ def view_report(request, report):
                 "threshhold": threshhold,
                 "result": result,
                 "average": average,
-                "report_excel": report_excel
+                "report_excel": report_excel,
             },
         )
     except KeyError as e:
