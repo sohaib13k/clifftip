@@ -1,20 +1,142 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5"
+    />
+    <meta name="author" content="AdminKit" />
+    <meta
+      name="keywords"
+      content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Directors Daily Report</title>
-</head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
 
-<body>
-  <ul>
-    {% for report in reports %}
-    <li>
-      <a href="{% url 'ddr-view' report %}">{{ report }}</a>
-    </li>
-    {% endfor %}
-  </ul>
-</body>
+    <link rel="canonical" href="https://demo.adminkit.io/pages-blank.html" />
 
+    <title>Home | Sukh Analytics</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Choose your prefered color scheme -->
+    <link href="{% static 'account/css/light.css' %}" rel="stylesheet" />
+    {% comment %}
+    <link href="{% static 'account/css/dark.css' %}" rel="stylesheet" />
+    {% endcomment %}
+    <link href="{% static 'account/css/styles.css' %}" rel="stylesheet" />
+  </head>
+  <!--
+  HOW TO USE: 
+  data-theme: default (default), dark, light, colored
+  data-layout: fluid (default), boxed
+  data-sidebar-position: left (default), right
+  data-sidebar-layout: default (default), compact
+-->
+
+  <body
+    data-theme="default"
+    data-layout="fluid"
+    data-sidebar-position="left"
+    data-sidebar-layout="default"
+  >
+    <div class="wrapper">
+      <nav id="sidebar" class="sidebar js-sidebar">
+        <div class="sidebar-content js-simplebar">
+          <a class="sidebar-brand" href="#">
+            <span class="sidebar-brand-text align-middle">
+              Home {% comment %}
+              <sup
+                ><small class="badge bg-primary text-uppercase">Pro</small></sup
+              >
+              {% endcomment %}
+            </span>
+            <svg
+              class="sidebar-brand-icon align-middle"
+              width="32px"
+              height="32px"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FFFFFF"
+              stroke-width="1.5"
+              stroke-linecap="square"
+              stroke-linejoin="miter"
+              color="#FFFFFF"
+              style="margin-left: -3px"
+            >
+              <path d="M12 4L20 8.00004L12 12L4 8.00004L12 4Z"></path>
+              <path d="M20 12L12 16L4 12"></path>
+              <path d="M20 16L12 20L4 16"></path>
+            </svg>
+          </a>
+
+         
+
+          
+        </div>
+      </nav>
+
+      <div class="main">
+        <nav class="navbar navbar-expand navbar-light navbar-bg">
+          <a class="sidebar-toggle js-sidebar-toggle">
+            <i class="hamburger align-self-center"></i>
+          </a>
+
+          <form class="d-none d-sm-inline-block">
+            <div class="input-group input-group-navbar">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search…"
+                aria-label="Search"
+              />
+              <button class="btn" type="button">
+                <i class="align-middle" data-feather="search"></i>
+              </button>
+            </div>
+          </form>
+
+      
+          
+        </nav>
+
+        <main class="content">
+          <div class="container-fluid p-0">
+            <h1 class="h3 mb-3">Director's Daily Report</h1>
+
+            <div class="row">
+              {% for report in reports %}
+              <div class="col-md-4 col-sm-6">
+                <div class="card">
+                  <div class="card-header">
+                    <a href="{% url 'ddr-view' report %}">
+                      <h5 class="card-title mb-0">{{ report }}</h5>
+                    </a>
+                  </div>
+                  <div class="card-body"></div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </main>
+
+      
+      </div>
+    </div>
+
+    <script src="{% static 'account/js/app.js' %}"></script>
+  </body>
 </html>

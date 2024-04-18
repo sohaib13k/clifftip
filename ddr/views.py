@@ -15,41 +15,42 @@ def ddr(request):
 
 def view_report(request, report):
     report = settings.BASE_DIR / "reports" / report
-    df = pd.read_excel(report, header=3, index_col=0)
+    # df = pd.read_excel(report, header=3, index_col=0)
 
     try:
-        total = df.at["Total", "Amount"]
-        df = pd.read_excel(report, header=3)
-        total_entries = df["Sr. No."].apply(lambda x: isinstance(x, (int, float))).sum()
-        threshhold = 30000
-        result = ""
+        # total = df.at["Total", "Amount"]
+        # df = pd.read_excel(report, header=3)
+        # total_entries = df["Sr. No."].apply(lambda x: isinstance(x, (int, float))).sum()
+        # threshhold = 30000
+        # result = ""
 
-        match = re.search(r"\d{1,3}(?:,\d{3})*(?:\.\d+)?", total)
+        # match = re.search(r"\d{1,3}(?:,\d{3})*(?:\.\d+)?", total)
 
-        if match:
-            numerical_value = match.group(0).replace(",", "")
-            numerical_value = float(numerical_value)
-        else:
-            numerical_value = None
+        # if match:
+        #     numerical_value = match.group(0).replace(",", "")
+        #     numerical_value = float(numerical_value)
+        # else:
+        #     numerical_value = None
 
-        average = numerical_value / total_entries
+        # average = numerical_value / total_entries
 
-        df = pd.read_excel(report, header=None).drop(index=[0, 1, 2])
+        # df = pd.read_excel(report, header=None).drop(index=[0, 1, 2])
+        df = pd.read_excel(report, header=None)
         report_excel = df.to_html(
             classes="table table-striped", index=False, header=False
         )
 
-        if average < threshhold:
-            result = "Sales average low that the set threshhold"
+        # if average < threshhold:
+        #     result = "Sales average low that the set threshhold"
         return render(
             request,
             "ddr/view_report.html",
             {
-                "report": report,
-                "total": total,
-                "threshhold": threshhold,
-                "result": result,
-                "average": average,
+                "report": report.name,
+                # "total": total,
+                # "threshhold": threshhold,
+                # "result": result,
+                # "average": average,
                 "report_excel": report_excel,
             },
         )
