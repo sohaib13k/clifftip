@@ -7,7 +7,7 @@ import re
 
 
 def ddr(request):
-    directory_path = settings.BASE_DIR + "reports"
+    directory_path = settings.BASE_DIR / "reports"
     reports = [report.name for report in directory_path.iterdir() if report.is_file()]
 
     return render(request, "ddr/ddr.html", {"reports": reports})
