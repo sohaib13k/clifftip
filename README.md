@@ -2,7 +2,7 @@
 
 ```python
 from dotenv import load_dotenv
-load_dotenv(dotenv_path=path + '/.env')
+load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir.
 ```
 
 
