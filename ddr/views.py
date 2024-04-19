@@ -55,4 +55,5 @@ def view_report(request, report):
             },
         )
     except KeyError as e:
+        # TODO: replace below line with logger
         print(f"Key error: {e} - Check if the specified row or column exists.")
