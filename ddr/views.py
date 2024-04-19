@@ -47,6 +47,20 @@ def temp(request, report):
         classes="table table-striped", index=False, header=True
     )
 
+
+
+
+
+
+    updated_sales = updated_sales.groupby('Sales Person').agg({'Net Total': 'sum'}).reset_index()
+
+    # Convert to HTML for displaying in the template
+    analysis = updated_sales.to_html(classes="table table-striped", index=False, header=True)
+
+
+
+
+
     return render(
         request,
         "ddr/view_report.html",
@@ -57,6 +71,7 @@ def temp(request, report):
             # "result": result,
             # "average": average,
             "report_excel": report_excel,
+            "analysis": analysis,
         },
     )
 
