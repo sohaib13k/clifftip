@@ -1,9 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <!-- Choose your prefered color scheme -->
+    <link href="{% static 'account/css/light.css' %}" rel="stylesheet" />
+    {% comment %}
+    <link href="{% static 'account/css/dark.css' %}" rel="stylesheet" />
+    {% endcomment %}
+    <link href="{% static 'account/css/styles.css' %}" rel="stylesheet" />
 </head>
 <body>
     <h2>Summary</h2>
@@ -14,6 +22,9 @@
     <div style="color: red;"> Result: {{ result}} </div> {% endcomment %}
 
     <h2>Excel Data</h2>
+    <a href="#" class="btn btn-primary">Download Excel</a>
+    <hr>
+
     <div class="table-responsive">
     {{ report_excel|safe }}
 </div>
