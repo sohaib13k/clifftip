@@ -17,7 +17,8 @@ def ddr(request):
 def temp(request, report):
     directory_path = settings.BASE_DIR / "reports"
 
-    df_sales = pd.read_excel(report)
+    df_sales = pd.read_excel(report, skiprows=3)
+    # df_sales = pd.read_excel(report).drop([0,1,2])
 
     # df_sales['Sales Person'] = '0'
     # df_sales['Branch'] = '0'
