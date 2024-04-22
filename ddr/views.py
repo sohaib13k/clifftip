@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 import os
 import re
-from .service import report_logic
-
+# from .service import report_logic
+from .service import commonutil
 
 def ddr(request):
     directory_path = settings.BASE_DIR / "reports"
@@ -31,9 +31,12 @@ def temp(request, report):
     updated_sales = pd.merge(
         df_sales,
         df_parties[["GST", "Sales Person", "Branch"]],
-        on="GST",
+        left_on="Customer GSTN",
+        right_on="GST",
         how="inner",
     )
+
+    updated_sales=updated_sales.drop("GST", axis='columns')
 
     updated_sales.to_excel(directory_path / "downloads/new.xlsx", index=False)
 
@@ -53,11 +56,29 @@ def temp(request, report):
 
 
     individual_sales = updated_sales.groupby('Sales Person').agg({'Net Total': 'sum'}).reset_index()
-    branch_sales = updated_sales.groupby('Branch').agg({'Net Total': 'sum'}).reset_index()
-    item_type_sales = updated_sales.groupby('Item Type').agg({'Net Total': 'sum'}).reset_index()
-    individual_by_item_type_sales = updated_sales.groupby(['Sales Person', 'Item Type']).size().unstack(fill_value=0)
-    branch_by_item_type_sales = updated_sales.groupby(['Branch', 'Item Type']).size().unstack(fill_value=0)
+    individual_sales = commonutil.append_total(individual_sales, 'Sales Person', 'Net Total')
+    
 
+    branch_sales = updated_sales.groupby('Branch').agg({'Net Total': 'sum'}).reset_index()
+    branch_sales = commonutil.append_total(branch_sales, 'Branch', 'Net Total')
+
+    item_type_sales = updated_sales.groupby('Item Type').agg({'Net Total': 'sum'}).reset_index()
+    item_type_sales = commonutil.append_total(item_type_sales, 'Item Type', 'Net Total')
+
+
+
+
+
+
+    individual_by_item_type_sales = updated_sales.groupby(['Sales Person', 'Item Type']).size().unstack(fill_value=0)
+    total_individual_item = individual_by_item_type_sales.sum()
+    individual_by_item_type_sales.loc['Total'] = total_individual_item
+
+
+
+    branch_by_item_type_sales = updated_sales.groupby(['Branch', 'Item Type']).size().unstack(fill_value=0)
+    total_branch_item = branch_by_item_type_sales.sum()
+    branch_by_item_type_sales.loc['Total'] = total_branch_item
 
     # Convert to HTML for displaying in the template
     sales_analysis = individual_sales.to_html(classes="table table-striped", index=False, header=True)
