@@ -52,10 +52,19 @@ def temp(request, report):
 
 
 
-    updated_sales = updated_sales.groupby('Sales Person').agg({'Net Total': 'sum'}).reset_index()
+    individual_sales = updated_sales.groupby('Sales Person').agg({'Net Total': 'sum'}).reset_index()
+    branch_sales = updated_sales.groupby('Branch').agg({'Net Total': 'sum'}).reset_index()
+    item_type_sales = updated_sales.groupby('Item Type').agg({'Net Total': 'sum'}).reset_index()
+    individual_by_item_type_sales = updated_sales.groupby(['Sales Person', 'Item Type']).size().unstack(fill_value=0)
+    branch_by_item_type_sales = updated_sales.groupby(['Branch', 'Item Type']).size().unstack(fill_value=0)
+
 
     # Convert to HTML for displaying in the template
-    analysis = updated_sales.to_html(classes="table table-striped", index=False, header=True)
+    sales_analysis = individual_sales.to_html(classes="table table-striped", index=False, header=True)
+    branch_analysis = branch_sales.to_html(classes="table table-striped", index=False, header=True)
+    item_type_analysis = item_type_sales.to_html(classes="table table-striped", index=False, header=True)
+    individual_by_item_type_analysis = individual_by_item_type_sales.to_html(classes="table table-striped", index=True  , header=True)
+    branch_by_item_type_analysis = branch_by_item_type_sales.to_html(classes="table table-striped", index=True  , header=True)
 
 
 
@@ -71,7 +80,11 @@ def temp(request, report):
             # "result": result,
             # "average": average,
             "report_excel": report_excel,
-            "analysis": analysis,
+            "sales_analysis": sales_analysis,
+            "branch_analysis": branch_analysis,
+            "item_type_analysis": item_type_analysis,
+            "individual_by_item_type_analysis": individual_by_item_type_analysis,
+            "branch_by_item_type_analysis": branch_by_item_type_analysis,
         },
     )
 
