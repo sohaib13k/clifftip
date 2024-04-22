@@ -119,7 +119,7 @@
             <div class="row">
               {% for report in reports %}
               <div class="col-md-4 col-sm-6">
-                <div class="card">
+                <div class="card {{color_single_excel}}">
                   <div class="card-header">
                     <a href="{% url 'ddr-view' report %}">
                       <h5 class="card-title mb-0">{{ report }}</h5>

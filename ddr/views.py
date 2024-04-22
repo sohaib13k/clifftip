@@ -5,14 +5,14 @@ import pandas as pd
 import os
 import json
 import re
-# from .service import report_logic
+from .service import report_logic
 from .service import commonutil
 
 def ddr(request):
     directory_path = settings.BASE_DIR / "reports"
     reports = [report.name for report in directory_path.iterdir() if report.is_file()]
 
-    return render(request, "ddr/ddr.html", {"reports": reports})
+    return render(request, "ddr/ddr.html", {"reports": reports, "color_single_excel":"bg-success"})
 
 
 def temp(request, report):
