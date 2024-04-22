@@ -3,6 +3,7 @@ from django.conf import settings
 from pathlib import Path
 import pandas as pd
 import os
+import json
 import re
 # from .service import report_logic
 from .service import commonutil
@@ -16,18 +17,11 @@ def ddr(request):
 
 def temp(request, report):
     directory_path = settings.BASE_DIR / "reports"
-
     df_sales = pd.read_excel(report, skiprows=3)
-    # df_sales = pd.read_excel(report).drop([0,1,2])
-
-    # df_sales['Sales Person'] = '0'
-    # df_sales['Branch'] = '0'
+    df_parties = pd.read_excel(directory_path / "sub_reports" / "All_Parties_DDR.xlsx")
 
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
     # df_sales.insert(gstn_index, 'Item Type', '0')
-
-    df_parties = pd.read_excel(directory_path / "sub_reports" / "All_Parties_DDR.xlsx")
-    # df_parties = df_parties.drop(['Branch'], axis=1)
 
     updated_sales = pd.merge(
         df_sales,
@@ -38,27 +32,16 @@ def temp(request, report):
     )
 
     updated_sales=updated_sales.drop("GST", axis='columns')
-
     updated_sales.to_excel(directory_path / "downloads/new.xlsx", index=False)
-
-    # Merge DataFrames on 'Customer GSTN' and 'GST no'
-    # Assuming 'Customer GSTN' and 'GST no' are the column names in both DataFrames
-    # merged_df = pd.merge(df_parties, df_sales[['Customer GSTN', 'GST no', 'Sales Person']],
-    #                      on=['Customer GSTN', 'GST no'],
-    #                      how='left')
 
     report_excel = updated_sales.to_html(
         classes="table table-striped", index=False, header=True
     )
 
 
-
-
-
-
+    # Addig total to add values
     individual_sales = updated_sales.groupby('Sales Person').agg({'Net Total': 'sum'}).reset_index()
     individual_sales = commonutil.append_total(individual_sales, 'Sales Person', 'Net Total')
-    
 
     branch_sales = updated_sales.groupby('Branch').agg({'Net Total': 'sum'}).reset_index()
     branch_sales = commonutil.append_total(branch_sales, 'Branch', 'Net Total')
@@ -66,16 +49,9 @@ def temp(request, report):
     item_type_sales = updated_sales.groupby('Item Type').agg({'Net Total': 'sum'}).reset_index()
     item_type_sales = commonutil.append_total(item_type_sales, 'Item Type', 'Net Total')
 
-
-
-
-
-
     individual_by_item_type_sales = updated_sales.groupby(['Sales Person', 'Item Type']).size().unstack(fill_value=0)
     total_individual_item = individual_by_item_type_sales.sum()
     individual_by_item_type_sales.loc['Total'] = total_individual_item
-
-
 
     branch_by_item_type_sales = updated_sales.groupby(['Branch', 'Item Type']).size().unstack(fill_value=0)
     total_branch_item = branch_by_item_type_sales.sum()
@@ -88,7 +64,50 @@ def temp(request, report):
     individual_by_item_type_analysis = individual_by_item_type_sales.to_html(classes="table table-striped", index=True  , header=True)
     branch_by_item_type_analysis = branch_by_item_type_sales.to_html(classes="table table-striped", index=True  , header=True)
 
+    # Preparing data for chart
+    individual_chart_data = {
+    'labels': individual_sales['Sales Person'].tolist()[:-1],  # Excludes the 'Total' label
+    'data': individual_sales['Net Total'].tolist()[:-1],  # Excludes the 'Total' data
+    }
 
+    branch_chart_data = {
+    'labels': branch_sales['Branch'].tolist()[:-1],   # Excludes the 'Total' label
+    'data': branch_sales['Net Total'].tolist()[:-1],  # Excludes the 'Total' label
+    }
+
+    item_type_chart_data = {
+    'labels': item_type_sales['Item Type'].tolist()[:-1],  # Excludes the 'Total' label
+    'data': item_type_sales['Net Total'].tolist()[:-1],  # Excludes the 'Total' label
+    }
+
+    individual_item_type_datasets = []
+    for item_type in individual_by_item_type_sales.columns:
+        individual_item_type_datasets.append({
+        'label': item_type,
+        'data': individual_by_item_type_sales[item_type].tolist()[:-1]  # Excludes the 'Total' data
+    })
+
+    branch_item_type_datasets = []
+    for item_type in branch_by_item_type_sales.columns:
+        branch_item_type_datasets.append({
+        'label': item_type,
+        'data': branch_by_item_type_sales[item_type].tolist()[:-1]  # Excludes the 'Total' data
+    })  
+
+    # Assuming you want to pass all chart data in one serialized JSON object
+    all_chart_data = {
+    'individual_chart_data': individual_chart_data,
+    'branch_chart_data': branch_chart_data,
+    'item_type_chart_data': item_type_chart_data,
+    'individual_by_item_type_chart_data': {
+        'labels': individual_by_item_type_sales.index.tolist()[:-1],
+        'datasets': individual_item_type_datasets
+    },
+    'branch_by_item_type_chart_data': {
+        'labels': branch_by_item_type_sales.index.tolist()[:-1],
+        'datasets': branch_item_type_datasets
+    }}
+    all_chart_data_json = json.dumps(all_chart_data)
 
 
 
@@ -107,6 +126,8 @@ def temp(request, report):
             "item_type_analysis": item_type_analysis,
             "individual_by_item_type_analysis": individual_by_item_type_analysis,
             "branch_by_item_type_analysis": branch_by_item_type_analysis,
+            "all_chart_data_json":all_chart_data_json,
+            "myRange":range(3)  
         },
     )
 

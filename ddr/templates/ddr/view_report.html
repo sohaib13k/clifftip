@@ -39,6 +39,83 @@
         {{ individual_by_item_type_analysis|safe }}
     <div class="table-responsive">
         {{ branch_by_item_type_analysis|safe }}
-</div>
+
+        <h2>Chart</h2>
+        {% for i in myRange %}
+        <div class="col-12 col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Individual sale</h5>
+                    {% comment %} <h6 class="card-subtitle text-muted">A column chart uses vertical bars to display data and is used to compare values across {% endcomment %}
+                        categories.</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart w-100">
+                        <div id="apexcharts-column"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Parse the JSON data from the Django context
+                var chartData = JSON.parse('{{ all_chart_data_json|safe }}');
+                console.log(chartData);
+            
+                // Column chart
+                var options = {
+                    chart: {
+                        height: 350,
+                        type: "bar",
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            endingShape: "rounded",
+                            columnWidth: "55%",
+                        },
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ["transparent"]
+                    },
+                    series: [{
+                        name: "Net Total Sales",
+                        data: chartData.individual_chart_data.data // Use the data from chartData
+                    }],
+                    xaxis: {
+                        categories: chartData.individual_chart_data.labels // Use the labels from chartData
+                    },
+                    yaxis: {
+                        title: {
+                            text: "Net Total (₹)"
+                        }
+                    },
+                    fill: {
+                        opacity: 1
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return "₹ " + val
+                            }
+                        }
+                    }
+                }
+                var chart = new ApexCharts(
+                    document.querySelector("#apexcharts-column"),
+                    options
+                );
+                chart.render();
+            });
+        </script>
+        <script src="{% static 'js/app.js' %}"></script>
+
 </body>
 </html>

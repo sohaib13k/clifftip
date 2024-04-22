@@ -32,10 +32,10 @@ ALLOWED_HOSTS = ["localhost", "sohaib13k.pythonanywhere.com"]
 
 INSTALLED_APPS = [
     # custom apps
-    "home.apps.HomeConfig",
-    "ddr.apps.DdrConfig",
-    "utilities.apps.UtilitiesConfig",
-    "account.apps.AccountConfig",
+    "home",
+    "ddr",
+    "utilities",
+    "account",
     # default apps
     "django.contrib.admin",
     "django.contrib.auth",
