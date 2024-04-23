@@ -52,6 +52,8 @@ def temp(request, report):
     )
 
     updated_sales = updated_sales.drop("GST", axis="columns")
+    updated_sales = updated_sales[updated_sales["Branch"] != 0]
+
     updated_sales.to_excel(directory_path / "downloads/new.xlsx", index=False)
 
     report_excel = updated_sales.to_html(
@@ -59,14 +61,13 @@ def temp(request, report):
     )
 
     temp = updated_sales.to_json(orient="table")
-    # temp_min=json.dumps(json.loads(temp), separators=(',',':'))
     output_directory = settings.BASE_DIR.parent / "json" / "report"
     os.makedirs(output_directory, exist_ok=True)
     compressed_file_path = output_directory / "data.json.gz"
     with gzip.open(compressed_file_path, "wt", encoding="utf-8") as compressed_file:
         compressed_file.write(temp)
 
-    # Addig total to add values
+    # Aggregating sales values
     individual_sales = (
         updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
     )
@@ -86,17 +87,17 @@ def temp(request, report):
 
     individual_by_item_type_sales = (
         updated_sales.groupby(["Sales Person", "Item Type"])
-        .size()
-        .unstack(fill_value=0)
+        .agg({"Net Total": "sum"})
+        .unstack(
+            fill_value=0)
     )
-    total_individual_item = individual_by_item_type_sales.sum()
-    individual_by_item_type_sales.loc["Total"] = total_individual_item
 
     branch_by_item_type_sales = (
-        updated_sales.groupby(["Branch", "Item Type"]).size().unstack(fill_value=0)
+        updated_sales.groupby(["Branch", "Item Type"])
+        .agg({"Net Total": "sum"})
+        .unstack(fill_value=0)
     )
-    total_branch_item = branch_by_item_type_sales.sum()
-    branch_by_item_type_sales.loc["Total"] = total_branch_item
+
 
     # Convert to HTML for displaying in the template
     sales_analysis = individual_sales.to_html(
@@ -161,7 +162,7 @@ def temp(request, report):
             }
         )
 
-    # Assuming you want to pass all chart data in one serialized JSON object
+    # passing all chart data in one serialized JSON object
     all_chart_data = {
         "individual_chart_data": individual_chart_data,
         "branch_chart_data": branch_chart_data,
