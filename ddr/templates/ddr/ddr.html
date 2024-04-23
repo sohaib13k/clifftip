@@ -81,10 +81,6 @@
               <path d="M20 16L12 20L4 16"></path>
             </svg>
           </a>
-
-         
-
-          
         </div>
       </nav>
 
@@ -107,9 +103,6 @@
               </button>
             </div>
           </form>
-
-      
-          
         </nav>
 
         <main class="content">
@@ -117,12 +110,12 @@
             <h1 class="h3 mb-3">Director's Daily Report</h1>
 
             <div class="row">
-              {% for report in reports %}
+              {% for data in rawdata %}
               <div class="col-md-4 col-sm-6">
-                <div class="card {{color_single_excel}}">
+                <div class="card">
                   <div class="card-header">
-                    <a href="{% url 'ddr-view' report %}">
-                      <h5 class="card-title mb-0">{{ report }}</h5>
+                    <a href="{% url 'ddr-view' data %}">
+                      <h5 class="card-title mb-0">{{ data }}</h5>
                     </a>
                   </div>
                   <div class="card-body"></div>
@@ -132,8 +125,6 @@
             </div>
           </div>
         </main>
-
-      
       </div>
     </div>
 

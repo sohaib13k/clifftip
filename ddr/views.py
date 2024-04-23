@@ -1,18 +1,38 @@
+import os
+import gzip
+from django.conf import settings
+import json
 from django.shortcuts import render
 from django.conf import settings
-from pathlib import Path
 import pandas as pd
-import os
 import json
 import re
 from .service import report_logic
 from .service import commonutil
+from .models import CustomReport
+
 
 def ddr(request):
-    directory_path = settings.BASE_DIR / "reports"
-    reports = [report.name for report in directory_path.iterdir() if report.is_file()]
+    """
+    View to show raw data file
+    """
+    rawdata_file_dir = settings.BASE_DIR / "reports"
+    rawdata = [file.name for file in rawdata_file_dir.iterdir() if file.is_file()]
+    rawdata_db = list(CustomReport.objects.values_list("name", flat=True))
+    if rawdata_db:
+        rawdata.append(rawdata_db)
 
-    return render(request, "ddr/ddr.html", {"reports": reports, "color_single_excel":"bg-success"})
+    request.session["rawdata"] = (
+        rawdata  # persisting data for re-use until session exists
+    )
+
+    return render(
+        request,
+        "ddr/ddr.html",
+        {
+            "rawdata": rawdata,
+        },
+    )
 
 
 def temp(request, report):
@@ -31,85 +51,131 @@ def temp(request, report):
         how="inner",
     )
 
-    updated_sales=updated_sales.drop("GST", axis='columns')
+    updated_sales = updated_sales.drop("GST", axis="columns")
     updated_sales.to_excel(directory_path / "downloads/new.xlsx", index=False)
 
     report_excel = updated_sales.to_html(
         classes="table table-striped", index=False, header=True
     )
 
+    temp = updated_sales.to_json(orient="table")
+    # temp_min=json.dumps(json.loads(temp), separators=(',',':'))
+    output_directory = settings.BASE_DIR.parent / "json" / "report"
+    os.makedirs(output_directory, exist_ok=True)
+    compressed_file_path = output_directory / "data.json.gz"
+    with gzip.open(compressed_file_path, "wt", encoding="utf-8") as compressed_file:
+        compressed_file.write(temp)
 
     # Addig total to add values
-    individual_sales = updated_sales.groupby('Sales Person').agg({'Net Total': 'sum'}).reset_index()
-    individual_sales = commonutil.append_total(individual_sales, 'Sales Person', 'Net Total')
+    individual_sales = (
+        updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
+    )
+    individual_sales = commonutil.append_total(
+        individual_sales, "Sales Person", "Net Total"
+    )
 
-    branch_sales = updated_sales.groupby('Branch').agg({'Net Total': 'sum'}).reset_index()
-    branch_sales = commonutil.append_total(branch_sales, 'Branch', 'Net Total')
+    branch_sales = (
+        updated_sales.groupby("Branch").agg({"Net Total": "sum"}).reset_index()
+    )
+    branch_sales = commonutil.append_total(branch_sales, "Branch", "Net Total")
 
-    item_type_sales = updated_sales.groupby('Item Type').agg({'Net Total': 'sum'}).reset_index()
-    item_type_sales = commonutil.append_total(item_type_sales, 'Item Type', 'Net Total')
+    item_type_sales = (
+        updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
+    )
+    item_type_sales = commonutil.append_total(item_type_sales, "Item Type", "Net Total")
 
-    individual_by_item_type_sales = updated_sales.groupby(['Sales Person', 'Item Type']).size().unstack(fill_value=0)
+    individual_by_item_type_sales = (
+        updated_sales.groupby(["Sales Person", "Item Type"])
+        .size()
+        .unstack(fill_value=0)
+    )
     total_individual_item = individual_by_item_type_sales.sum()
-    individual_by_item_type_sales.loc['Total'] = total_individual_item
+    individual_by_item_type_sales.loc["Total"] = total_individual_item
 
-    branch_by_item_type_sales = updated_sales.groupby(['Branch', 'Item Type']).size().unstack(fill_value=0)
+    branch_by_item_type_sales = (
+        updated_sales.groupby(["Branch", "Item Type"]).size().unstack(fill_value=0)
+    )
     total_branch_item = branch_by_item_type_sales.sum()
-    branch_by_item_type_sales.loc['Total'] = total_branch_item
+    branch_by_item_type_sales.loc["Total"] = total_branch_item
 
     # Convert to HTML for displaying in the template
-    sales_analysis = individual_sales.to_html(classes="table table-striped", index=False, header=True)
-    branch_analysis = branch_sales.to_html(classes="table table-striped", index=False, header=True)
-    item_type_analysis = item_type_sales.to_html(classes="table table-striped", index=False, header=True)
-    individual_by_item_type_analysis = individual_by_item_type_sales.to_html(classes="table table-striped", index=True  , header=True)
-    branch_by_item_type_analysis = branch_by_item_type_sales.to_html(classes="table table-striped", index=True  , header=True)
+    sales_analysis = individual_sales.to_html(
+        classes="table table-striped", index=False, header=True
+    )
+    branch_analysis = branch_sales.to_html(
+        classes="table table-striped", index=False, header=True
+    )
+    item_type_analysis = item_type_sales.to_html(
+        classes="table table-striped", index=False, header=True
+    )
+    individual_by_item_type_analysis = individual_by_item_type_sales.to_html(
+        classes="table table-striped", index=True, header=True
+    )
+    branch_by_item_type_analysis = branch_by_item_type_sales.to_html(
+        classes="table table-striped", index=True, header=True
+    )
 
     # Preparing data for chart
     individual_chart_data = {
-    'labels': individual_sales['Sales Person'].tolist()[:-1],  # Excludes the 'Total' label
-    'data': individual_sales['Net Total'].tolist()[:-1],  # Excludes the 'Total' data
+        "labels": individual_sales["Sales Person"].tolist()[
+            :-1
+        ],  # Excludes the 'Total' label
+        "data": individual_sales["Net Total"].tolist()[
+            :-1
+        ],  # Excludes the 'Total' data
     }
 
     branch_chart_data = {
-    'labels': branch_sales['Branch'].tolist()[:-1],   # Excludes the 'Total' label
-    'data': branch_sales['Net Total'].tolist()[:-1],  # Excludes the 'Total' label
+        "labels": branch_sales["Branch"].tolist()[:-1],  # Excludes the 'Total' label
+        "data": branch_sales["Net Total"].tolist()[:-1],  # Excludes the 'Total' label
     }
 
     item_type_chart_data = {
-    'labels': item_type_sales['Item Type'].tolist()[:-1],  # Excludes the 'Total' label
-    'data': item_type_sales['Net Total'].tolist()[:-1],  # Excludes the 'Total' label
+        "labels": item_type_sales["Item Type"].tolist()[
+            :-1
+        ],  # Excludes the 'Total' label
+        "data": item_type_sales["Net Total"].tolist()[
+            :-1
+        ],  # Excludes the 'Total' label
     }
 
     individual_item_type_datasets = []
     for item_type in individual_by_item_type_sales.columns:
-        individual_item_type_datasets.append({
-        'label': item_type,
-        'data': individual_by_item_type_sales[item_type].tolist()[:-1]  # Excludes the 'Total' data
-    })
+        individual_item_type_datasets.append(
+            {
+                "label": item_type,
+                "data": individual_by_item_type_sales[item_type].tolist()[
+                    :-1
+                ],  # Excludes the 'Total' data
+            }
+        )
 
     branch_item_type_datasets = []
     for item_type in branch_by_item_type_sales.columns:
-        branch_item_type_datasets.append({
-        'label': item_type,
-        'data': branch_by_item_type_sales[item_type].tolist()[:-1]  # Excludes the 'Total' data
-    })  
+        branch_item_type_datasets.append(
+            {
+                "label": item_type,
+                "data": branch_by_item_type_sales[item_type].tolist()[
+                    :-1
+                ],  # Excludes the 'Total' data
+            }
+        )
 
     # Assuming you want to pass all chart data in one serialized JSON object
     all_chart_data = {
-    'individual_chart_data': individual_chart_data,
-    'branch_chart_data': branch_chart_data,
-    'item_type_chart_data': item_type_chart_data,
-    'individual_by_item_type_chart_data': {
-        'labels': individual_by_item_type_sales.index.tolist()[:-1],
-        'datasets': individual_item_type_datasets
-    },
-    'branch_by_item_type_chart_data': {
-        'labels': branch_by_item_type_sales.index.tolist()[:-1],
-        'datasets': branch_item_type_datasets
-    }}
+        "individual_chart_data": individual_chart_data,
+        "branch_chart_data": branch_chart_data,
+        "item_type_chart_data": item_type_chart_data,
+        "individual_by_item_type_chart_data": {
+            "labels": individual_by_item_type_sales.index.tolist()[:-1],
+            "datasets": individual_item_type_datasets,
+        },
+        "branch_by_item_type_chart_data": {
+            "labels": branch_by_item_type_sales.index.tolist()[:-1],
+            "datasets": branch_item_type_datasets,
+        },
+    }
     all_chart_data_json = json.dumps(all_chart_data)
-
-
 
     return render(
         request,
@@ -126,8 +192,8 @@ def temp(request, report):
             "item_type_analysis": item_type_analysis,
             "individual_by_item_type_analysis": individual_by_item_type_analysis,
             "branch_by_item_type_analysis": branch_by_item_type_analysis,
-            "all_chart_data_json":all_chart_data_json,
-            "myRange":range(3)  
+            "all_chart_data_json": all_chart_data_json,
+            "myRange": range(3),
         },
     )
 
