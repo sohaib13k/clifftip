@@ -66,6 +66,7 @@ def temp(request, report):
     report_excel = updated_sales.to_html(
         classes="table table-striped", index=False, header=True
     )
+    report_excel_json = updated_sales.to_json(orient="records")
 
     temp = updated_sales.to_json(orient="table")
     output_directory = settings.BASE_DIR.parent / "json" / "report"
@@ -218,6 +219,7 @@ def temp(request, report):
             # "result": result,
             # "average": average,
             "report_excel": report_excel,
+            "report_excel_json": report_excel_json,
             "sales_analysis": sales_analysis,
             "branch_analysis": branch_analysis,
             "item_type_analysis": item_type_analysis,

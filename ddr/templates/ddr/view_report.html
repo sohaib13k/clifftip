@@ -6,12 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
 
+    <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
+    
     <!-- Choose your prefered color scheme -->
     <link href="{% static 'css/light.css' %}" rel="stylesheet" />
     {% comment %}
     <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
     {% endcomment %}
     <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+    <style>
+        #spreadsheet {
+          height: 400px;
+          margin: 20px;
+        }
+        html, body {
+            height: 100%; /* Ensure the full height is available */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+        }
+        #spreadsheet {
+            height: calc(50vh - 40px); /* 100% of the viewport height minus some margin */
+            width: 98%; /* Full width of the viewport */
+            overflow: auto; /* Add scrollbars when content overflows */
+            margin: 20px; /* Margin around the spreadsheet */
+            border: solid;
+            border-width: thin;
+        }
+    </style>
+    
   </head>
   <body>
     <h2>Summary</h2>
@@ -24,15 +46,15 @@
     {% endcomment %}
 
     <h2>Excel Data</h2>
-    <a href="#" class="btn btn-primary">Download Excel</a>
     <hr />
 
     <button class="btn btn-primary" id="toggleButton">
       Show/Hide Excel Data
     </button>
-    <div class="table-responsive" id="toggleContent" style="display: none">
-      {{ report_excel|safe }}
-    </div>
+
+    <button class="btn btn-primary" onclick="downloadExcel()">Download Excel</button>
+
+    <div id="spreadsheet" class="handsontable" style="display: none"></div>
 
     <hr />
     <div class="table-responsive">{{ sales_analysis|safe }}</div>
@@ -158,7 +180,7 @@
         
         
         document.getElementById('toggleButton').addEventListener('click', function() {
-            var content = document.getElementById('toggleContent');
+            var content = document.getElementById('spreadsheet');
             if (content.style.display === 'none') {
                 content.style.display = 'block';
             } else {
@@ -166,7 +188,70 @@
             }
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var jsonData = {{ report_excel_json|safe }};
+            var data = Object.values(jsonData); // Convert object of objects into an array of objects
+
+            var container = document.getElementById('spreadsheet');
+            var hot = new Handsontable(container, {
+                data: data,
+                rowHeaders: true,
+                colHeaders: [
+                    "SR NO", "Invoice No", "Invoice Date", "Customer Name", "Customer GSTN", "Item Code",
+                    "Item Name", "Quantity", "Rate", "Taxable Amt", "CGST", "SGST", "IGST", "Net Total",
+                    "Sales Person", "Branch", "Item Type"
+                ],
+                columns: [
+                    {data: 'SR NO', type: 'numeric'},
+                    {data: 'Invoice No', type: 'text'},
+                    {data: 'Invoice Date', type: 'date', dateFormat: 'MM/DD/YYYY'},
+                    {data: 'Customer Name', type: 'text'},
+                    {data: 'Customer GSTN', type: 'text'},
+                    {data: 'Item Code', type: 'text'},
+                    {data: 'Item Name', type: 'text'},
+                    {data: 'Quantity', type: 'numeric'},
+                    {data: 'Rate', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
+                    {data: 'Taxable Amt', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
+                    {data: 'CGST', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
+                    {data: 'SGST', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
+                    {data: 'IGST', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
+                    {data: 'Net Total', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
+                    {data: 'Sales Person', type: 'text'},
+                    {data: 'Branch', type: 'text'},
+                    {data: 'Item Type', type: 'text'}
+                ],
+                filters: true,
+                dropdownMenu: true,
+                manualColumnResize: true,
+                manualRowResize: true,
+                contextMenu: true,
+                licenseKey: 'non-commercial-and-evaluation' // specify the license key here
+            });
+        });
+
+        function downloadExcel() {
+            // Retrieve and log the JSON data
+            var jsonData = {{ report_excel_json|safe }};
+            console.log(jsonData);  // Check the structure here
+        
+            if (!Array.isArray(jsonData)) {
+                console.error('Data is not an array:', jsonData);
+                return; // Exit if data is not an array
+            }
+        
+            // Continue with Excel file creation if data is correct
+            const worksheet = XLSX.utils.json_to_sheet(jsonData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+            XLSX.writeFile(workbook, "Report.xlsx");
+        }
+        
+    </script>
     
+    <script src="{% static 'js/handsontable.full.min.js' %}"></script>
+    <script src="{% static 'js/xlsx.full.min.js' %}"></script>
     <script src="{% static 'js/app.js' %}"></script>
   </body>
 </html>
