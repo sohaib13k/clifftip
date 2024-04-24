@@ -63,112 +63,110 @@
       </div>
     </div>
     {% endfor %}
-
+    
     <script>
-      function cleanNumeric(value) {
-        return parseFloat(value.replace(/[^0-9.-]+/g, ""));
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        // Parse the JSON data from the Django context
-        var chartData = JSON.parse("{{ all_chart_data_json|safe }}");
-        console.log(chartData);
-
-        // Prepare data and labels
-        var data = chartData.individual_chart_data.data.map(cleanNumeric);
-        var labels = chartData.individual_chart_data.labels;
-
-        // Combine the arrays: 'data' and 'labels'
-        var combined = data.map(function (value, index) {
-          return { value: value, label: labels[index] };
+        function cleanNumeric(value) {
+            return parseFloat(value.replace(/[^0-9.-]+/g, ""));
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            // Parse the JSON data from the Django context
+            var chartData = JSON.parse('{{ all_chart_data_json|safe }}');
+            console.log(chartData);
+        
+            // Prepare data and labels
+            var data = chartData.individual_chart_data.data.map(cleanNumeric);
+            var labels = chartData.individual_chart_data.labels;
+        
+            // Combine the arrays: 'data' and 'labels'
+            var combined = data.map(function(value, index) {
+                return {
+                    value: value,
+                    label: labels[index]
+                };
+            });
+        
+            // Sort combined array by the 'value' in descending order
+            combined.sort(function(a, b) {
+                return b.value - a.value; // For descending sort
+            });
+        
+            // Separate them back out
+            var sortedData = combined.map(function(item) {
+                return item.value;
+            });
+            var sortedLabels = combined.map(function(item) {
+                return item.label;
+            });
+        
+        
+            // Column chart options
+            var options = {
+                chart: {
+                    height: 350,
+                    type: "bar",
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        endingShape: "rounded",
+                        columnWidth: "55%",
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ["transparent"]
+                },
+                series: [{
+                    name: "Net Total Sales",
+                    data: sortedData // Ensure this data is numeric
+                }],
+                xaxis: {
+                    categories: sortedLabels
+                },
+                yaxis: {
+                    title: {
+                        text: "Net Total (₹)"
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false, // Ensure this is set to false
+                    y: {
+                        formatter: function(val) {
+                            return new Intl.NumberFormat('en-IN', {
+                                maximumFractionDigits: 2,
+                                style: 'currency',
+                                currency: 'INR'
+                            }).format(val);
+                        }
+                    }
+                }
+            };
+        
+            var chart = new ApexCharts(document.querySelector("#apexcharts-column"), options);
+            chart.render();
         });
-
-        // Sort combined array by the 'value' in descending order
-        combined.sort(function (a, b) {
-          return b.value - a.value; // For descending sort
-        });
-
-        // Separate them back out
-        var sortedData = combined.map(function (item) {
-          return item.value;
-        });
-        var sortedLabels = combined.map(function (item) {
-          return item.label;
-        });
-
-        var options = {
-          chart: {
-            height: 350,
-            type: "bar",
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              endingShape: "rounded",
-              columnWidth: "55%",
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          stroke: {
-            show: true,
-            width: 2,
-            colors: ["transparent"],
-          },
-          series: [
-            {
-              name: "Net Total Sales",
-              data: sortedData, // Ensure this data is numeric
-            },
-          ],
-          xaxis: {
-            categories: sortedLabels,
-          },
-          yaxis: {
-            title: {
-              text: "Net Total (₹)",
-            },
-          },
-          fill: {
-            opacity: 1,
-          },
-          tooltip: {
-            shared: true,
-            intersect: false, // Ensure this is set to false
-            y: {
-              formatter: function (val) {
-                return (
-                  "₹ " +
-                  new Intl.NumberFormat("en-IN", {
-                    maximumFractionDigits: 2,
-                    style: "currency",
-                    currency: "INR",
-                  }).format(val)
-                );
-              },
-            },
-          },
-        };
-
-        var chart = new ApexCharts(
-          document.querySelector("#apexcharts-column"),
-          options
-        );
-        chart.render();
-      });
-
-      document
-        .getElementById("toggleButton")
-        .addEventListener("click", function () {
-          var content = document.getElementById("toggleContent");
-          if (content.style.display === "none") {
-            content.style.display = "block";
-          } else {
-            content.style.display = "none";
-          }
+        
+        
+        
+        document.getElementById('toggleButton').addEventListener('click', function() {
+            var content = document.getElementById('toggleContent');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+            } else {
+                content.style.display = 'none';
+            }
         });
     </script>
+    
     <script src="{% static 'js/app.js' %}"></script>
   </body>
 </html>
