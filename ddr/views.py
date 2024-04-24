@@ -1,14 +1,10 @@
 import os
 import gzip
-from django.conf import settings
-import json
 from django.shortcuts import render
 from django.conf import settings
 import pandas as pd
 import json
-import re
-from .service import report_logic
-from .service import commonutil
+from . import commonutil
 from .models import CustomReport
 
 
@@ -39,6 +35,7 @@ def temp(request, report):
     directory_path = settings.BASE_DIR / "reports"
     df_sales = pd.read_excel(report, skiprows=3)
     df_parties = pd.read_excel(directory_path / "sub_reports" / "All_Parties_DDR.xlsx")
+    df_itemtype = pd.read_excel(directory_path / "sub_reports" / "Item Type Finished Goods.xlsx")
 
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
     # df_sales.insert(gstn_index, 'Item Type', '0')
@@ -51,8 +48,18 @@ def temp(request, report):
         how="inner",
     )
 
+    updated_sales = pd.merge(
+        updated_sales,
+        df_itemtype[["Item Type", "Item Code"]],
+        on="Item Code",
+        how="inner",
+    )
+    # print(df_itemtype[["Item Type"]])
+    updated_sales.to_excel(directory_path / "downloads/updated_sales.xlsx", index=False)
+
     updated_sales = updated_sales.drop("GST", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
+    updated_sales = updated_sales[updated_sales["Sales Person"] != 'General ID']
 
     updated_sales.to_excel(directory_path / "downloads/new.xlsx", index=False)
 
@@ -83,7 +90,17 @@ def temp(request, report):
     item_type_sales = (
         updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
     )
+
+    # import locale
+    # locale.setlocale(locale.LC_ALL, 'en_IN.utf8')
+    #
+    # def format_currency(value):
+    #     return locale.format_string("%d", value, grouping=True)
+
     item_type_sales = commonutil.append_total(item_type_sales, "Item Type", "Net Total")
+    # item_type_sales['Net Total'] = item_type_sales['Net Total'].apply(format_currency)
+    # print(item_type_sales)
+
 
     individual_by_item_type_sales = (
         updated_sales.groupby(["Sales Person", "Item Type"])
@@ -97,6 +114,19 @@ def temp(request, report):
         .agg({"Net Total": "sum"})
         .unstack(fill_value=0)
     )
+
+
+    # formatting numbers as per locale
+    # format_currency
+    individual_sales['Net Total'] = individual_sales['Net Total'].apply(commonutil.format_rupees)
+    branch_sales['Net Total'] = branch_sales['Net Total'].apply(commonutil.format_rupees)
+    item_type_sales['Net Total'] = item_type_sales['Net Total'].apply(commonutil.format_rupees)
+
+    for column in individual_by_item_type_sales.columns:  # Skip the first column
+        individual_by_item_type_sales[column] = individual_by_item_type_sales[column].apply(commonutil.format_rupees)
+
+    for column in branch_by_item_type_sales.columns:  # Skip the first column
+        branch_by_item_type_sales[column] = branch_by_item_type_sales[column].apply(commonutil.format_rupees)
 
 
     # Convert to HTML for displaying in the template

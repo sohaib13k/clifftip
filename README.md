@@ -11,15 +11,7 @@ get_random_secret_key()
 ```
 
 2. adding wsgi configuration as per below.
-3. collecting static files
-```python
-python manage.py collectstatic
-``` 
-4. migrations
-```python
-python manage.py makemigrations
-python manage.py migrate
-```
+
 
 ### wsgi configuration for pythonanywhere depoyment
 
@@ -27,7 +19,3 @@ python manage.py migrate
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir.
 ```
-
-
-### TODO
-1. Currently /ddr categorises, logic/view based on individual report. Means each report will have it's own logic function and view template. This is based on assumption that each report is unique in itself with different view-expectation from director. But later if this is not the case, then views/logic will be merged to remove code duplicacy; like let's say for some 20 reports, directors only sees the total amount, then these 20 logic/view will be merged. 
