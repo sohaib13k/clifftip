@@ -11,7 +11,15 @@ get_random_secret_key()
 ```
 
 2. adding wsgi configuration as per below.
-
+3. collecting static files
+```python
+python manage.py collectstatic
+``` 
+4. migrations
+```python
+python manage.py makemigrations
+python manage.py migrate
+```
 
 ### wsgi configuration for pythonanywhere depoyment
 
