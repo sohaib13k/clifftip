@@ -194,7 +194,7 @@ def temp(request, report):
             "individual_by_item_type_analysis": individual_by_item_type_analysis,
             "branch_by_item_type_analysis": branch_by_item_type_analysis,
             "all_chart_data_json": all_chart_data_json,
-            "myRange": range(3),
+            "myRange": range(1),
         },
     )
 

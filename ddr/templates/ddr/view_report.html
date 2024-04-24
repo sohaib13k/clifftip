@@ -25,8 +25,13 @@
     <a href="#" class="btn btn-primary">Download Excel</a>
     <hr>
 
-    <div class="table-responsive">
-    {{ report_excel|safe }}
+    {% comment %} <div class="table-responsive">
+    {{ report_excel|safe }} {% endcomment %}
+
+    <button class="btn btn-primary" id="toggleButton">Show/Hide Excel Data</button>
+    <div class="table-responsive" id="toggleContent" style="display:none;">
+        {{ report_excel|safe }}
+    </div>
 
     <hr>
     <div class="table-responsive">
@@ -64,7 +69,29 @@
                 var chartData = JSON.parse('{{ all_chart_data_json|safe }}');
                 console.log(chartData);
             
-                // Column chart
+                // Prepare data and labels
+                var data = chartData.individual_chart_data.data;
+                var labels = chartData.individual_chart_data.labels;
+            
+                // Combine the arrays: 'data' and 'labels'
+                var combined = data.map(function(value, index) {
+                    return { value: value, label: labels[index] };
+                });
+            
+                // Sort combined array by the 'value' in descending order
+                combined.sort(function(a, b) {
+                    return b.value - a.value; // For descending sort
+                });
+            
+                // Separate them back out
+                var sortedData = combined.map(function(item) {
+                    return item.value;
+                });
+                var sortedLabels = combined.map(function(item) {
+                    return item.label;
+                });
+            
+                // Column chart options
                 var options = {
                     chart: {
                         height: 350,
@@ -87,10 +114,10 @@
                     },
                     series: [{
                         name: "Net Total Sales",
-                        data: chartData.individual_chart_data.data // Use the data from chartData
+                        data: sortedData // Use the sorted data
                     }],
                     xaxis: {
-                        categories: chartData.individual_chart_data.labels // Use the labels from chartData
+                        categories: sortedLabels // Use the sorted labels
                     },
                     yaxis: {
                         title: {
@@ -103,16 +130,25 @@
                     tooltip: {
                         y: {
                             formatter: function(val) {
-                                return "₹ " + val
+                                return "₹ " + val;
                             }
                         }
                     }
-                }
-                var chart = new ApexCharts(
-                    document.querySelector("#apexcharts-column"),
-                    options
-                );
+                };
+            
+                var chart = new ApexCharts(document.querySelector("#apexcharts-column"), options);
                 chart.render();
+            });
+            
+
+
+            document.getElementById('toggleButton').addEventListener('click', function() {
+                var content = document.getElementById('toggleContent');
+                if (content.style.display === 'none') {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
             });
         </script>
         <script src="{% static 'js/app.js' %}"></script>
