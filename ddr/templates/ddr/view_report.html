@@ -94,7 +94,6 @@
         document.addEventListener("DOMContentLoaded", function() {
             // Parse the JSON data from the Django context
             var chartData = JSON.parse('{{ all_chart_data_json|safe }}');
-            console.log(chartData);
         
             // Prepare data and labels
             var data = chartData.individual_chart_data.data.map(cleanNumeric);
@@ -234,7 +233,6 @@
         function downloadExcel() {
             // Retrieve and log the JSON data
             var jsonData = {{ report_excel_json|safe }};
-            console.log(jsonData);  // Check the structure here
         
             if (!Array.isArray(jsonData)) {
                 console.error('Data is not an array:', jsonData);

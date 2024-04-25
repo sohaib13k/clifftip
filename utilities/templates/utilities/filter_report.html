@@ -7,22 +7,32 @@
     <style>
         table {
             border-collapse: collapse;
-            border: 2px solid #ddd;
-            /* Border color */
             width: 100%;
         }
-
-        th,
-        td {
-            padding: 8px;
+        
+        th, td {
+            padding: 2px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
-            /* Border color */
+            border: 1px solid #ddd; /* Ensures borders on all sides */
+            white-space: nowrap; /* Prevents text from wrapping */
+            overflow: hidden; /* Keeps the content clipped to the cell */
+            text-overflow: ellipsis; /* Adds an ellipsis if the text overflows */
         }
-
+        
         th {
             background-color: #f2f2f2;
-            /* Header background color */
+        }
+        
+        /* Banded row styling */
+        tr:nth-child(odd) { /* Odd rows */
+            background-color: #f9f9f9;
+        }
+        
+        tr:nth-child(even) { /* Even rows */
+            background-color: #ffffff;
+        }
+        .highlighted {
+            background-color: #ffff99; /* Light yellow background for visibility */
         }
     </style>
 </head>
@@ -90,46 +100,54 @@
         function toggleColumn(index) {
             var table = document.getElementById('data-table');
             var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-
-            var columnIndex = index + 1; // Excel columns are 1-indexed
+        
+            // Excel columns are 0-indexed in HTML but need +1 handling in your data structure
             var isVisible = checkboxes[index].checked;
-
+        
             for (var i = 0; i < table.rows.length; i++) {
                 var row = table.rows[i];
                 if (isVisible) {
-                    row.cells[columnIndex].style.display = '';
+                    row.cells[index].style.display = '';  // Show the column
                 } else {
-                    row.cells[columnIndex].style.display = 'none';
+                    row.cells[index].style.display = 'none';  // Hide the column
                 }
             }
         }
+        
 
         function renderDataTable(data) {
             var tableContainer = document.getElementById('table-container');
             tableContainer.innerHTML = '';
-
+        
             var table = document.createElement('table');
             table.id = 'data-table';
-
+        
             // Create header row
             var headerRow = table.insertRow();
-            data[0].forEach(function (header) {
-                var cell = headerRow.insertCell();
-                cell.textContent = header;
+            data[0].forEach(function (header, index) {
+                if (header !== undefined && header !== null && header.trim() !== '') { // Ignore empty headers
+                    var cell = headerRow.insertCell();
+                    cell.textContent = header;
+                }
             });
-
+        
             // Create data rows
             for (var i = 1; i < data.length; i++) {
                 var rowData = data[i];
                 var row = table.insertRow();
-                rowData.forEach(function (cellData) {
-                    var cell = row.insertCell();
-                    cell.textContent = cellData;
+                var cellIndex = 0; // Keep track of cell index for non-empty headers
+                data[0].forEach(function (header, index) {
+                    if (header !== undefined && header !== null && header.trim() !== '') { // Ignore columns under empty headers
+                        var cell = row.insertCell();
+                        cell.textContent = rowData[index] === undefined ? '' : rowData[index];
+                        cellIndex++;
+                    }
                 });
             }
-
+        
             tableContainer.appendChild(table);
         }
+        
 
         function downloadExcel() {
             if (!jsonData) {
@@ -155,7 +173,9 @@
                 }
             });
 
-            var worksheet = XLSX.utils.aoa_to_sheet(filteredData);
+            var transposedData = filteredData[0].map((_, colIndex) => filteredData.map(row => row[colIndex]));
+
+            var worksheet = XLSX.utils.aoa_to_sheet(transposedData);
 
             var workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet);
@@ -180,6 +200,62 @@
                 }, 0);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var table = document.getElementById('table-container');
+            if (table) { // Ensure the table exists
+                var isSelecting = false;
+                var isDragging = false; // To distinguish between click and drag
+                var cellsSelected = new Set(); // Track highlighted cells
+        
+                // Function to highlight cell
+                function highlightCell(cell) {
+                    cell.classList.add('highlighted');
+                    cellsSelected.add(cell); // Add to set of selected cells
+                }
+        
+                // Function to clear highlight from cell
+                function clearHighlight(cell) {
+                    cell.classList.remove('highlighted');
+                    cellsSelected.delete(cell); // Remove from set of selected cells
+                }
+        
+                // Toggle highlight on click
+                table.onmousedown = function(event) {
+                    if (event.target.tagName === 'TD') {
+                        isSelecting = true;
+                        isDragging = false; // Assume it's not a drag initially
+                        event.preventDefault(); // Prevent text selection
+                    }
+                };
+        
+                table.onmousemove = function(event) {
+                    if (isSelecting && event.target.tagName === 'TD') {
+                        if (!cellsSelected.has(event.target)) {
+                            highlightCell(event.target);
+                            isDragging = true; // Set dragging to true as we move
+                        }
+                    }
+                };
+        
+                table.onmouseup = function(event) {
+                    if (event.target.tagName === 'TD') {
+                        if (!isDragging) {
+                            // If there was no dragging, toggle the clicked cell
+                            if (cellsSelected.has(event.target)) {
+                                clearHighlight(event.target);
+                            } else {
+                                highlightCell(event.target);
+                            }
+                        }
+                    }
+                    isSelecting = false;
+                    isDragging = false; // Reset dragging status
+                };
+            } else {
+                console.error('Table with ID "table-container" was not found.');
+            }
+        }); 
     </script>
 </body>
 

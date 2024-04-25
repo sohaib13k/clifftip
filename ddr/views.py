@@ -54,14 +54,10 @@ def temp(request, report):
         on="Item Code",
         how="inner",
     )
-    # print(df_itemtype[["Item Type"]])
-    updated_sales.to_excel(directory_path / "downloads/updated_sales.xlsx", index=False)
 
     updated_sales = updated_sales.drop("GST", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
     updated_sales = updated_sales[updated_sales["Sales Person"] != 'General ID']
-
-    updated_sales.to_excel(directory_path / "downloads/new.xlsx", index=False)
 
     report_excel = updated_sales.to_html(
         classes="table table-striped", index=False, header=True
