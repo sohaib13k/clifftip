@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Excel Report</title>
+</head>
+<body>
+    <h1>Upload Excel Report</h1>
+    <form action="{% url 'utilities-report-submit' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="excel_file" accept=".xlsx, .xls">
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

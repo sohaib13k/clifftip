@@ -19,3 +19,9 @@ get_random_secret_key()
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir.
 ```
+
+
+### Report upload conventions
+|Report name|ferquency|file name format|
+|-|-|-|
+|sales purchase|monthly|
