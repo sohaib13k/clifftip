@@ -99,6 +99,7 @@
             <i class="hamburger align-self-center"></i>
           </a>
 
+          
           <form class="d-none d-sm-inline-block">
             <div class="input-group input-group-navbar">
               <input
@@ -112,8 +113,15 @@
               </button>
             </div>
           </form>
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button class="btn" type="submit">
+              <i class="align-right">Logout</i>
+            </button>
+          </form>
         </nav>
 
+        
         <main class="content">
           <div class="container-fluid p-0">
             <h1 class="h3 mb-3">Director's Daily Report</h1>

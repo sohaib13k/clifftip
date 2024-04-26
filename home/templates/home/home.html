@@ -19,6 +19,10 @@
     </div>
 
     <hr />
-    <img src="{% static 'img/sample.png' %}" alt="My image" style="height: 4em" />
+    <form action="{% url 'logout' %}" method="post">
+      {% csrf_token %}
+      <button type="submit">Logout</button>
+    </form>
+
   </body>
 </html>

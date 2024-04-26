@@ -2,20 +2,21 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse
 import pandas as pd
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def utilities(request):
     return render(request, "utilities/utilities.html")
 
-
+@login_required
 def report(request):
     return render(request, "utilities/filter_report.html")
 
-
+@login_required
 def upload(request):
     return render(request, "utilities/upload_report.html")
 
-
+@login_required
 def handle_uploaded_file(f, relative_location):
     """
         saves file as the location
@@ -27,7 +28,7 @@ def handle_uploaded_file(f, relative_location):
         for chunk in f.chunks():
             destination.write(chunk)
 
-
+@login_required
 def submit(request):
     if request.method == "POST" and request.FILES["excel_file"]:
         excel_file = request.FILES["excel_file"]

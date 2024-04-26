@@ -72,15 +72,17 @@
                       />
                     </div>
                     {% endcomment %}
-                    <form>
+                    <form action={% url 'login' %} method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+
                       <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input
                           class="form-control form-control-lg"
-                          type="email"
+                          type="name"
                           name="email"
                           placeholder="Enter your email"
-                          value="admin@sukhanalytics.com"
+                          {% comment %} value="admin@sukhanalytics.com" {% endcomment %}
                         />
                       </div>
                       <div class="mb-3">
@@ -90,7 +92,7 @@
                           type="password"
                           name="password"
                           placeholder="Enter your password"
-                          value="password"
+                          {% comment %} value="password" {% endcomment %}
                         />
                         <small>
                           <a href="pages-reset-password.html"
@@ -112,12 +114,14 @@
                           </span>
                         </label>
                       </div>
-                      <div class="text-center mt-3">
-                        <a href="ddr/" class="btn btn-lg btn-primary"
+                      <button type="submit">Submit</button>
+
+                      {% comment %} <div class="text-center mt-3">
+                        <a href={% url 'login'  %} class="btn btn-lg btn-primary"
                           >Sign in</a
                         >
                         <!-- <button type="submit" class="btn btn-lg btn-primary">Sign in</button> -->
-                      </div>
+                      </div> {% endcomment %}
                     </form>
                   </div>
                 </div>

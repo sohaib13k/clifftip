@@ -6,8 +6,9 @@ import pandas as pd
 import json
 from . import commonutil
 from .models import CustomReport
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def ddr(request):
     """
     View to show raw data file
@@ -226,7 +227,7 @@ def temp(request, report):
         },
     )
 
-
+@login_required
 def view_report(request, report):
     report = settings.BASE_DIR / "reports" / report
 
