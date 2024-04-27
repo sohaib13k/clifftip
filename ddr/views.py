@@ -14,7 +14,7 @@ def ddr(request):
     """
     View to show raw data file
     """
-    rawdata_file_dir = settings.BASE_DIR / "reports"
+    rawdata_file_dir = settings.REPORTS_DIR
     rawdata = [file.name for file in rawdata_file_dir.iterdir() if file.is_file()]
     rawdata_db = list(CustomReport.objects.values_list("name", flat=True))
     if rawdata_db:
@@ -34,7 +34,7 @@ def ddr(request):
 
 
 def temp(request, report):
-    # directory_path = settings.BASE_DIR / "reports"
+    # directory_path = settings.REPORTS_DIR
     # df_sales = pd.read_excel(report, skiprows=3)
     # df_parties = pd.read_excel(directory_path / "sub_reports" / "All_Parties_DDR.xlsx")
     # df_itemtype = pd.read_excel(directory_path / "sub_reports" / "Item Type Finished Goods.xlsx")
@@ -233,7 +233,7 @@ def temp(request, report):
 
 @login_required
 def view_report(request, report):
-    report = settings.BASE_DIR / "reports" / report
+    report = settings.REPORTS_DIR / report
 
     if report.name == "Sale_Register_DDR.xlsx":
         return temp(request, report)
