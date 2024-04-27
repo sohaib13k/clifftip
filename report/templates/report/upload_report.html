@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Upload Excel Report</h1>
-    <form action="{% url 'utilities-report-submit' %}" method="post" enctype="multipart/form-data">
+    <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="excel_file" accept=".xlsx, .xls">
         <button type="submit">Submit</button>

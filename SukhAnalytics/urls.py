@@ -25,4 +25,5 @@ urlpatterns = [
     path("ddr/", include("ddr.urls")),
     path("utilities/", include("utilities.urls")),
     path("account/", include("account.urls")),
+    path("report/", include("report.urls")),
 ]

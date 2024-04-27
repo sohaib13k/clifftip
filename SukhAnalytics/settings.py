@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "utilities",
     "account",
     "commonutil",
+    "report",
     # default apps
     "django.contrib.admin",
     "django.contrib.auth",

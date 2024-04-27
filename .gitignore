@@ -162,7 +162,4 @@ cython_debug/
 # vscode
 .vscode
 
-# static dir
-/static/
-
 */migrations/
