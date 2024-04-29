@@ -35,7 +35,7 @@ def ddr(request):
 
 def temp(request, report):
     directory_path = settings.REPORTS_DIR
-    df_sales = pd.read_excel(report)
+    df_sales = pd.read_excel(report, skiprows=3)
     df_parties = pd.read_excel(directory_path / "sub_reports" / "All_Parties_DDR.xlsx")
     df_itemtype = pd.read_excel(directory_path / "sub_reports" / "Item Type Finished Goods.xlsx")
 
