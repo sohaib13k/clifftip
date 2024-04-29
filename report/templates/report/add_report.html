@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Excel Report</title>
+</head>
+<body>
+    <h1>Upload Excel Report</h1>
+    <form action="{% url 'report-add' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div>
+            <label for="name">Report Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="is_masterdata">Is Master Data?</label>
+            <input type="checkbox" id="is_masterdata" name="is_masterdata">
+        </div>
+        <div class="conditional">
+            <label for="date_col">Date-Column name:</label>
+            <input type="text" id="date_col" name="date_col" required>
+        </div>
+        <div class="conditional">
+            <label for="time_col">Time-Column name:</label>
+            <input type="text" id="time_col" name="time_col" required>
+        </div>
+        <div class="conditional">
+            <label for="is_datetime_merged">Is Report Date and Time in the Same Column?</label>
+            <input type="checkbox" id="is_datetime_merged" name="is_datetime_merged">
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        window.onload = function() {
+            var checkbox = document.getElementById('is_masterdata');
+            var fields = document.querySelectorAll('.conditional');
+            checkbox.onchange = function() {
+                fields.forEach(field => {
+                    if (checkbox.checked) {
+                        field.style.display = 'none';
+                        // Remove the 'required' attribute from inputs within the hidden section
+                        field.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
+                    } else {
+                        field.style.display = 'block';
+                        // Add back the 'required' attribute to appropriate inputs
+                        field.querySelectorAll('input[type="text"]').forEach(input => input.setAttribute('required', ''));
+                    }
+                });
+            };
+        };        
+    </script>
+</body>
+</html>

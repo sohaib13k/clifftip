@@ -7,10 +7,14 @@
 </head>
 <body>
     <h1>Upload Excel Report</h1>
-    <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="excel_file" accept=".xlsx, .xls">
-        <button type="submit">Submit</button>
-    </form>
+    {% for report in all_reports %}
+        <h2> {{ report.name }} (id #{{ report.id }}) </h2>
+        <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="report_id" value="{{ report.id }}">
+            <input type="file" name="excel_file" accept=".xlsx, .xls">
+            <button type="submit">Submit</button>
+        </form>
+    {% endfor %}
 </body>
 </html>
