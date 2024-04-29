@@ -161,6 +161,3 @@ cython_debug/
 
 # vscode
 .vscode
-
-# TODO: remove this when db locally working
-*/migrations/

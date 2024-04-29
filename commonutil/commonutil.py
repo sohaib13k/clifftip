@@ -1,4 +1,5 @@
-import uuid
+import random
+import string
 from datetime import datetime
 import os
 
@@ -10,7 +11,6 @@ def uploaded_excel(f, location):
     :param location: location where write need to be done
     """
     if not os.path.exists(location):
-        print(">>>>>>>>>>>>>>", location)
         os.makedirs(location, exist_ok=True)
 
     with open(location / f.name, "wb+") as destination:
@@ -20,5 +20,5 @@ def uploaded_excel(f, location):
 
 def get_unique_filename():
     today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    unique_suffix = uuid.uuid4()
-    return f"{today_str}_{unique_suffix}"
+    random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+    return f"{today_str}_{random_str}"

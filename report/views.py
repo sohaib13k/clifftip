@@ -5,7 +5,7 @@ from commonutil import commonutil
 from django.http import HttpResponse
 from django.urls import reverse
 from .models import Report
-
+from pathlib import Path
 
 @login_required
 def report(request):
@@ -44,9 +44,11 @@ def upload(request):
         
         file_path = settings.REPORTS_DIR / report_name / excel_file.name
 
+        # print(">>>>>>>>>>>>>>>>", file_path)
         if file_path.exists():
-            today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-            new_path = Path(settings.REPORTS_DIR) / f"{report_name}_{today_str}.bak.xlsx"
+            ext = Path(excel_file.name).suffix
+            unique_suffix = commonutil.get_unique_filename()
+            new_path = Path(settings.REPORTS_DIR) / report_name / f"{Path(excel_file.name).stem}_{unique_suffix}.bak{ext}"
             file_path.rename(new_path)
 
         commonutil.uploaded_excel(excel_file, settings.REPORTS_DIR / report_name)

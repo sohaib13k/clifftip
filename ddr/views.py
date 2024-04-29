@@ -207,7 +207,7 @@ def temp(request, report):
     }
     all_chart_data_json = json.dumps(all_chart_data)
     
-    render_date = render(
+    render_data = render(
         request,
         "ddr/view_report.html",
         {
@@ -228,7 +228,8 @@ def temp(request, report):
         },
     )
 
-    return render_date
+    return render_data
+
     # with open(settings.BASE_DIR.parent / "data" / "html" / 'html.html', 'r') as f:
     #     return HttpResponse(f.read(), content_type="text/html")
 
