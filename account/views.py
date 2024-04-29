@@ -8,7 +8,6 @@ def acc_login(request):
     return render(request, 'account/login.html')
 
 def user_login(request):
-    print(">>>>>>>>>>>>>>>>")
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
