@@ -17,7 +17,7 @@ def load_env_file():
 def main():
     """Run administrative tasks."""
     load_env_file()  # loading environment variables from .env
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SukhAnalytics.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Clifftip.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
