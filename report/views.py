@@ -14,6 +14,7 @@ def report(request):
     return render(request, "report/report.html")
 
 
+# TODO: verify function name using regex- only alphanumeric with space allowed
 @login_required
 def upload(request):
     if request.method != "POST" or "excel_file" not in request.FILES:

@@ -136,12 +136,12 @@
             <h1 class="h3 mb-3">Director's Daily Report</h1>
 
             <div class="row">
-              {% for data in rawdata %}
+              {% for report in accessible_reports %}
               <div class="col-md-4 col-sm-6">
                 <div class="card">
                   <div class="card-header">
-                    <a href="{% url 'ddr-view' data %}">
-                      <h5 class="card-title mb-0">{{ data }}</h5>
+                    <a href="{% url 'ddr-view' report.id %}">
+                      <h5 class="card-title mb-0">{{ report.name }}</h5>
                     </a>
                   </div>
                   <div class="card-body"></div>

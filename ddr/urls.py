@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path("", views.ddr, name="ddr-home"),
-    path("view/<str:report>/", views.view_report, name="ddr-view"),
+    path("view/<int:report_id>/", views.view_report, name="ddr-view"),
 ]

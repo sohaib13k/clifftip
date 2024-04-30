@@ -9,27 +9,33 @@ from .commonutil import append_total
 from .models import CustomReport
 from django.contrib.auth.decorators import login_required
 from commonutil import commonutil
+from report.models import Report
+from ddr.service import report_logic
+
 
 @login_required
 def ddr(request):
     """
-    View to show raw data file
+    View to fetch assigned reports
     """
-    rawdata_file_dir = settings.REPORT_DIR
-    rawdata = [file.name for file in rawdata_file_dir.iterdir() if file.is_file()]
-    rawdata_db = list(CustomReport.objects.values_list("name", flat=True))
-    if rawdata_db:
-        rawdata.append(rawdata_db)
+    user = request.user
 
-    request.session["rawdata"] = (
-        rawdata  # persisting data for re-use until session exists
-    )
+    # Fetch reports directly accessible to the user, ensuring it is distinct
+    direct_reports = user.accessible_reports_users.all().distinct()
+
+    # Fetch reports accessible through user's groups, ensuring it is distinct
+    group_reports = Report.objects.filter(
+        access_groups__in=user.groups.all()
+    ).distinct()
+
+    # Combine both QuerySets without duplicates using the union operator
+    accessible_reports = direct_reports.union(group_reports)
 
     return render(
         request,
         "ddr/ddr.html",
         {
-            "rawdata": rawdata,
+            "accessible_reports": accessible_reports,
         },
     )
 
@@ -38,7 +44,9 @@ def temp(request, report):
     directory_path = settings.REPORT_DIR
     df_sales = pd.read_excel(report, skiprows=3)
     df_parties = pd.read_excel(directory_path / "sub_reports" / "All_Parties_DDR.xlsx")
-    df_itemtype = pd.read_excel(directory_path / "sub_reports" / "Item Type Finished Goods.xlsx")
+    df_itemtype = pd.read_excel(
+        directory_path / "sub_reports" / "Item Type Finished Goods.xlsx"
+    )
 
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
     # df_sales.insert(gstn_index, 'Item Type', '0')
@@ -60,7 +68,7 @@ def temp(request, report):
 
     updated_sales = updated_sales.drop("GST", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
-    updated_sales = updated_sales[updated_sales["Sales Person"] != 'General ID']
+    updated_sales = updated_sales[updated_sales["Sales Person"] != "General ID"]
 
     report_excel = updated_sales.to_html(
         classes="table table-striped", index=False, header=True
@@ -75,15 +83,21 @@ def temp(request, report):
         compressed_file.write(temp)
 
     # Aggregating sales values
-    individual_sales = updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
+    individual_sales = (
+        updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
+    )
     individual_sales = append_total(individual_sales, "Sales Person", "Net Total")
     individual_sales = add_percentage_column(individual_sales, "Net Total")
 
-    branch_sales = updated_sales.groupby("Branch").agg({"Net Total": "sum"}).reset_index()
+    branch_sales = (
+        updated_sales.groupby("Branch").agg({"Net Total": "sum"}).reset_index()
+    )
     branch_sales = append_total(branch_sales, "Branch", "Net Total")
     branch_sales = add_percentage_column(branch_sales, "Net Total")
 
-    item_type_sales = updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
+    item_type_sales = (
+        updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
+    )
     item_type_sales = append_total(item_type_sales, "Item Type", "Net Total")
     item_type_sales = add_percentage_column(item_type_sales, "Net Total")
 
@@ -96,12 +110,10 @@ def temp(request, report):
     # item_type_sales = append_total(item_type_sales, "Item Type", "Net Total")
     # item_type_sales['Net Total'] = item_type_sales['Net Total'].apply(format_currency)
 
-
     individual_by_item_type_sales = (
         updated_sales.groupby(["Sales Person", "Item Type"])
         .agg({"Net Total": "sum"})
-        .unstack(
-            fill_value=0)
+        .unstack(fill_value=0)
     )
 
     branch_by_item_type_sales = (
@@ -110,19 +122,27 @@ def temp(request, report):
         .unstack(fill_value=0)
     )
 
-
     # formatting numbers as per locale
     # format_currency
-    individual_sales['Net Total'] = individual_sales['Net Total'].apply(commonutil.format_rupees)
-    branch_sales['Net Total'] = branch_sales['Net Total'].apply(commonutil.format_rupees)
-    item_type_sales['Net Total'] = item_type_sales['Net Total'].apply(commonutil.format_rupees)
+    individual_sales["Net Total"] = individual_sales["Net Total"].apply(
+        commonutil.format_rupees
+    )
+    branch_sales["Net Total"] = branch_sales["Net Total"].apply(
+        commonutil.format_rupees
+    )
+    item_type_sales["Net Total"] = item_type_sales["Net Total"].apply(
+        commonutil.format_rupees
+    )
 
     for column in individual_by_item_type_sales.columns:  # Skip the first column
-        individual_by_item_type_sales[column] = individual_by_item_type_sales[column].apply(commonutil.format_rupees)
+        individual_by_item_type_sales[column] = individual_by_item_type_sales[
+            column
+        ].apply(commonutil.format_rupees)
 
     for column in branch_by_item_type_sales.columns:  # Skip the first column
-        branch_by_item_type_sales[column] = branch_by_item_type_sales[column].apply(commonutil.format_rupees)
-
+        branch_by_item_type_sales[column] = branch_by_item_type_sales[column].apply(
+            commonutil.format_rupees
+        )
 
     # Convert to HTML for displaying in the template
     sales_analysis = individual_sales.to_html(
@@ -202,7 +222,7 @@ def temp(request, report):
         },
     }
     all_chart_data_json = json.dumps(all_chart_data)
-    
+
     render_data = render(
         request,
         "ddr/view_report.html",
@@ -229,16 +249,25 @@ def temp(request, report):
     # with open(settings.BASE_DIR.parent / "data" / "html" / 'html.html', 'r') as f:
     #     return HttpResponse(f.read(), content_type="text/html")
 
+
 @login_required
-def view_report(request, report):
-    report = settings.REPORT_DIR / report
+def view_report(request, report_id):
+    try:
+        report = Report.objects.get(id=report_id)
+    except Report.DoesNotExist:
+        return HttpResponse(
+            "Report name could not be found. Please check the report ID."
+        )
+    except Report.MultipleObjectsReturned:
+        # TODO: handle this scenario, when multiple objects returned
+        return HttpResponse("Multiple reports found. Please contact with admin.")
 
     if report.name == "Sale_Register_DDR.xlsx":
         return temp(request, report)
 
-    # func = getattr(__service__, report.lower())
-
-    # report_logic.func()
+    func = getattr(report_logic, report.service_name, None)
+    response = func()
+    return HttpResponse(response)
 
     # df = pd.read_excel(report, header=3, index_col=0)
 
@@ -287,8 +316,8 @@ def view_report(request, report):
 def add_percentage_column(df, total_col_name):
     total_sum = df[total_col_name].iloc[-1]  # Accessing the last element in the column
     if total_sum == 0:  # Avoid division by zero
-        df['Percentage'] = 0
+        df["Percentage"] = 0
     else:
         # Calculate the percentage of each row relative to the total sum
-        df['Percentage'] = (df[total_col_name] / total_sum * 100).round(2)
+        df["Percentage"] = (df[total_col_name] / total_sum * 100).round(2)
     return df
