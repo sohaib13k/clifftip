@@ -5,9 +5,10 @@ from django.shortcuts import render
 from django.conf import settings
 import pandas as pd
 import json
-from . import commonutil
+from .commonutil import append_total
 from .models import CustomReport
 from django.contrib.auth.decorators import login_required
+from commonutil import commonutil
 
 @login_required
 def ddr(request):
@@ -77,14 +78,14 @@ def temp(request, report):
     individual_sales = (
         updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
     )
-    individual_sales = commonutil.append_total(
+    individual_sales = append_total(
         individual_sales, "Sales Person", "Net Total"
     )
 
     branch_sales = (
         updated_sales.groupby("Branch").agg({"Net Total": "sum"}).reset_index()
     )
-    branch_sales = commonutil.append_total(branch_sales, "Branch", "Net Total")
+    branch_sales = append_total(branch_sales, "Branch", "Net Total")
 
     item_type_sales = (
         updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
@@ -96,9 +97,8 @@ def temp(request, report):
     # def format_currency(value):
     #     return locale.format_string("%d", value, grouping=True)
 
-    item_type_sales = commonutil.append_total(item_type_sales, "Item Type", "Net Total")
+    item_type_sales = append_total(item_type_sales, "Item Type", "Net Total")
     # item_type_sales['Net Total'] = item_type_sales['Net Total'].apply(format_currency)
-    # print(item_type_sales)
 
 
     individual_by_item_type_sales = (
@@ -284,4 +284,5 @@ def view_report(request, report):
             },
         )
     except KeyError as e:
+        # TODO: add logger
         print(f"Key error: {e} - Check if the specified row or column exists.")

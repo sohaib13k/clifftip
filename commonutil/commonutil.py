@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime
 import os
-
+from babel.numbers import format_decimal
 
 def uploaded_excel(f, location):
     """
@@ -20,5 +20,12 @@ def uploaded_excel(f, location):
 
 def get_unique_filename():
     today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+    random_str = "".join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return f"{today_str}_{random_str}"
+
+
+def format_rupees(number):
+    try:
+        return format_decimal(number, locale="en_IN")
+    except:
+        return number
