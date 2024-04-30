@@ -1,8 +1,10 @@
 from django.contrib import admin
 from .models import Report
+from .forms import ReportForm
 
 
 class ReportAdmin(admin.ModelAdmin):
+    form = ReportForm
     list_display = [
         "name",
         "is_masterdata",

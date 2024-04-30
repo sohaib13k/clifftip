@@ -1,0 +1,48 @@
+{% extends "admin/change_form.html" %}
+{% load static i18n %}
+
+{% block extrahead %}
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  {{ block.super }}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+      const isMasterDataCheckbox = document.getElementById('id_is_masterdata');
+      const fieldsToToggleAndClear = ['id_is_datetime_merged', 'id_date_col', 'id_time_col'];
+
+      function toggleFields() {
+        const isMasterData = isMasterDataCheckbox.checked;
+        
+        fieldsToToggleAndClear.forEach(fieldId => {
+          const fieldElement = document.getElementById(fieldId);
+          const fieldDiv = fieldElement.closest('div.form-row');
+
+          if (isMasterData) {
+            fieldDiv.style.display = 'none';
+            // Clear the value if the field is a text input or a checkbox
+            if (fieldElement.type === 'text' || fieldElement.type === 'checkbox') {
+              fieldElement.value = fieldElement.type === 'checkbox' ? false : '';
+              if (fieldElement.type === 'checkbox') {
+                fieldElement.checked = false;
+              }
+            }
+            // If it's a select dropdown, reset it to the default option, typically the first one
+            else if (fieldElement.tagName === 'SELECT') {
+              fieldElement.selectedIndex = 0;
+            }
+          } else {
+            fieldDiv.style.display = 'block';
+          }
+        });
+      }
+
+      // Initial check on load
+      toggleFields();
+
+      // Add event listener to the master data checkbox
+      isMasterDataCheckbox.addEventListener('change', toggleFields);
+    });
+  </script>
+{% endblock %}
