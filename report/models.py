@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Report(models.Model):
-    name = models.CharField(max_length=127)
+    name = models.CharField(max_length=127, unique=True)
     is_masterdata = models.BooleanField(default=False)
     is_datetime_merged = models.BooleanField(default=False, null=True, blank=True)
     date_col = models.CharField(max_length=127, null=True, blank=True)

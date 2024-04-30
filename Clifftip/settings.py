@@ -17,7 +17,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # custom paths
-REPORTS_DIR = BASE_DIR.parent / "data" / "reports"
+REPORT_DIR = BASE_DIR.parent / "data" / "reports"
+JSON_DIR = BASE_DIR.parent / "data" / "json"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
