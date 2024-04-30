@@ -10,7 +10,7 @@ from .models import CustomReport
 from django.contrib.auth.decorators import login_required
 from commonutil import commonutil
 from report.models import Report
-from ddr.service import report_logic
+from report.service import report_logic
 
 
 @login_required

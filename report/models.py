@@ -13,8 +13,8 @@ class Report(models.Model):
     )
     is_masterdata = models.BooleanField(default=False, verbose_name="Master data sheet")
     is_datetime_merged = models.BooleanField(default=False, verbose_name="Same column for date & time")
-    date_col = models.CharField(max_length=127, null=True, blank=True)
-    time_col = models.CharField(max_length=127, null=True, blank=True)
+    date_col = models.CharField(max_length=127, null=True, blank=True, verbose_name="Date column header")
+    time_col = models.CharField(max_length=127, null=True, blank=True, verbose_name="Time column header")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False
     )

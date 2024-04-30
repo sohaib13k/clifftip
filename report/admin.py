@@ -15,6 +15,8 @@ class ReportAdmin(admin.ModelAdmin):
     ]
     filter_horizontal = ["access_users", "access_groups"]
 
+    search_fields = ["name"]
+
     def view_on_site(self, obj):
         pass
 

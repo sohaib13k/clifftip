@@ -1,3 +1,4 @@
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.conf import settings
@@ -7,6 +8,7 @@ from django.urls import reverse
 from .models import Report
 from pathlib import Path
 import pandas as pd
+from report.service import data_frame
 
 
 @login_required
@@ -17,8 +19,8 @@ def report(request):
 # TODO: verify function name using regex- only alphanumeric with space allowed
 @login_required
 def upload(request):
+    all_reports = request.user.accessible_reports_users.all()
     if request.method != "POST" or "excel_file" not in request.FILES:
-        all_reports = list(Report.objects.all())
         return render(
             request, "report/upload_report.html", {"all_reports": all_reports}
         )
@@ -29,24 +31,20 @@ def upload(request):
         return HttpResponse("Invalid file format. Please upload an Excel file.")
 
     try:
-        all_reports = Report.objects.values_list("id", "name")
         report_id = request.POST.get("report_id")
-        report_id = int(report_id) if report_id.isdigit() else None
+        report = all_reports.get(id=report_id)
 
-        report_exists = any(report_id == report[0] for report in all_reports)
-
-        if not report_exists:
-            add_url = reverse("report-add")
+        report_name = report.name
+        if report_name is None:
+            # TODO: add logger in all places like this; to track error
             return HttpResponse(
-                f"This is an invalid report. Kindly add any new report before uploading <hr> <a href='{add_url}'>Report Metadata (add)</a>"
+                "Report name could not be found. Please check with admin"
             )
 
-        report_name = next(
-            (report[1] for report in all_reports if report_id == report[0]), None
-        )
-        if report_name is None:
+        file_size_mb = excel_file.size / 1024 / 1024  # Convert bytes to megabytes
+        if not can_upload_file(file_size_mb, request.user):
             return HttpResponse(
-                "Report name could not be found. Please check the report ID."
+                f"You've exhausted your {request.user.profile.storage_limit} Mb storage limit. Kindly check with admin."
             )
 
         file_path = settings.REPORT_DIR / report_name / excel_file.name
@@ -62,74 +60,60 @@ def upload(request):
             file_path.rename(new_path)
 
         commonutil.uploaded_excel(excel_file, settings.REPORT_DIR / report_name)
+
+        save_as_csv(report, file_path)
+
+        increment_file_upload_limit(file_size_mb, request.user)
+
         upload_url = reverse("report-upload")
-        parse_and_save_excel(file_path, report_name)
         return HttpResponse(
-            # TODO: add logger
             f"File uploaded successfully and saved! <hr> <a href='{upload_url}'>Upload more report</a>"
         )
 
     except Exception as e:
-        # TODO: add logger
-        return HttpResponse("Error saving Excel file: " + str(e))
+        return HttpResponse(f"Error saving Excel file: {str(e)}")
 
 
-@login_required
-def add(request):
-    if request.method != "POST":
-        return render(request, "report/add_report.html")
+def increment_file_upload_limit(file_size, user):
+    profile = user.profile
+    profile.used_storage += file_size
+    profile.save()
 
-    name = request.POST.get("name")
-    all_reports = Report.objects.values_list("name")
-    report_exists = any(name == report[0] for report in all_reports)
 
-    if report_exists:
-        return HttpResponse(f"This report already exists.")
+def can_upload_file(file_size, user):
+    profile = user.profile
 
-    created_by = request.user.username
-    is_masterdata = "is_masterdata" in request.POST
-
-    if is_masterdata:
-        is_masterdata = 1
-        is_datetime_merged, date_col, time_col = (None,) * 3
-    else:
-        is_masterdata = 0
-        date_col = request.POST.get("date_col")
-        time_col = request.POST.get("time_col")
-        is_datetime_merged = "is_datetime_merged" in request.POST
-
-    report = Report(
-        name=name,
-        is_masterdata=is_masterdata,
-        is_datetime_merged=is_datetime_merged,
-        date_col=date_col,
-        time_col=time_col,
-        created_by=created_by,
-    )
-    report.save()
-
-    return HttpResponse("Report created successfully!")
+    if profile.used_storage + file_size > profile.storage_limit:
+        return False
+    return True
 
 
 # TODO: fix duplicate data issue. If same report uploaded again then data appending
-def parse_and_save_excel(excel_path, report_name):
-    file_path = settings.JSON_DIR / report_name
+def save_as_csv(report, excel_path):
+    file_path = settings.CSV_DIR / report.name
     Path(file_path).mkdir(parents=True, exist_ok=True)
 
-    df = pd.read_excel(excel_path, engine="openpyxl", skiprows=3)
-    df["Invoice Date"] = pd.to_datetime(df["Invoice Date"])
-    df["Year"] = df["Invoice Date"].dt.year
-    df["Month"] = df["Invoice Date"].dt.month
+    func = getattr(data_frame, report.service_name, None)
+    df = func(excel_path)
 
-    grouped = df.groupby(["Year", "Month"])
+    if report.is_masterdata:
+        file_name = report.name + ".csv"
+        csv_file_path = file_path / file_name
+        df.to_csv(csv_file_path, mode="w", header=True, index=False)
+    else:
+        df[report.date_col] = pd.to_datetime(df[report.date_col])
+        df["Year"] = df[report.date_col].dt.year
+        df["Month"] = df[report.date_col].dt.month
 
-    for (year, month), group in grouped:
-        # Format filename as 'YYYY_MM.csv'
-        filename = f"{year}_{month:02d}.csv"
-        csv_file_path = file_path / filename
+        grouped = df.groupby(["Year", "Month"])
 
-        # Check if file already exists
-        if csv_file_path.exists():
-            group.to_csv(csv_file_path, mode="a", header=False, index=False)
-        else:
-            group.to_csv(csv_file_path, mode="w", header=True, index=False)
+        for (year, month), group in grouped:
+            # Format filename as 'YYYY_MM.csv'
+            filename = f"{year}_{month:02d}.csv"
+            csv_file_path = file_path / filename
+
+            # Check if file already exists
+            if csv_file_path.exists():
+                group.to_csv(csv_file_path, mode="a", header=False, index=False)
+            else:
+                group.to_csv(csv_file_path, mode="w", header=True, index=False)

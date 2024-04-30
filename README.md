@@ -53,6 +53,7 @@ server {
 ```
 
 ### Report upload conventions
-|Report name|ferquency|file name format|
+|Report name|ferquency|req.|
 |-|-|-|
-|sales purchase|monthly|
+|sales purchase|monthly|4th row contains header. (Customer GSTN)|
+|all_parties|NA|it should be in xls/xlsx. 2 branch column; first one to be removed.|

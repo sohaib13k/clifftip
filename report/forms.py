@@ -22,7 +22,6 @@ class ReportForm(forms.ModelForm):
         is_datetime_merged = self.cleaned_data.get("is_datetime_merged")
         date_col = self.cleaned_data.get("date_col")
         time_col = self.cleaned_data.get("time_col")
-        print(date_col, time_col)
 
         if is_datetime_merged and date_col != time_col:
             raise ValidationError(
