@@ -92,14 +92,11 @@
         }
         
         document.addEventListener("DOMContentLoaded", function() {
-            // Parse the JSON data from the Django context
             var chartData = JSON.parse('{{ all_chart_data_json|safe }}');
         
-            // Prepare data and labels
             var data = chartData.individual_chart_data.data.map(cleanNumeric);
             var labels = chartData.individual_chart_data.labels;
         
-            // Combine the arrays: 'data' and 'labels'
             var combined = data.map(function(value, index) {
                 return {
                     value: value,
@@ -107,12 +104,10 @@
                 };
             });
         
-            // Sort combined array by the 'value' in descending order
             combined.sort(function(a, b) {
                 return b.value - a.value; // For descending sort
             });
         
-            // Separate them back out
             var sortedData = combined.map(function(item) {
                 return item.value;
             });
@@ -120,19 +115,36 @@
                 return item.label;
             });
         
+            // Calculate average
+            var totalSum = sortedData.reduce((sum, current) => sum + current, 0);
+            var average = totalSum / sortedData.length;
         
-            // Column chart options
+            // ApexCharts options
             var options = {
                 chart: {
                     height: 350,
-                    type: "bar",
+                    type: 'bar',
                 },
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        endingShape: "rounded",
-                        columnWidth: "55%",
+                        endingShape: 'rounded',
+                        columnWidth: '55%',
                     },
+                },
+                annotations: {
+                    yaxis: [{
+                        y: average,
+                        borderColor: '#00E396',
+                        label: {
+                            borderColor: '#00E396',
+                            style: {
+                                color: '#fff',
+                                background: '#00E396',
+                            },
+                            text: 'Average: ' + new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(average),
+                        },
+                    }]
                 },
                 dataLabels: {
                     enabled: false
@@ -143,8 +155,8 @@
                     colors: ["transparent"]
                 },
                 series: [{
-                    name: "Net Total Sales",
-                    data: sortedData // Ensure this data is numeric
+                    name: 'Net Total Sales',
+                    data: sortedData
                 }],
                 xaxis: {
                     categories: sortedLabels
@@ -162,14 +174,16 @@
                     intersect: false, // Ensure this is set to false
                     y: {
                         formatter: function(val) {
+                            var percentage = ((val - average) / average * 100).toFixed(2);
+                            var sign = percentage >= 0 ? "+" : "";
                             return new Intl.NumberFormat('en-IN', {
                                 maximumFractionDigits: 2,
                                 style: 'currency',
                                 currency: 'INR'
-                            }).format(val);
+                            }).format(val) + ' (' + sign + percentage + '%)';
                         }
                     }
-                }
+                },
             };
         
             var chart = new ApexCharts(document.querySelector("#apexcharts-column"), options);
