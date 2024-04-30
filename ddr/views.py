@@ -75,21 +75,17 @@ def temp(request, report):
         compressed_file.write(temp)
 
     # Aggregating sales values
-    individual_sales = (
-        updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
-    )
-    individual_sales = append_total(
-        individual_sales, "Sales Person", "Net Total"
-    )
+    individual_sales = updated_sales.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
+    individual_sales = append_total(individual_sales, "Sales Person", "Net Total")
+    individual_sales = add_percentage_column(individual_sales, "Net Total")
 
-    branch_sales = (
-        updated_sales.groupby("Branch").agg({"Net Total": "sum"}).reset_index()
-    )
+    branch_sales = updated_sales.groupby("Branch").agg({"Net Total": "sum"}).reset_index()
     branch_sales = append_total(branch_sales, "Branch", "Net Total")
+    branch_sales = add_percentage_column(branch_sales, "Net Total")
 
-    item_type_sales = (
-        updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
-    )
+    item_type_sales = updated_sales.groupby("Item Type").agg({"Net Total": "sum"}).reset_index()
+    item_type_sales = append_total(item_type_sales, "Item Type", "Net Total")
+    item_type_sales = add_percentage_column(item_type_sales, "Net Total")
 
     # import locale
     # locale.setlocale(locale.LC_ALL, 'en_IN.utf8')
@@ -97,7 +93,7 @@ def temp(request, report):
     # def format_currency(value):
     #     return locale.format_string("%d", value, grouping=True)
 
-    item_type_sales = append_total(item_type_sales, "Item Type", "Net Total")
+    # item_type_sales = append_total(item_type_sales, "Item Type", "Net Total")
     # item_type_sales['Net Total'] = item_type_sales['Net Total'].apply(format_currency)
 
 
@@ -286,3 +282,13 @@ def view_report(request, report):
     except KeyError as e:
         # TODO: add logger
         print(f"Key error: {e} - Check if the specified row or column exists.")
+
+
+def add_percentage_column(df, total_col_name):
+    total_sum = df[total_col_name].iloc[-1]  # Accessing the last element in the column
+    if total_sum == 0:  # Avoid division by zero
+        df['Percentage'] = 0
+    else:
+        # Calculate the percentage of each row relative to the total sum
+        df['Percentage'] = (df[total_col_name] / total_sum * 100).round(2)
+    return df
