@@ -57,3 +57,10 @@ server {
 |-|-|-|
 |sales purchase|monthly|4th row contains header. (Customer GSTN)|
 |all_parties|NA|it should be in xls/xlsx. 2 branch column; first one to be removed.|
+
+
+### Points
+1. Adding a new report or creating a view, below places to be updated-
+1.1. report.service.data_frame.py
+1.2. report.service.report_logic.py
+1.3. Create a view with same name

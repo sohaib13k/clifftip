@@ -6,7 +6,7 @@ def get_excel_read_engine(excel_path):
     return "openpyxl" if excel_path.suffix == ".xlsx" else "xlrd"
 
 
-def sale_purchase(excel_path):
+def sale_register(excel_path):
     return pd.read_excel(
         excel_path, engine=get_excel_read_engine(excel_path), skiprows=3
     )
