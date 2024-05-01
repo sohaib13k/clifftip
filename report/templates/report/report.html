@@ -6,6 +6,24 @@
     <title>Report view</title>
 </head>
 <body>
-    <a href={% url 'report-upload' %}>Upload report</a>
+  <ul>
+    <li><a href={% url 'report-upload' %}>Upload report</a>
+      <hr>
+    <li>View Report
+    <div class="row">
+        {% for report in accessible_reports %}
+        <div class="col-md-4 col-sm-6">
+          <div class="card">
+            <div class="card-header">
+              <a href="{% url 'report-view' report.id %}">
+                <h5 class="card-title mb-0">- {{ report.name }}</h5>
+              </a>
+            </div>
+            <div class="card-body"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </ul>
 </body>
 </html>

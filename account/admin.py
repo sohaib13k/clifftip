@@ -9,7 +9,7 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
     verbose_name_plural = "profile"
-
+    readonly_fields = ('used_storage',)
 
 # Define a new User admin
 class UserAdmin(BaseUserAdmin):

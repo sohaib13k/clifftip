@@ -7,15 +7,16 @@ class ReportAdmin(admin.ModelAdmin):
     form = ReportForm
     list_display = [
         "name",
+        "is_custom_report",
         "is_masterdata",
         "date_col",
-        "time_col",
-        "is_datetime_merged",
         "last_updated_tmstmp",
     ]
-    filter_horizontal = ["access_users", "access_groups"]
+    filter_horizontal = ["access_users", "access_groups", "reports"]
 
     search_fields = ["name"]
+
+    readonly_fields = ("created_by", "created_date")
 
     def view_on_site(self, obj):
         pass

@@ -12,7 +12,7 @@ class ReportForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data.get("name")
         # Regex to check for alphanumeric characters with only one in-between space
-        if not re.match(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)?$", name):
+        if not re.match(r"^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$", name):
             raise ValidationError(
                 "Name must be alphanumeric and may contain only one in-between space."
             )
@@ -28,3 +28,25 @@ class ReportForm(forms.ModelForm):
                 'If "Same column for date & time" is selected, then both date and time values should be the same.'
             )
         return time_col
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_custom_report = cleaned_data.get('is_custom_report')
+        reports = cleaned_data.get('reports')
+
+        if not is_custom_report and reports.exists():
+            raise ValidationError({
+                'reports': "Kindly check the \"Customised Report\" checkbox, if report to be associated."
+            })
+
+        if is_custom_report and not reports.exists():
+            raise ValidationError({
+                'reports': "Kindly add reports, otherwise uncheck \"Customised Report\"."
+            })
+        
+        if is_custom_report and len(reports)<=1:
+            raise ValidationError({
+                'reports': "Minumum two reports should be added."
+            })
+        
+        return cleaned_data

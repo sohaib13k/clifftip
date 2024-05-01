@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import Group
-
+from django.urls import reverse
 
 class Report(models.Model):
     name = models.CharField(max_length=127, unique=True)
@@ -9,7 +9,7 @@ class Report(models.Model):
         max_length=127,
         unique=True,
         editable=False,
-        help_text="Name of this models service method",
+        help_text="Name of this model service method",
     )
     is_masterdata = models.BooleanField(default=False, verbose_name="Master data sheet")
     is_datetime_merged = models.BooleanField(default=False, verbose_name="Same column for date & time")
@@ -25,6 +25,10 @@ class Report(models.Model):
     )
     access_groups = models.ManyToManyField(
         Group, related_name="accessible_reports_groups", blank=True
+    )
+    is_custom_report = models.BooleanField(default=False, verbose_name="customised report")
+    reports = models.ManyToManyField(
+        'self', related_name="custom_report_parents", symmetrical=False, blank=True
     )
 
     class Meta:
