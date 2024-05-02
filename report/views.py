@@ -169,12 +169,12 @@ def view_report(request, report_id):
 
     func = getattr(report_logic, report.service_name, None)
 
-    if report.name == "Sale Register":
-        return func(request, report)
-    processed_data = func(request, report)
+    # if report.name == "Sale Register":
+    #     return func(request, report)
+    result = func(request, report)
 
     return render(
         request,
         f"report/{report.service_name}.html",
-        {"processed_data": processed_data},
+        {"result": result},
     )

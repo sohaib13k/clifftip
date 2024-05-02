@@ -34,22 +34,31 @@ def get_latest_csv_from_dir(report):
 
 
 def sale_register(request, report):
-    file_path = settings.REPORT_DIR / report.name
-    latest_file = max(file_path.glob("*.xlsx"), key=lambda x: x.stat().st_mtime)
+    # file_path = settings.REPORT_DIR / report.name
+    # latest_file = max(file_path.glob("*.xlsx"), key=lambda x: x.stat().st_mtime)
+    # return temp(request, latest_file)
 
-    return temp(request, latest_file)
+    latest_file = get_latest_csv_from_dir(report)
+    df = pd.read_csv(latest_file)
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": df.to_json(orient="records"),
+        "report": report,
+    }
+
+    return result
 
 
 def all_parties(request, report):
     latest_file = get_latest_csv_from_dir(report)
     df = pd.read_csv(latest_file)
-    processed_data = {
+    result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
-        "report_json": df.to_json(orient="records"),
-        "title": report.name,
+        "data": df.to_json(orient="records"),
+        "report": report,
     }
 
-    return processed_data
+    return result
 
 
 def temp(request, report):
@@ -244,8 +253,7 @@ def temp(request, report):
         request,
         "report/sale_register.html",
         {
-            "report": report.name,
-            "title": report.name,
+            "report": report,
             # "total": total,
             # "threshhold": threshhold,
             # "result": result,
