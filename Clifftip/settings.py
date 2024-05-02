@@ -30,8 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = "True" == os.getenv("DEBUG")
 
 # ALLOWED_HOSTS = ["localhost", "sohaib13k.pythonanywhere.com", "mavensoft.com"]
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = [os.getenv("ALLOWED_HOSTS")]
 
 # Application definition
 
