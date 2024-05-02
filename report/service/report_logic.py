@@ -44,7 +44,9 @@ def all_parties(request, report):
     latest_file = get_latest_csv_from_dir(report)
     df = pd.read_csv(latest_file)
     processed_data = {
-        "table": df.to_html(classes="table table-striped", index=False, header=False)
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "report_json": df.to_json(orient="records"),
+        "title": report.name,
     }
 
     return processed_data
@@ -243,6 +245,7 @@ def temp(request, report):
         "report/sale_register.html",
         {
             "report": report.name,
+            "title": report.name,
             # "total": total,
             # "threshhold": threshhold,
             # "result": result,

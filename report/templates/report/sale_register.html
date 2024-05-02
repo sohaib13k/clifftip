@@ -1,23 +1,14 @@
+{% extends "commonutil/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
 
+{% block title %} {{ title }} {% endblock %}
+
+{% block styles %}
     <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
-    
-    <!-- Choose your prefered color scheme -->
-    <link href="{% static 'css/light.css' %}" rel="stylesheet" />
-    {% comment %}
-    <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
-    {% endcomment %}
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
-    
-    
-  </head>
-  <body>
+{% endblock styles %}
+
+{% block content %}
+
     <h2>Summary</h2>
     <div>Report name: {{ report }}</div>
     {% comment %}
@@ -34,7 +25,7 @@
       Show/Hide Excel Data
     </button>
 
-    <button class="btn btn-primary" onclick="downloadExcel()">Download Excel</button>
+    <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
 
     <div id="spreadsheet" class="handsontable" style="display: none"></div>
 
@@ -72,7 +63,7 @@
     <script>
         window.reportExcelJson = {{ report_excel_json|safe }};  // Make JSON data available globally
     </script>
-    
+
     <script>
         function cleanNumeric(value) {
             return parseFloat(value.replace(/[^0-9.-]+/g, ""));
@@ -190,29 +181,12 @@
     </script>
 
     <script>
-        
-
-        function downloadExcel() {
-            // Retrieve and log the JSON data
-            var jsonData = {{ report_excel_json|safe }};
-        
-            if (!Array.isArray(jsonData)) {
-                console.error('Data is not an array:', jsonData);
-                return; // Exit if data is not an array
-            }
-        
-            // Continue with Excel file creation if data is correct
-            const worksheet = XLSX.utils.json_to_sheet(jsonData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-            XLSX.writeFile(workbook, "Report.xlsx");
-        }
-        
+        window.reportExcelJson = {{ report_excel_json|safe }};
     </script>
-    
+
+    <script src="{% static 'js/downloadexcel.js' %}"></script>    
     <script src="{% static 'js/handsontable.full.min.js' %}"></script>
-    <script src="{% static 'js/dynamic_handsontable.js' %}"></script>
+    <script src="{% static 'js/dynamichandsontable.js' %}"></script>
     <script src="{% static 'js/xlsx.full.min.js' %}"></script>
-    <script src="{% static 'js/app.js' %}"></script>
-  </body>
-</html>
+
+{% endblock content %}

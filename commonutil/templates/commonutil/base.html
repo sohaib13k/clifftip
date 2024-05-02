@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <title>{% block title %}Clifftip{% endblock %}</title>
+
+		<link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/light.css' %}" rel="stylesheet" />
+    <!-- Commented out but ready if needed -->
+    <!-- <link href="{% static 'css/dark.css' %}" rel="stylesheet" /> -->
+
+    <link href="{% static 'css/basestyles.css' %}" rel="stylesheet">
+		{% block styles %}{% endblock %}
+
+</head>
+<body>
+    {% block content %}{% endblock %}
+
+		<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

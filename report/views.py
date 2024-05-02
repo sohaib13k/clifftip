@@ -168,11 +168,10 @@ def view_report(request, report_id):
         return HttpResponse("Multiple reports found. Please contact with admin.")
 
     func = getattr(report_logic, report.service_name, None)
-    
+
     if report.name == "Sale Register":
         return func(request, report)
-    else:
-        processed_data = func(request, report)
+    processed_data = func(request, report)
 
     return render(
         request,
