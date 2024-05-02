@@ -220,7 +220,7 @@
                             try {
                                 data = JSON.parse(data);  // Parse string into JSON
                             } catch (e) {
-                                console.error("Error parsing JSON!", e);
+                                {% comment %} TODO: add loggers {% endcomment %}
                             }
                         }
         
@@ -228,11 +228,10 @@
                             window.reportExcelJson = data;
                             new handsontableManager('spreadsheet');
                         } else {
-                            console.error("Data is not an array:", data);
+                            {% comment %} TODO: add loggers {% endcomment %}
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error("AJAX Error:", error);
                         $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
                     }
                 });
