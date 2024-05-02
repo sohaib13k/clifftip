@@ -27,3 +27,6 @@ urlpatterns = [
     path("account/", include("account.urls")),
     path("report/", include("report.urls")),
 ]
+
+# api routes for report
+urlpatterns += [path("api/report/", include("report.api.urls"))]

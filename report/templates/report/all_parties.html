@@ -4,6 +4,7 @@
 {% block title %} Report | {{ processed_data.title }} {% endblock %}
 
 {% block styles %}
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
 {% endblock styles %}
 
@@ -22,6 +23,14 @@
             Download Excel
         </button>
     </div>
+
+    <select id="timeInterval" class="form-select">
+        <option value="day">This Day</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+        <option value="custom">Custom</option>
+    </select>
 
     
     {% comment %} <div id="spreadsheet" class="table-responsive">
@@ -48,8 +57,53 @@
         }
     });
 </script>
+
+<script>
+    $(document).ready(function() {
+        $('#timeInterval').change(function() {
+            var interval = $(this).val();
+            fetchAndDisplayData(interval);
+        });
+
+        function fetchAndDisplayData(interval) {
+            $.ajax({
+                url: '/api/report/1/',  // Adjust URL to your Django URL configuration
+                type: 'GET',
+                data: {
+                    start_date: '2024-01-15',
+                    end_date: '2024-02-15',
+                    interval: interval  // make sure your API handles this parameter
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // Ensure that data is an array
+                    if (typeof data === 'string') {
+                        try {
+                            data = JSON.parse(data);  // Parse string into JSON
+                        } catch (e) {
+                            console.error("Error parsing JSON!", e);
+                        }
+                    }
+        
+                    if (Array.isArray(data)) {
+                        window.reportExcelJson = data;
+                        new handsontableManager('spreadsheet');
+                    } else {
+                        console.error("Data is not an array:", data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                    $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
+                }
+            });
+        }
+        
+    });
+</script>
+
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
 <script src="{% static 'js/handsontable.full.min.js' %}"></script>
-<script src="{% static 'js/custom/commonutil.js' %}"></script>    
 <script src="{% static 'js/xlsx.full.min.js' %}"></script>
 
 {% endblock content %}
