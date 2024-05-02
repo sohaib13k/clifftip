@@ -32,7 +32,10 @@
 <div id="spreadsheet" class="handsontable" style="display: block"></div>
 
 <script>
-    window.reportExcelJson = {{ processed_data.report_json|safe }};  
+    window.reportExcelJson = {{ processed_data.report_json|safe }};
+    document.addEventListener("DOMContentLoaded", function () {
+        new handsontableManager('spreadsheet');
+    });  
 </script>
 
 <script>
@@ -45,9 +48,8 @@
         }
     });
 </script>
-<script src="{% static 'js/downloadexcel.js' %}"></script>    
 <script src="{% static 'js/handsontable.full.min.js' %}"></script>
-<script src="{% static 'js/dynamichandsontable.js' %}"></script>
+<script src="{% static 'js/custom/commonutil.js' %}"></script>    
 <script src="{% static 'js/xlsx.full.min.js' %}"></script>
 
 {% endblock content %}
