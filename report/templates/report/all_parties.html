@@ -24,8 +24,6 @@
         </button>
     </div>
 
-    {% include "commonutil/time_interval_select.html" %}
-    
     {% comment %} <div id="spreadsheet" class="table-responsive">
         {{ result.table|safe }}
     </div> {% endcomment %}
@@ -49,60 +47,6 @@
             content.style.display = 'none';
         }
     });
-</script>
-
-{% comment %} date filter ajax {% endcomment %}
-<script>
-    $(document).ready(function() {
-        $('#timeInterval').change(function() {
-            var interval = $(this).val();
-            fetchAndDisplayData(interval);
-        });
-    
-        function fetchAndDisplayData(interval) {
-            var requestData = {};  // Define an object to store request data
-    
-            // Conditionally set request data based on the interval
-            if (interval == 'custom') {
-                requestData = {
-                    start_date: '2024-01-15',
-                    end_date: '2024-02-15'
-                };
-            } else {
-                requestData = {
-                    interval: interval 
-                };
-            }
-    
-            $.ajax({
-                url: '/api/report/{{ result.report.id }}/',  // Adjust URL to your Django URL configuration
-                type: 'GET',
-                data: requestData,  // Set the data based on the condition
-                dataType: 'json',
-                success: function(data) {
-                    // Ensure that data is an array
-                    if (typeof data === 'string') {
-                        try {
-                            data = JSON.parse(data);  // Parse string into JSON
-                        } catch (e) {
-                            console.error("Error parsing JSON!", e);
-                        }
-                    }
-    
-                    if (Array.isArray(data)) {
-                        window.reportExcelJson = data;
-                        new handsontableManager('spreadsheet');
-                    } else {
-                        console.error("Data is not an array:", data);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX Error:", error);
-                    $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
-                }
-            });
-        }
-    }); 
 </script>
 
 <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>

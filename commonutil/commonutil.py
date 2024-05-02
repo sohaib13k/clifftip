@@ -1,8 +1,9 @@
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from babel.numbers import format_decimal
+
 
 def uploaded_excel(f, location):
     """
@@ -29,3 +30,32 @@ def format_rupees(number):
         return format_decimal(number, locale="en_IN")
     except:
         return number
+
+
+def get_interval_date_str(interval):
+    """
+    Return start date and end date from a given interval.
+    start date is assumed the past date and end date is closer to todays date
+
+    returns (start date, end date)
+    start date = YYYY-mm-dd
+    end date = YYYY-mm-dd
+    """
+    now = datetime.now().today()
+
+    if interval == "day":
+        # TODO: this in unncecessary as already by default one month data in been sent, so fetch from that
+        return (now.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"))
+    elif interval == "week":
+        start_date = now - timedelta(now.weekday())
+        return (start_date.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"))
+    elif interval == "month":
+        return (
+            "-".join(map(lambda x: str(x).zfill(2), [now.year, now.month, 1])),
+            now.strftime("%Y-%m-%d"),
+        )
+    elif interval == "year":
+        return (
+            "-".join(map(lambda x: str(x).zfill(2), [now.year, 1, 1])),
+            now.strftime("%Y-%m-%d"),
+        )

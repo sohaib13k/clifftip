@@ -3,9 +3,9 @@ from django.views import View
 from report.models import Report
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from commonutil import commonutil
 import json
 import os
-import datetime
 import pandas as pd
 
 
@@ -15,12 +15,35 @@ class ReportView(LoginRequiredMixin, View):
     redirect_field_name = "next"  # This field can be used to redirect back to to the original page after login
 
     def get(self, request, report_id=None):
-        print(report_id)
         report = request.user.accessible_reports_users.get(id=report_id)
 
-        start_date = request.GET.get("start_date")
-        end_date = request.GET.get("end_date")
+        if report.is_masterdata:
+            return JsonResponse(
+                {
+                    "error": "Masterdata cannot be filtered, since date column missing."
+                },
+                status=406,
+            )
 
+        interval = request.GET.get("interval")
+
+        if interval:
+            if interval not in ["day", "week", "month", "year"]:
+                return JsonResponse({"error": "Invalid interval provided."}, status=400)
+            start_date, end_date = commonutil.get_interval_date_str(interval)
+
+        else:
+            start_date = request.GET.get("start_date")
+            end_date = request.GET.get("end_date")
+
+            if not start_date or not end_date:
+                return JsonResponse(
+                    {
+                        "error": "Start date and end date required when interval is not provided."
+                    },
+                    status=400,
+                )
+        # start_date = "2024-05-01"
         start_year_month = tuple(map(int, start_date.split("-")[:2]))  # (year, month)
         end_year_month = tuple(map(int, end_date.split("-")[:2]))  # (year, month)
 
@@ -33,14 +56,20 @@ class ReportView(LoginRequiredMixin, View):
                 # Remove ".csv" extension
                 file_year_month = tuple(map(int, filename[:-4].split("_")[:2]))
 
-                if (
-                    start_year_month is None or start_year_month <= file_year_month
-                ) and (end_year_month is None or end_year_month >= file_year_month):
+                if start_year_month <= file_year_month <= end_year_month:
                     file_path = os.path.join(csv_directory, filename)
                     df = pd.read_csv(file_path)
                     agg_data = pd.concat([agg_data, df], ignore_index=True)
 
-        return JsonResponse(agg_data.to_json(orient="records"), safe=False)
+        filtered_data = agg_data[
+            (agg_data[report.date_col] >= start_date)
+            & (agg_data[report.date_col] <= end_date)
+        ]
+
+        return JsonResponse(
+            filtered_data.sort_values(report.date_col).to_json(orient="records"),
+            safe=False,
+        )
 
     def post(self, request):
         # Create a new report
