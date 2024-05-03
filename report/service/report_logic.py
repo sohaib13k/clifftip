@@ -60,6 +60,28 @@ def all_parties(request, report):
 
     return result
 
+def item_type_finished_goods(request, report):
+    latest_file = get_latest_csv_from_dir(report)
+    df = pd.read_csv(latest_file)
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": df.to_json(orient="records"),
+        "report": report,
+    }
+
+    return result
+
+def routing_report(request, report):
+    latest_file = get_latest_csv_from_dir(report)
+    df = pd.read_csv(latest_file)
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": df.to_json(orient="records"),
+        "report": report,
+    }
+
+    return result
+
 
 def temp(request, report):
     directory_path = settings.REPORT_DIR

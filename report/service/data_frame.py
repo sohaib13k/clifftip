@@ -14,3 +14,9 @@ def sale_register(excel_path):
 
 def all_parties(excel_path):
     return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
+
+def item_type_finished_goods(excel_path):
+    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
+
+def routing_report(excel_path):
+    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
