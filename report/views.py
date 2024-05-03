@@ -145,7 +145,7 @@ def save_as_csv(report, excel_path):
 
         for (year, month), group in grouped:
             # Format filename as 'YYYY_MM.csv'
-            filename = f"{year}_{month:02d}.csv"
+            filename = f"{int(year)}_{int(month):02d}.csv"
             csv_file_path = file_path / filename
 
             # Check if file already exists
