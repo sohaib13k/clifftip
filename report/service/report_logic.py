@@ -26,12 +26,24 @@ def get_latest_csv_from_dir(report):
     try:
         latest_file = max(csv_dir.glob("*.csv"), key=lambda x: x.stat().st_mtime)
     except ValueError:
-        return JsonResponse(
-            {"error": "No CSV files found in the directory."}, status=404
-        )
+        return None
 
     return latest_file
 
+def default(request, report):
+    latest_file = get_latest_csv_from_dir(report)
+    
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
+
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": df.to_json(orient="records"),
+        "report": report,
+    }
+
+    return result
 
 def sale_register(request, report):
     # file_path = settings.REPORT_DIR / report.name

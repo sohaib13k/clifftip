@@ -130,6 +130,11 @@ def save_as_csv(report, excel_path):
     Path(file_path).mkdir(parents=True, exist_ok=True)
 
     func = getattr(data_frame, report.service_name, None)
+    
+    # routing to a default view for temp. upload
+    if func == None:
+        func = getattr(data_frame, 'default', None)
+
     df = func(excel_path)
 
     if report.is_masterdata:
@@ -167,14 +172,21 @@ def view_report(request, report_id):
         # TODO: handle this scenario, when multiple objects returned
         return HttpResponse("Multiple reports found. Please contact with admin.")
 
-    func = getattr(report_logic, report.service_name, None)
+    template = report.service_name
+
+    try:
+        func = getattr(report_logic, report.service_name, None)
+        result = func(request, report)
+    except (TypeError, ValueError) as ex:
+        func = getattr(report_logic, 'default', None)
+        template = "default"
+        result = func(request, report)
 
     # if report.name == "Sale Register":
     #     return func(request, report)
-    result = func(request, report)
 
     return render(
         request,
-        f"report/{report.service_name}.html",
+        f"report/{template}.html",
         {"result": result},
     )

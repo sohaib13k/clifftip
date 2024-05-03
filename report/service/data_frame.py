@@ -5,6 +5,8 @@ def get_excel_read_engine(excel_path):
     """Read Excel file using appropriate engine based on file extension."""
     return "openpyxl" if excel_path.suffix == ".xlsx" else "xlrd"
 
+def default(excel_path):
+    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
 
 def sale_register(excel_path):
     return pd.read_excel(

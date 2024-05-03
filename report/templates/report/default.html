@@ -1,0 +1,56 @@
+{% extends "commonutil/base.html" %}
+{% load static %}
+
+{% block title %} Report | {{ result.report.name }} {% endblock %}
+
+{% block styles %}
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
+{% endblock styles %}
+
+{% block content %}
+
+<div class="container my-5">
+    <h2 class="mb-4">Summary</h2>
+    <div>Report name: {{ result.report.name }}</div>
+
+    <h2 class="mt-5">Excel Data</h2>
+    <div class="d-flex justify-content-between mb-2">
+        <button class="btn btn-primary" id="toggleButton">
+            Show/Hide Excel Data
+        </button>
+        <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">
+            Download Excel
+        </button>
+    </div>
+
+    {% comment %} <div id="spreadsheet" class="table-responsive">
+        {{ result.table|safe }}
+    </div> {% endcomment %}
+</div>
+
+<div id="spreadsheet" class="handsontable" style="display: block"></div>
+
+<script>
+    window.reportExcelJson = {{ result.data|safe }};
+    document.addEventListener("DOMContentLoaded", function () {
+        new handsontableManager('spreadsheet');
+    });  
+</script>
+
+<script>
+    document.getElementById('toggleButton').addEventListener('click', function() {
+        var content = document.getElementById('spreadsheet');
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+        } else {
+            content.style.display = 'none';
+        }
+    });
+</script>
+
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/handsontable.full.min.js' %}"></script>
+<script src="{% static 'js/xlsx.full.min.js' %}"></script>
+
+{% endblock content %}
