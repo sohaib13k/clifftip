@@ -25,6 +25,10 @@ load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir
 3. Install nginx
 ```bash
 4. gunicorn --bind 0.0.0.0:8000 wsgi:application
+4.1 When git pull- 
+4.1.1 pkill gunicorn
+4.1.2 gunicorn --bind 0.0.0.0:8000 myproject.wsgi:application
+4.1.3 sudo systemctl restart nginx
 ```
 5. Remove the default server block. Create a new configuration file in /etc/nginx/sites-available/ and symlink it to /etc/nginx/sites-enabled/
 6. Set up Nginx to proxy requests to Gunicorn:

@@ -178,8 +178,8 @@ def view_report(request, report_id):
         func = getattr(report_logic, report.service_name, None)
         result = func(request, report)
     except (TypeError, ValueError) as ex:
-        func = getattr(report_logic, 'default', None)
         template = "default"
+        func = getattr(report_logic, 'default', None)
         result = func(request, report)
 
     # if report.name == "Sale Register":
