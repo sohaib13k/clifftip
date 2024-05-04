@@ -1,5 +1,5 @@
 """
-WSGI config for Clifftip project.
+WSGI config for clifftip project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -17,6 +17,6 @@ from pathlib import Path
 
 load_dotenv(dotenv_path=Path.cwd() / '.env') # path is projects root-dir. or base-dir.
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Clifftip.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clifftip.settings')
 
 application = get_wsgi_application()
