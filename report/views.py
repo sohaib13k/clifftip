@@ -87,7 +87,9 @@ def upload(request):
 
     temp_file_path = upload_excel_temp(excel_file)
 
-    save_as_csv(report, temp_file_path)
+    response = save_as_csv(report, temp_file_path)
+    if isinstance(response, HttpResponse):
+        return response
 
     commonutil.uploaded_excel(excel_file, settings.REPORT_DIR / report_name)
 
@@ -142,7 +144,13 @@ def save_as_csv(report, excel_path):
         csv_file_path = file_path / file_name
         df.to_csv(csv_file_path, mode="w", header=True, index=False)
     else:
-        df[report.date_col] = pd.to_datetime(df[report.date_col])
+        try:
+            df[report.date_col] = pd.to_datetime(df[report.date_col])
+        except KeyError as ex:
+            return HttpResponse(
+                f"Uploaded report doesn't contain \"{report.date_col}\" column. Kindly upload the right report",
+                status=404
+            )
         df["Year"] = df[report.date_col].dt.year
         df["Month"] = df[report.date_col].dt.month
 

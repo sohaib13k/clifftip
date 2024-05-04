@@ -3,7 +3,7 @@ import string
 from datetime import datetime, timedelta
 import os
 from babel.numbers import format_decimal
-
+import pandas as pd
 
 def uploaded_excel(f, location):
     """
@@ -59,3 +59,48 @@ def get_interval_date_str(interval):
             "-".join(map(lambda x: str(x).zfill(2), [now.year, 1, 1])),
             now.strftime("%Y-%m-%d"),
         )
+
+
+def read_excel_or_html(excel_path, skiprows=None):
+    """
+    Reads an Excel file or converts an HTML file to a DataFrame.
+    :param excel_path: Path of the file to be read.
+    :param skiprows: Number of rows to skip at the start of the file for Excel files.
+    :return: A DataFrame containing the data.
+    """
+    if is_file_html(excel_path):
+        # Convert HTML to DataFrame if the file is HTML
+        return convert_html_to_dataframe(excel_path)
+    # Otherwise, read as Excel file
+    return pd.read_excel(
+        excel_path, engine=get_excel_read_engine(excel_path), skiprows=skiprows
+    )
+
+
+def is_file_html(file_path):
+    """Check if the file content starts with typical HTML tags."""
+    try:
+        with open(file_path, "rb") as file:
+            start = file.read(100).decode("utf-8").strip()
+            return (
+                start.startswith("<!DOCTYPE") or "<html" in start or "<table" in start
+            )
+    except Exception as e:
+        return False
+
+
+def convert_html_to_dataframe(html_path):
+    """Convert an HTML file to a DataFrame and return it.
+
+    This function reads an HTML file, assuming it contains at least one table,
+    and returns the first table as a DataFrame.
+    """
+    # Use Pandas to read the HTML file
+    df_list = pd.read_html(html_path)
+    # Assuming the first table is what you need
+    return df_list[0]  # Return the DataFrame of the first table directly
+
+
+def get_excel_read_engine(excel_path):
+    """Read Excel file using appropriate engine based on file extension."""
+    return "openpyxl" if excel_path.suffix == ".xlsx" else "xlrd"

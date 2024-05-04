@@ -1,24 +1,17 @@
 import pandas as pd
-
-
-def get_excel_read_engine(excel_path):
-    """Read Excel file using appropriate engine based on file extension."""
-    return "openpyxl" if excel_path.suffix == ".xlsx" else "xlrd"
+from commonutil.commonutil import read_excel_or_html
 
 def default(excel_path):
-    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
+    return read_excel_or_html(excel_path)
 
 def sale_register(excel_path):
-    return pd.read_excel(
-        excel_path, engine=get_excel_read_engine(excel_path), skiprows=3
-    )
-
+    return read_excel_or_html(excel_path, skiprows=3)
 
 def all_parties(excel_path):
-    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
+    return read_excel_or_html(excel_path)
 
 def item_type_finished_goods(excel_path):
-    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
+    return read_excel_or_html(excel_path)
 
 def routing_report(excel_path):
-    return pd.read_excel(excel_path, engine=get_excel_read_engine(excel_path))
+    return read_excel_or_html(excel_path)
