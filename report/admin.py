@@ -16,7 +16,7 @@ class ReportAdmin(admin.ModelAdmin):
 
     search_fields = ["name"]
 
-    readonly_fields = ("created_by", "created_date")
+    readonly_fields = ("created_by", "created_date", "service_name")
 
     def view_on_site(self, obj):
         pass

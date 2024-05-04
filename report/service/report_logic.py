@@ -30,9 +30,10 @@ def get_latest_csv_from_dir(report):
 
     return latest_file
 
+
 def default(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    
+
     df = pd.DataFrame()
     if latest_file is not None:
         df = pd.read_csv(latest_file)
@@ -44,6 +45,7 @@ def default(request, report):
     }
 
     return result
+
 
 def sale_register(request, report):
     # file_path = settings.REPORT_DIR / report.name
@@ -72,6 +74,7 @@ def all_parties(request, report):
 
     return result
 
+
 def item_type_finished_goods(request, report):
     latest_file = get_latest_csv_from_dir(report)
     df = pd.read_csv(latest_file)
@@ -83,12 +86,52 @@ def item_type_finished_goods(request, report):
 
     return result
 
+
 def routing_report(request, report):
     latest_file = get_latest_csv_from_dir(report)
     df = pd.read_csv(latest_file)
+
+    lock_counts = df["Lock/Unlock"].value_counts().to_dict()
+    locked_count = lock_counts.get("Lock", 0)
+    unlocked_count = lock_counts.get("Unlock", 0)
+
+    total_count = locked_count + unlocked_count
+
+    locked_percent = (locked_count / total_count) * 100 if total_count != 0 else 0
+    unlocked_percent = (unlocked_count / total_count) * 100 if total_count != 0 else 0
+
     result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
+        "data_lock": locked_count,
+        "data_unlock": unlocked_count,
+        "data_lock_percent": locked_percent,
+        "data_unlock_percent": unlocked_percent,
+        "report": report,
+    }
+
+    return result
+
+def bom_report(request, report):
+    latest_file = get_latest_csv_from_dir(report)
+    df = pd.read_csv(latest_file)
+
+    lock_counts = df["Lock/Unlock"].value_counts().to_dict()
+    locked_count = lock_counts.get("Lock", 0)
+    unlocked_count = lock_counts.get("Unlock", 0)
+
+    total_count = locked_count + unlocked_count
+
+    locked_percent = (locked_count / total_count) * 100 if total_count != 0 else 0
+    unlocked_percent = (unlocked_count / total_count) * 100 if total_count != 0 else 0
+
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": df.to_json(orient="records"),
+        "data_lock": locked_count,
+        "data_unlock": unlocked_count,
+        "data_lock_percent": locked_percent,
+        "data_unlock_percent": unlocked_percent,
         "report": report,
     }
 

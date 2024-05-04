@@ -15,3 +15,6 @@ def item_type_finished_goods(excel_path):
 
 def routing_report(excel_path):
     return read_excel_or_html(excel_path)
+
+def bom_report(excel_path):
+    return read_excel_or_html(excel_path)

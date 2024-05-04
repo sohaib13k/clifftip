@@ -37,7 +37,8 @@ class Report(models.Model):
 
     def save(self, *args, **kwargs):
         # Remove all spaces and convert to lowercase, this
-        self.service_name = "_".join(self.name.split()).lower()
+        if not self.service_name:
+            self.service_name = "_".join(self.name.split()).lower()
         super(Report, self).save(*args, **kwargs)
 
     def __str__(self):
