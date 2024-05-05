@@ -16,6 +16,10 @@ from .models import Report
 from commonutil import commonutil
 from .commonutil import append_total
 from report.service import report_logic
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -62,9 +66,8 @@ def upload(request):
     report_id = request.POST.get("report_id")
     report = all_reports.get(id=report_id)
 
-    report_name = report.name
-    if report_name is None:
-        # TODO: add logger in all places like this; to track error
+    if report.name is None:
+        logger.error("Report name missing, even though it's a required field in table")
         return HttpResponse("Report name could not be found. Please check with admin")
 
     file_size_mb = excel_file.size / 1024 / 1024  # Convert bytes to megabytes
@@ -73,14 +76,14 @@ def upload(request):
             f"You've exhausted your {request.user.profile.storage_limit} Mb storage limit. Kindly check with admin."
         )
 
-    file_path = settings.REPORT_DIR / report_name / excel_file.name
+    file_path = settings.REPORT_DIR / report.service_name / excel_file.name
 
     if file_path.exists():
         ext = Path(excel_file.name).suffix
         unique_suffix = commonutil.get_unique_filename()
         new_path = (
             Path(settings.REPORT_DIR)
-            / report_name
+            / report.service_name
             / f"{Path(excel_file.name).stem}_{unique_suffix}.bak{ext}"
         )
         file_path.rename(new_path)
@@ -91,7 +94,7 @@ def upload(request):
     if isinstance(response, HttpResponse):
         return response
 
-    commonutil.uploaded_excel(excel_file, settings.REPORT_DIR / report_name)
+    commonutil.uploaded_excel(excel_file, settings.REPORT_DIR / report.service_name)
 
     increment_file_upload_limit(file_size_mb, request.user)
 
@@ -117,7 +120,7 @@ def can_upload_file(file_size, user):
 
 def upload_excel_temp(excel_file):
     temp_dir = tempfile.mkdtemp()
-    temp_file_path = os.path.join(temp_dir, excel_file.name)
+    # temp_file_path = os.path.join(temp_dir, excel_file.name)
 
     # Save the file to the temporary directory
     fs = FileSystemStorage(location=temp_dir)
@@ -128,28 +131,35 @@ def upload_excel_temp(excel_file):
 
 # TODO: fix duplicate data issue. If same report uploaded again then data appending
 def save_as_csv(report, excel_path):
-    file_path = settings.CSV_DIR / report.name
+    file_path = settings.CSV_DIR / report.service_name
     Path(file_path).mkdir(parents=True, exist_ok=True)
 
     func = getattr(data_frame, report.service_name, None)
-    
+
     # routing to a default view for temp. upload
     if func == None:
-        func = getattr(data_frame, 'default', None)
+        func = getattr(data_frame, "default", None)
 
     df = func(excel_path)
 
     if report.is_masterdata:
-        file_name = report.name + ".csv"
+        file_name = report.service_name + ".csv"
         csv_file_path = file_path / file_name
+
+        if csv_file_path.exists():
+            ext = Path(file_name).suffix
+            unique_suffix = commonutil.get_unique_filename()
+            new_path = file_path / f"{Path(file_name).stem}_{unique_suffix}.bak{ext}"
+            csv_file_path.rename(new_path)
+
         df.to_csv(csv_file_path, mode="w", header=True, index=False)
     else:
         try:
             df[report.date_col] = pd.to_datetime(df[report.date_col])
         except KeyError as ex:
             return HttpResponse(
-                f"Uploaded report doesn't contain \"{report.date_col}\" column. Kindly upload the right report",
-                status=404
+                f'Uploaded report doesn\'t contain "{report.date_col}" column. Kindly upload the right report',
+                status=404,
             )
         df["Year"] = df[report.date_col].dt.year
         df["Month"] = df[report.date_col].dt.month
@@ -181,17 +191,17 @@ def view_report(request, report_id):
         return HttpResponse("Multiple reports found. Please contact with admin.")
 
     template = report.service_name
+    func = getattr(report_logic, report.service_name, None)
 
-    try:
-        func = getattr(report_logic, report.service_name, None)
-        result = func(request, report)
-    except (TypeError, ValueError) as ex:
+    if func == None:
         template = "default"
-        func = getattr(report_logic, 'default', None)
-        result = func(request, report)
+        func = getattr(report_logic, "default", None)
 
-    # if report.name == "Sale Register":
-    #     return func(request, report)
+    # try:
+    #     result = func(request, report)
+    # except (TypeError, ValueError) as ex:
+
+    result = func(request, report)
 
     return render(
         request,

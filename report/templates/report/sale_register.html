@@ -1,7 +1,7 @@
 {% extends "commonutil/base.html" %}
 {% load static %}
 
-{% block title %} Report | {{ report.name }} {% endblock %}
+{% block title %} Report | {{ result.report.name }} {% endblock %}
 
 {% block styles %}
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
@@ -11,7 +11,7 @@
 {% block content %}
 
     <h2>Summary</h2>
-    <div>Report name: {{ report.name }}</div>
+    <div>Report name: {{ result.report.name }}</div>
     {% comment %}
     <div>Threshhold: {{ threshhold }}</div>
     <div>Total: {{ total}}</div>

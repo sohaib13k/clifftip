@@ -22,7 +22,7 @@ from django.http import JsonResponse
 
 
 def get_latest_csv_from_dir(report):
-    csv_dir = settings.CSV_DIR / report.name
+    csv_dir = settings.CSV_DIR / report.service_name
     try:
         latest_file = max(csv_dir.glob("*.csv"), key=lambda x: x.stat().st_mtime)
     except ValueError:
@@ -48,7 +48,7 @@ def default(request, report):
 
 
 def sale_register(request, report):
-    # file_path = settings.REPORT_DIR / report.name
+    # file_path = settings.REPORT_DIR / report.service_name
     # latest_file = max(file_path.glob("*.xlsx"), key=lambda x: x.stat().st_mtime)
     # return temp(request, latest_file)
 

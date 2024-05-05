@@ -47,7 +47,7 @@ class ReportView(LoginRequiredMixin, View):
         start_year_month = tuple(map(int, start_date.split("-")[:2]))  # (year, month)
         end_year_month = tuple(map(int, end_date.split("-")[:2]))  # (year, month)
 
-        csv_directory = settings.CSV_DIR / report.name
+        csv_directory = settings.CSV_DIR / report.service_name
 
         agg_data = pd.DataFrame()
 
