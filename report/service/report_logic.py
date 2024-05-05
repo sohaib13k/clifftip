@@ -53,7 +53,11 @@ def sale_register(request, report):
     # return temp(request, latest_file)
 
     latest_file = get_latest_csv_from_dir(report)
-    df = pd.read_csv(latest_file)
+
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
+
     result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
@@ -65,7 +69,11 @@ def sale_register(request, report):
 
 def all_parties(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    df = pd.read_csv(latest_file)
+
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
+
     result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
@@ -77,7 +85,11 @@ def all_parties(request, report):
 
 def item_type_finished_goods(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    df = pd.read_csv(latest_file)
+    
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
+
     result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
@@ -89,7 +101,10 @@ def item_type_finished_goods(request, report):
 
 def routing_report(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    df = pd.read_csv(latest_file)
+    
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
 
     lock_counts = df["Lock/Unlock"].value_counts().to_dict()
     locked_count = lock_counts.get("Lock", 0)
@@ -114,8 +129,11 @@ def routing_report(request, report):
 
 def bom_report(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    df = pd.read_csv(latest_file)
-
+    
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
+        
     lock_counts = df["Lock/Unlock"].value_counts().to_dict()
     locked_count = lock_counts.get("Lock", 0)
     unlocked_count = lock_counts.get("Unlock", 0)

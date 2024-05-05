@@ -19,9 +19,7 @@ class ReportView(LoginRequiredMixin, View):
 
         if report.is_masterdata:
             return JsonResponse(
-                {
-                    "error": "Masterdata cannot be filtered, since date column missing."
-                },
+                {"error": "Masterdata cannot be filtered, since date column missing."},
                 status=406,
             )
 
@@ -51,15 +49,19 @@ class ReportView(LoginRequiredMixin, View):
 
         agg_data = pd.DataFrame()
 
-        for filename in os.listdir(csv_directory):
-            if filename.endswith(".csv"):
-                # Remove ".csv" extension
-                file_year_month = tuple(map(int, filename[:-4].split("_")[:2]))
+        try:
+            for filename in os.listdir(csv_directory):
+                if filename.endswith(".csv"):
+                    # Remove ".csv" extension
+                    file_year_month = tuple(map(int, filename[:-4].split("_")[:2]))
 
-                if start_year_month <= file_year_month <= end_year_month:
-                    file_path = os.path.join(csv_directory, filename)
-                    df = pd.read_csv(file_path)
-                    agg_data = pd.concat([agg_data, df], ignore_index=True)
+                    if start_year_month <= file_year_month <= end_year_month:
+                        file_path = os.path.join(csv_directory, filename)
+                        df = pd.read_csv(file_path)
+                        agg_data = pd.concat([agg_data, df], ignore_index=True)
+
+        except FileNotFoundError:
+            return JsonResponse(data={}, status=204)
 
         filtered_data = agg_data[
             (agg_data[report.date_col] >= start_date)

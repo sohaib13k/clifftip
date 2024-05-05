@@ -215,6 +215,12 @@
                     data: requestData,  // Set the data based on the condition
                     dataType: 'json',
                     success: function(data) {
+                        // Check if data is an object and is empty
+                        if ($.isEmptyObject(data)) {
+                            $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
+                            return;  // Exit the function if no data is available
+                        }
+                        
                         // Ensure that data is an array
                         if (typeof data === 'string') {
                             try {
