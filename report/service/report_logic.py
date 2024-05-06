@@ -1,24 +1,11 @@
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.urls import reverse
-from pathlib import Path
 import pandas as pd
 import gzip
 import json
 import os
-import tempfile
-from django.core.files.storage import FileSystemStorage
-from report.service import data_frame
-from report.models import Report
 from commonutil import commonutil
 from report.commonutil import append_total, add_percentage_column
-from report.service import report_logic
-import pandas as pd
-import os
 from django.conf import settings
-from django.http import JsonResponse
 
 
 def get_latest_csv_from_dir(report):
@@ -85,7 +72,7 @@ def all_parties(request, report):
 
 def item_type_finished_goods(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    
+
     df = pd.DataFrame()
     if latest_file is not None:
         df = pd.read_csv(latest_file)
@@ -101,7 +88,7 @@ def item_type_finished_goods(request, report):
 
 def routing_report(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    
+
     df = pd.DataFrame()
     if latest_file is not None:
         df = pd.read_csv(latest_file)
@@ -127,13 +114,14 @@ def routing_report(request, report):
 
     return result
 
+
 def bom_report(request, report):
     latest_file = get_latest_csv_from_dir(report)
-    
+
     df = pd.DataFrame()
     if latest_file is not None:
         df = pd.read_csv(latest_file)
-        
+
     lock_counts = df["Lock/Unlock"].value_counts().to_dict()
     locked_count = lock_counts.get("Lock", 0)
     unlocked_count = lock_counts.get("Unlock", 0)
