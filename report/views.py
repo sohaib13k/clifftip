@@ -15,7 +15,7 @@ from report.service import data_frame
 from .models import Report
 from commonutil import commonutil
 from .commonutil import append_total
-from report.service import report_logic
+from report.service import report_logic, upload_check
 import logging
 
 
@@ -143,6 +143,12 @@ def save_as_csv(report, excel_path):
     df = func(excel_path)
 
     if report.is_masterdata:
+        # uploaded report column/date check
+        func = getattr(upload_check, report.service_name, None)
+        response = func(df)
+        if isinstance(response, HttpResponse):
+            return response
+
         file_name = report.service_name + ".csv"
         csv_file_path = file_path / file_name
 
