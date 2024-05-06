@@ -192,17 +192,19 @@ def view_report(request, report_id):
 
     # if /url?cached=false, then fresh report will be generated and returned
     if cached_param is not None and cached_param.lower() == "false":
+        template = f"report/{service_name}.html"
+
         func = getattr(report_logic, service_name, None)
 
         if func is None:
-            service_name = "default"
+            template = f"report/default.html"
             func = getattr(report_logic, "default", None)
 
         result = func(request, report)
 
         render_html = render(
             request,
-            f"report/{service_name}.html",
+            template,
             {"result": result},
         )
 

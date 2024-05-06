@@ -35,18 +35,34 @@ class ReportForm(forms.ModelForm):
         reports = cleaned_data.get('reports')
 
         if not is_custom_report and reports.exists():
-            raise ValidationError({
-                'reports': "Kindly check the \"Customised Report\" checkbox, if report to be associated."
-            })
+            raise ValidationError(
+                {
+                    "is_custom_report": "Kindly select this checkbox if this is a customised report",
+                    "reports": 'Kindly check the "Customised Report" checkbox, if report to be associated. \
+                        Otherwise remove all selection from right side box.',
+                }
+            )
 
         if is_custom_report and not reports.exists():
             raise ValidationError({
                 'reports': "Kindly add reports, otherwise uncheck \"Customised Report\"."
             })
-        
+
         if is_custom_report and len(reports)<=1:
             raise ValidationError({
                 'reports': "Minumum two reports should be added."
             })
-        
+
+        # Additional check for date_col or is_masterdata
+        date_col = cleaned_data.get("date_col")
+        is_masterdata = cleaned_data.get("is_masterdata")
+
+        if not (date_col or is_masterdata):
+            errors = {}
+            if not date_col:
+                errors['date_col'] = "This field is required unless 'Master data sheet' is checked."
+            if not is_masterdata:
+                errors['is_masterdata'] = "This field must be checked unless a 'Date column header' is provided."
+            raise ValidationError(errors)
+
         return cleaned_data
