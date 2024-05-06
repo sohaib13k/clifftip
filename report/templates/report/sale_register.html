@@ -30,7 +30,7 @@
 
     <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
 
-    <div id="spreadsheet" class="handsontable" style="display: none"></div>
+    <div id="spreadsheet" class="handsontable" style="display: block"></div>
 
     <hr />
     <div class="table-responsive">{{ sales_analysis|safe }}</div>
@@ -189,15 +189,10 @@
     {% comment %} date filter ajax {% endcomment %}
     <script>
         $(document).ready(function() {
-            $('#timeInterval').change(function() {
-                var interval = $(this).val();
-                fetchAndDisplayData(interval);
-            });
-        
+            // Function to fetch and display data based on interval
             function fetchAndDisplayData(interval) {
-                var requestData = {};  // Define an object to store request data
+                var requestData = {};
         
-                // Conditionally set request data based on the interval
                 if (interval == 'custom') {
                     requestData = {
                         start_date: '2024-01-15',
@@ -210,31 +205,23 @@
                 }
         
                 $.ajax({
-                    url: '/api/report/{{ result.report.id }}/',  // Adjust URL to your Django URL configuration
+                    url: '/api/report/{{ result.report.id }}/',
                     type: 'GET',
-                    data: requestData,  // Set the data based on the condition
+                    data: requestData,
                     dataType: 'json',
                     success: function(data) {
-                        // Check if data is an object and is empty
                         if ($.isEmptyObject(data)) {
                             $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
-                            return;  // Exit the function if no data is available
+                            return;
                         }
-                        
-                        // Ensure that data is an array
+        
                         if (typeof data === 'string') {
-                            try {
-                                data = JSON.parse(data);  // Parse string into JSON
-                            } catch (e) {
-                                {% comment %} TODO: add loggers {% endcomment %}
-                            }
+                            data = JSON.parse(data);
                         }
         
                         if (Array.isArray(data)) {
                             window.reportExcelJson = data;
                             new handsontableManager('spreadsheet');
-                        } else {
-                            {% comment %} TODO: add loggers {% endcomment %}
                         }
                     },
                     error: function(xhr, status, error) {
@@ -242,7 +229,15 @@
                     }
                 });
             }
-        });        
+        
+            // Trigger fetching and displaying data when the page loads with the default selected interval
+            fetchAndDisplayData($('#timeInterval').val());
+        
+            // Event handler for when the select element's value changes
+            $('#timeInterval').change(function() {
+                fetchAndDisplayData($(this).val());
+            });
+        });               
     </script>
 
     <script src="{% static 'js/handsontable.full.min.js' %}"></script>
