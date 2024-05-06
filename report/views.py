@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
 from pathlib import Path
@@ -12,7 +12,7 @@ from .models import Report
 from commonutil import commonutil
 from report.service import report_logic, upload_check
 import logging
-
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,9 @@ def report(request):
     """
     View to fetch assigned reports
     """
-    accessible_reports = Report.get_accessible_reportlist(request.user, include_custom_report=True)
+    accessible_reports = Report.get_accessible_reportlist(
+        request.user, include_custom_report=True
+    )
 
     return render(
         request,
@@ -36,14 +38,14 @@ def report(request):
 # TODO: verify function name using regex- only alphanumeric with space allowed
 @login_required
 def upload(request):
-    accessible_reports = Report.get_accessible_reportlist(request.user)
-    # TODO: not sure why is_custom_report is set to false here
-    # all_reports = request.user.accessible_reports_users.filter(is_custom_report=False)
+    accessible_reports = Report.get_accessible_reportlist(
+        request.user, include_custom_report=False
+    )
     if request.method != "POST" or "excel_file" not in request.FILES:
         return render(
             request,
             "report/other/upload_report.html",
-            {"all_reports": accessible_reports},
+            {"accessible_reports": accessible_reports},
         )
 
     excel_file = request.FILES["excel_file"]
@@ -52,7 +54,7 @@ def upload(request):
         return HttpResponse("Invalid file format. Please upload an Excel file.")
 
     report_id = request.POST.get("report_id")
-    report = all_reports.get(id=report_id)
+    report = accessible_reports.get(id=report_id)
 
     if report.name is None:
         logger.error("Report name missing, even though it's a required field in table")
@@ -67,14 +69,9 @@ def upload(request):
     file_path = settings.REPORT_DIR / report.service_name / excel_file.name
 
     if file_path.exists():
-        ext = Path(excel_file.name).suffix
-        unique_suffix = commonutil.get_unique_filename()
-        new_path = (
-            Path(settings.REPORT_DIR)
-            / report.service_name
-            / f"{Path(excel_file.name).stem}_{unique_suffix}.bak{ext}"
+        commonutil.rename_file_with_unique_suffix(
+            file_path, excel_file.name, settings.REPORT_DIR, report
         )
-        file_path.rename(new_path)
 
     temp_file_path = upload_excel_temp(excel_file)
 
@@ -141,6 +138,7 @@ def save_as_csv(report, excel_path):
         file_name = report.service_name + ".csv"
         csv_file_path = file_path / file_name
 
+        # TODO: replace this with commonutil.rename_file_with_unique_suffix(...)
         if csv_file_path.exists():
             ext = Path(file_name).suffix
             unique_suffix = commonutil.get_unique_filename()
@@ -188,17 +186,56 @@ def view_report(request, report_id):
         # TODO: handle this scenario, when multiple objects returned
         return HttpResponse("Multiple reports found. Please contact with admin.")
 
-    template = report.service_name
-    func = getattr(report_logic, report.service_name, None)
+    service_name = report.service_name
 
-    if func is None:
-        template = "default"
-        func = getattr(report_logic, "default", None)
+    cached_param = request.GET.get("cached", None)
 
-    result = func(request, report)
+    # if /url?cached=false, then fresh report will be generated and returned
+    if cached_param is not None and cached_param.lower() == "false":
+        func = getattr(report_logic, service_name, None)
 
-    return render(
-        request,
-        f"report/{template}.html",
-        {"result": result},
-    )
+        if func is None:
+            service_name = "default"
+            func = getattr(report_logic, "default", None)
+
+        result = func(request, report)
+
+        render_html = render(
+            request,
+            f"report/{service_name}.html",
+            {"result": result},
+        )
+
+        content = render_html.content.decode("utf-8")
+
+        template_path = (
+            settings.CACHED_TEMPLATE_DIR / service_name / f"{service_name}.html"
+        )
+
+        if template_path.exists():
+            commonutil.rename_file_with_unique_suffix(
+                template_path,
+                f"{service_name}.html",
+                settings.CACHED_TEMPLATE_DIR,
+                report,
+            )
+
+        if not os.path.exists(settings.CACHED_TEMPLATE_DIR / service_name):
+            os.makedirs(settings.CACHED_TEMPLATE_DIR / service_name, exist_ok=True)
+        with open(template_path, "w") as f:
+            f.write(content)
+
+        return render_html
+
+    else:
+        template_path = (
+            settings.CACHED_TEMPLATE_DIR / service_name / f"{service_name}.html"
+        )
+        if template_path.exists():
+            with open(template_path, "r") as f:
+                return HttpResponse(f.read(), content_type="text/html")
+        else:
+            # Redirect to the same view with cached=false
+            redirect_url = reverse("report-view", kwargs={"report_id": report_id})
+            redirect_url_with_param = f"{redirect_url}?cached=false"
+            return redirect(redirect_url_with_param)

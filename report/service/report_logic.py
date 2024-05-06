@@ -59,7 +59,7 @@ def all_parties(request, report):
 
     df = pd.DataFrame()
     if latest_file is not None:
-        df = pd.read_csv(latest_file)
+        df = pd.read_csv(latest_file, low_memory=False)
 
     result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),

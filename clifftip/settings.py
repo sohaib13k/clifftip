@@ -19,6 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # custom paths
 REPORT_DIR = BASE_DIR.parent / "data" / "reports"
 CSV_DIR = BASE_DIR.parent / "data" / "csv"
+CACHED_TEMPLATE_DIR = BASE_DIR.parent / "data" / "template"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Upload Excel Report</h1>
-    {% for report in all_reports %}
+    {% for report in accessible_reports %}
         <h2> {{ report.name }} (id #{{ report.id }}) Last Updated: {{ report.last_updated_tmstmp|date:"d-m-Y g:i A"}}  </h2>
         <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}

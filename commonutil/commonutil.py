@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 import os
 from babel.numbers import format_decimal
 import pandas as pd
+from pathlib import Path
+
 
 def uploaded_excel(f, location):
     """
@@ -104,3 +106,19 @@ def convert_html_to_dataframe(html_path):
 def get_excel_read_engine(excel_path):
     """Read Excel file using appropriate engine based on file extension."""
     return "openpyxl" if excel_path.suffix == ".xlsx" else "xlrd"
+
+
+def rename_file_with_unique_suffix(
+    file_path,
+    filename,
+    data_basedir,
+    report=None,
+):
+    ext = Path(filename).suffix
+    unique_suffix = get_unique_filename()
+    new_path = (
+        Path(data_basedir)
+        / report.service_name
+        / f"{Path(filename).stem}_{unique_suffix}.bak{ext}"
+    )
+    file_path.rename(new_path)
