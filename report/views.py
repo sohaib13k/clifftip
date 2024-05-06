@@ -137,7 +137,7 @@ def save_as_csv(report, excel_path):
     func = getattr(data_frame, report.service_name, None)
 
     # routing to a default view for temp. upload
-    if func == None:
+    if func is None:
         func = getattr(data_frame, "default", None)
 
     df = func(excel_path)
@@ -163,7 +163,7 @@ def save_as_csv(report, excel_path):
     else:
         try:
             df[report.date_col] = pd.to_datetime(df[report.date_col])
-        except KeyError as ex:
+        except KeyError:
             return HttpResponse(
                 f'Uploaded report doesn\'t contain "{report.date_col}" column. Kindly upload the right report',
                 status=404,
@@ -200,7 +200,7 @@ def view_report(request, report_id):
     template = report.service_name
     func = getattr(report_logic, report.service_name, None)
 
-    if func == None:
+    if func is None:
         template = "default"
         func = getattr(report_logic, "default", None)
 
