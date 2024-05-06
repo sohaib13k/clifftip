@@ -2,8 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Report
-from report.service import report_logic
-from unittest.mock import patch, MagicMock
 
 
 class ViewReportTests(TestCase):
@@ -26,16 +24,22 @@ class ViewReportTests(TestCase):
             reverse("report-view", args=(999,))
         )  # Assuming 999 does not exist
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Report name could not be found", response.content.decode())
+        self.assertIn("Invalid report id passed.", response.content.decode())
 
     @patch("report.models.Report.objects.get")
     def test_multiple_reports_found(self, mock_get):
         mock_get.side_effect = Report.MultipleObjectsReturned
+        self.report.access_users.add(self.user)
         response = self.client.get(reverse("report-view", args=(1,)))
         self.assertIn("Multiple reports found", response.content.decode())
 
+    def test_authorisation(self):
+        response = self.client.get(reverse("report-view", args=(1,)))
+        self.assertIn("Invalid report id passed.", response.content.decode())
+
     @patch("report.service.report_logic.all_parties")
     def test_report_processing_success(self, mock_all_parties):
+        self.report.access_users.add(self.user)
         result = {
             "report": self.report,
         }
@@ -48,6 +52,7 @@ class ViewReportTests(TestCase):
         new_report = Report.objects.create(
             id=999, name="New Report", is_masterdata=True
         )  # some new report without any logic method or template
+        new_report.access_users.add(self.user)
         result = {
             "report": new_report,
         }
