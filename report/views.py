@@ -145,9 +145,10 @@ def save_as_csv(report, excel_path):
     if report.is_masterdata:
         # uploaded report column/date check
         func = getattr(upload_check, report.service_name, None)
-        response = func(df)
-        if isinstance(response, HttpResponse):
-            return response
+        if func is not None:
+            response = func(df)
+            if isinstance(response, HttpResponse):
+                return response
 
         file_name = report.service_name + ".csv"
         csv_file_path = file_path / file_name
