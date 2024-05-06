@@ -1,4 +1,3 @@
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import render
@@ -6,15 +5,11 @@ from django.http import HttpResponse
 from django.urls import reverse
 from pathlib import Path
 import pandas as pd
-import gzip
-import json
-import os
 import tempfile
 from django.core.files.storage import FileSystemStorage
 from report.service import data_frame
 from .models import Report
 from commonutil import commonutil
-from .commonutil import append_total
 from report.service import report_logic, upload_check
 import logging
 
@@ -27,18 +22,7 @@ def report(request):
     """
     View to fetch assigned reports
     """
-    user = request.user
-
-    # Fetch reports directly accessible to the user, ensuring it is distinct
-    direct_reports = user.accessible_reports_users.all().distinct()
-
-    # Fetch reports accessible through user's groups, ensuring it is distinct
-    group_reports = Report.objects.filter(
-        access_groups__in=user.groups.all()
-    ).distinct()
-
-    # Combine both QuerySets without duplicates using the union operator
-    accessible_reports = direct_reports.union(group_reports)
+    accessible_reports = Report.get_accessible_reportlist(request.user, include_custom_report=True)
 
     return render(
         request,
@@ -52,10 +36,14 @@ def report(request):
 # TODO: verify function name using regex- only alphanumeric with space allowed
 @login_required
 def upload(request):
-    all_reports = request.user.accessible_reports_users.filter(is_custom_report=False)
+    accessible_reports = Report.get_accessible_reportlist(request.user)
+    # TODO: not sure why is_custom_report is set to false here
+    # all_reports = request.user.accessible_reports_users.filter(is_custom_report=False)
     if request.method != "POST" or "excel_file" not in request.FILES:
         return render(
-            request, "report/other/upload_report.html", {"all_reports": all_reports}
+            request,
+            "report/other/upload_report.html",
+            {"all_reports": accessible_reports},
         )
 
     excel_file = request.FILES["excel_file"]
@@ -187,6 +175,9 @@ def save_as_csv(report, excel_path):
 
 @login_required
 def view_report(request, report_id):
+    if not Report.is_report_accessible(report_id, request.user):
+        return HttpResponse("Invalid report id passed.")
+
     try:
         report = Report.objects.get(id=report_id)
     except Report.DoesNotExist:
@@ -203,10 +194,6 @@ def view_report(request, report_id):
     if func is None:
         template = "default"
         func = getattr(report_logic, "default", None)
-
-    # try:
-    #     result = func(request, report)
-    # except (TypeError, ValueError) as ex:
 
     result = func(request, report)
 

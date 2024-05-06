@@ -1,7 +1,9 @@
+from django.db.models import Q
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.urls import reverse
+
 
 class Report(models.Model):
     name = models.CharField(max_length=127, unique=True)
@@ -28,7 +30,7 @@ class Report(models.Model):
     )
     is_custom_report = models.BooleanField(default=False, verbose_name="customised report")
     reports = models.ManyToManyField(
-        'self', related_name="custom_report_parents", symmetrical=False, blank=True
+        "self", related_name="custom_report_parents", symmetrical=False, blank=True
     )
 
     class Meta:
@@ -46,3 +48,23 @@ class Report(models.Model):
 
     def get_absolute_url(self):
         return reverse("_detail", kwargs={"pk": self.pk})
+
+    @staticmethod
+    def is_report_accessible(report_id, user):
+        return (
+            user.accessible_reports_users.filter(pk=report_id).exists()
+            or Report.objects.filter(
+                pk=report_id, access_groups__in=user.groups.all()
+            ).exists()
+        )
+
+    @staticmethod
+    def get_accessible_reportlist(user, include_custom_report=False):
+        queryset = Report.objects.filter(
+            Q(access_users=user) | Q(access_groups__in=user.groups.all())
+        ).distinct()
+
+        if not include_custom_report:
+            queryset = queryset.filter(is_custom_report=False)
+
+        return queryset
