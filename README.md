@@ -4,6 +4,9 @@
 ```bash
 DEBUG=True
 SECRET_KEY="5t36rsv1_(-$q025a!7_=(*sbsij^dss_)8v&znnr5kzqgroz0"
+ALLOWED_HOSTS="clifftip.mavensoft.in"
+LOG_LOCATION="/var/log/gunicorn/django.log"
+
 ```
 ```python
 from django.core.management.utils import get_random_secret_key  

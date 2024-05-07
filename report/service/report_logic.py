@@ -146,15 +146,12 @@ def bom_report(request, report):
 
 def temp(request, report):
     directory_path = settings.REPORT_DIR
-    df_sales = pd.read_excel(report, skiprows=3)
+    df_sales = pd.read_excel(directory_path / "sale_register" / "sale_reg.xlsx", skiprows=3)
     df_parties = pd.read_excel(
-        directory_path / "Sale Register" / "sub_reports" / "All_Parties_DDR.xlsx"
+        directory_path / "all_parties" / "all_parties.xlsx"
     )
     df_itemtype = pd.read_excel(
-        directory_path
-        / "Sale Register"
-        / "sub_reports"
-        / "Item Type Finished Goods.xlsx"
+                directory_path  / "item_type_finished_goods" / "item_type.xlsx"
     )
 
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
@@ -162,9 +159,9 @@ def temp(request, report):
 
     updated_sales = pd.merge(
         df_sales,
-        df_parties[["GST", "Sales Person", "Branch"]],
+        df_parties[["GST No.", "Sales Person", "Branch"]],
         left_on="Customer GSTN",
-        right_on="GST",
+        right_on="GST No.",
         how="inner",
     )
 
@@ -175,7 +172,7 @@ def temp(request, report):
         how="inner",
     )
 
-    updated_sales = updated_sales.drop("GST", axis="columns")
+    updated_sales = updated_sales.drop("GST No.", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
     updated_sales = updated_sales[updated_sales["Sales Person"] != "General ID"]
 
@@ -332,28 +329,48 @@ def temp(request, report):
     }
     all_chart_data_json = json.dumps(all_chart_data)
 
-    render_data = render(
-        request,
-        "report/sale_register.html",
-        {
-            "report": report,
-            # "total": total,
-            # "threshhold": threshhold,
-            # "result": result,
-            # "average": average,
-            "report_excel": report_excel,
-            "report_excel_json": report_excel_json,
-            "sales_analysis": sales_analysis,
-            "branch_analysis": branch_analysis,
-            "item_type_analysis": item_type_analysis,
-            "individual_by_item_type_analysis": individual_by_item_type_analysis,
-            "branch_by_item_type_analysis": branch_by_item_type_analysis,
-            "all_chart_data_json": all_chart_data_json,
-            "myRange": range(1),
-        },
-    )
+    # render_data = render(
+    #     request,
+    #     "report/sale_register.html",
+    #     {
+    #         "report": report,
+    #         # "total": total,
+    #         # "threshhold": threshhold,
+    #         # "result": result,
+    #         # "average": average,
+    #         "report_excel": report_excel,
+    #         "report_excel_json": report_excel_json,
+    #         "sales_analysis": sales_analysis,
+    #         "branch_analysis": branch_analysis,
+    #         "item_type_analysis": item_type_analysis,
+    #         "individual_by_item_type_analysis": individual_by_item_type_analysis,
+    #         "branch_by_item_type_analysis": branch_by_item_type_analysis,
+    #         "all_chart_data_json": all_chart_data_json,
+    #         "myRange": range(1),
+    #     },
+    # )
 
-    return render_data
+    return {
+        "report": report,
+        # "total": total,
+        # "threshhold": threshhold,
+        # "result": result,
+        # "average": average,
+        "report_excel": report_excel,
+        "report_excel_json": report_excel_json,
+        "sales_analysis": sales_analysis,
+        "branch_analysis": branch_analysis,
+        "item_type_analysis": item_type_analysis,
+        "individual_by_item_type_analysis": individual_by_item_type_analysis,
+        "branch_by_item_type_analysis": branch_by_item_type_analysis,
+        "all_chart_data_json": all_chart_data_json,
+        "myRange": range(1),
+    }
+
 
     # with open(settings.BASE_DIR.parent / "data" / "html" / 'html.html', 'r') as f:
     #     return HttpResponse(f.read(), content_type="text/html")
+
+
+def sale_purchase(request, report):
+    return temp(request, report)
