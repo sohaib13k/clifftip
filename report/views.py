@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils import timezone
 from pathlib import Path
 import pandas as pd
 import tempfile
@@ -82,6 +83,9 @@ def upload(request):
     commonutil.uploaded_excel(excel_file, settings.REPORT_DIR / report.service_name)
 
     increment_file_upload_limit(file_size_mb, request.user)
+
+    report.report_last_updated_tmstmp = timezone.now()
+    report.save(update_fields=['report_last_updated_tmstmp'])
 
     upload_url = reverse("report-upload")
     return HttpResponse(
