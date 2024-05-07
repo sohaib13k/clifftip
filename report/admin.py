@@ -8,7 +8,6 @@ class ReportAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "is_custom_report",
-        "is_masterdata",
         "date_col",
         "report_last_updated_tmstmp",
     ]
@@ -16,7 +15,9 @@ class ReportAdmin(admin.ModelAdmin):
 
     search_fields = ["name"]
 
-    readonly_fields = ("created_by", "created_date", "service_name")
+    readonly_fields = ("created_by", "report_last_updated_tmstmp")
+
+    exclude = ["is_datetime_merged"]
 
     def view_on_site(self, obj):
         pass

@@ -18,17 +18,6 @@ class ReportForm(forms.ModelForm):
             )
         return name
 
-    def clean_time_col(self):
-        is_datetime_merged = self.cleaned_data.get("is_datetime_merged")
-        date_col = self.cleaned_data.get("date_col")
-        time_col = self.cleaned_data.get("time_col")
-
-        if is_datetime_merged and date_col != time_col:
-            raise ValidationError(
-                'If "Same column for date & time" is selected, then both date and time values should be the same.'
-            )
-        return time_col
-
     def clean(self):
         cleaned_data = super().clean()
         is_custom_report = cleaned_data.get('is_custom_report')

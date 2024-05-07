@@ -22,7 +22,7 @@ class Report(models.Model):
     )
     created_date = models.DateTimeField(auto_now_add=True)
     model_last_updated_tmstmp = models.DateTimeField(auto_now=True)
-    report_last_updated_tmstmp = models.DateTimeField(null=True, editable=False)
+    report_last_updated_tmstmp = models.DateTimeField(null=True, editable=False, verbose_name="report last uploaded")
     access_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="accessible_reports_users", blank=True
     )
