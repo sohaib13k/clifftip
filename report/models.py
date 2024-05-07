@@ -21,7 +21,8 @@ class Report(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False
     )
     created_date = models.DateTimeField(auto_now_add=True)
-    last_updated_tmstmp = models.DateTimeField(auto_now=True)
+    model_last_updated_tmstmp = models.DateTimeField(auto_now=True)
+    report_last_updated_tmstmp = models.DateTimeField(null=True, editable=False)
     access_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="accessible_reports_users", blank=True
     )

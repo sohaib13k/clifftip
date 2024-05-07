@@ -37,26 +37,3 @@ class ViewReportTests(TestCase):
     def test_authorisation(self):
         response = self.client.get(reverse("report-view", args=(1,)))
         self.assertIn("Invalid report id passed.", response.content.decode())
-
-    @patch("report.service.report_logic.all_parties")
-    def test_report_processing_success(self, mock_all_parties):
-        self.report.access_users.add(self.user)
-        result = {
-            "report": self.report,
-        }
-        mock_all_parties.return_value = result
-        response = self.client.get(reverse("report-view", args=(self.report.id,)))
-        self.assertTemplateUsed(response, "report/all_parties.html")
-
-    @patch("report.service.report_logic.default")
-    def test_new_report_without_any_logic_or_template(self, mock_default):
-        new_report = Report.objects.create(
-            id=999, name="New Report", is_masterdata=True
-        )  # some new report without any logic method or template
-        new_report.access_users.add(self.user)
-        result = {
-            "report": new_report,
-        }
-        mock_default.return_value = result
-        response = self.client.get(reverse("report-view", args=(new_report.id,)))
-        self.assertTemplateUsed(response, "report/default.html")

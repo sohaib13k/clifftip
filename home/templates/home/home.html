@@ -1,31 +1,34 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clifftip</title>
-  </head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Clifftip</h1>
 
-  <body>
-    <h1>Clifftip</h1>
+        <div class="mb-3">
+            <a href="/ddr" class="btn btn-primary me-2">Dashboard</a>
+            <a href="/report" class="btn btn-primary me-2">Report</a>
+            <a href="/utilities" class="btn btn-primary">Utilities</a>
+        </div>
 
-    <div>
-      <a href="/ddr">Dashboard</a>
+        <hr class="my-4">
+
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
     </div>
-    <div>
-      <a href="/report">Report</a>
-    </div>
-    <div>
-      <a href="/utilities">Utilities</a>
-    </div>
 
-    <hr />
-    <form action="{% url 'logout' %}" method="post">
-      {% csrf_token %}
-      <button type="submit">Logout</button>
-    </form>
-
-  </body>
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

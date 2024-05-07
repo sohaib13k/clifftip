@@ -10,7 +10,7 @@ class ReportAdmin(admin.ModelAdmin):
         "is_custom_report",
         "is_masterdata",
         "date_col",
-        "last_updated_tmstmp",
+        "report_last_updated_tmstmp",
     ]
     filter_horizontal = ["access_users", "access_groups", "reports"]
 
