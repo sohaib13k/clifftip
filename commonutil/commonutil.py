@@ -1,6 +1,7 @@
 import random
 import string
 from datetime import datetime, timedelta
+from django.conf import settings
 import os
 from babel.numbers import format_decimal
 import pandas as pd
@@ -122,3 +123,13 @@ def rename_file_with_unique_suffix(
         / f"{Path(filename).stem}_{unique_suffix}.bak{ext}"
     )
     file_path.rename(new_path)
+
+
+def get_latest_csv_from_dir(report):
+    csv_dir = settings.CSV_DIR / report.service_name
+    try:
+        latest_file = max(csv_dir.glob("*.csv"), key=lambda x: x.stat().st_mtime)
+    except ValueError:
+        return None
+
+    return latest_file

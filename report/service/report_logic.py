@@ -8,18 +8,11 @@ from report.commonutil import append_total, add_percentage_column
 from django.conf import settings
 
 
-def get_latest_csv_from_dir(report):
-    csv_dir = settings.CSV_DIR / report.service_name
-    try:
-        latest_file = max(csv_dir.glob("*.csv"), key=lambda x: x.stat().st_mtime)
-    except ValueError:
-        return None
 
-    return latest_file
 
 
 def default(request, report):
-    latest_file = get_latest_csv_from_dir(report)
+    latest_file = commonutil.get_latest_csv_from_dir(report)
 
     df = pd.DataFrame()
     if latest_file is not None:
@@ -39,7 +32,7 @@ def sale_register(request, report):
     # latest_file = max(file_path.glob("*.xlsx"), key=lambda x: x.stat().st_mtime)
     # return temp(request, latest_file)
 
-    latest_file = get_latest_csv_from_dir(report)
+    latest_file = commonutil.get_latest_csv_from_dir(report)
 
     df = pd.DataFrame()
     if latest_file is not None:
@@ -55,7 +48,7 @@ def sale_register(request, report):
 
 
 def all_parties(request, report):
-    latest_file = get_latest_csv_from_dir(report)
+    latest_file = commonutil.get_latest_csv_from_dir(report)
 
     df = pd.DataFrame()
     if latest_file is not None:
@@ -71,7 +64,7 @@ def all_parties(request, report):
 
 
 def item_type_finished_goods(request, report):
-    latest_file = get_latest_csv_from_dir(report)
+    latest_file = commonutil.get_latest_csv_from_dir(report)
 
     df = pd.DataFrame()
     if latest_file is not None:
@@ -87,7 +80,7 @@ def item_type_finished_goods(request, report):
 
 
 def routing_report(request, report):
-    latest_file = get_latest_csv_from_dir(report)
+    latest_file = commonutil.get_latest_csv_from_dir(report)
 
     df = pd.DataFrame()
     if latest_file is not None:
@@ -116,7 +109,7 @@ def routing_report(request, report):
 
 
 def bom_report(request, report):
-    latest_file = get_latest_csv_from_dir(report)
+    latest_file = commonutil.get_latest_csv_from_dir(report)
 
     df = pd.DataFrame()
     if latest_file is not None:
