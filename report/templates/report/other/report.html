@@ -15,6 +15,11 @@
         background-color: #a7dbb5;
       }
 
+      a {
+        text-decoration: none; /* Remove underline */
+        color: #333; /* Your desired color */
+      }
+      
     </style>
 </head>
 <body>
@@ -28,12 +33,11 @@
           {% for report in accessible_reports %}
           <div class="col-md-4 col-sm-6 mb-4">
             <div class="card">
-              <div class="card-header">
+              <div class="card-header {% if report.is_custom_report %}custom-report-true{% else %}custom-report-false{% endif %}">
                 <a href="{% url 'report-view' report.id %}?cached=true">
                   <h5 class="card-title mb-0">{{ report.name }}</h5>
                 </a>
               </div>
-              <div class="card-body {% if report.is_custom_report %}custom-report-true{% else %}custom-report-false{% endif %}"></div>
             </div>
           </div>
           {% endfor %}
