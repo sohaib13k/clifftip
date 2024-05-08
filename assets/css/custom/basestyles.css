@@ -17,3 +17,11 @@ body {
   border: solid;
   border-width: thin;
 }
+
+.custom-report-true {
+  background-color: lightblue;
+}
+
+.custom-report-false {
+  background-color: lightgreen;
+}
