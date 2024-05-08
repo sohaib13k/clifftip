@@ -6,7 +6,7 @@ import os
 from commonutil import commonutil
 from report.commonutil import append_total, add_percentage_column
 from django.conf import settings
-
+from ..models import Report
 
 
 
@@ -149,6 +149,26 @@ def temp(request, report):
 
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
     # df_sales.insert(gstn_index, 'Item Type', '0')
+
+
+    # saving data for DDR view (temporary code)===============================
+    parties_with_sale = pd.merge(
+            df_parties,
+            df_sales[["Customer Name"]],
+            left_on="Company Name",
+            right_on="Customer Name",
+            how="inner",
+        )
+    parties_with_sale = parties_with_sale.drop_duplicates(subset=['Company Name'])
+    
+    parties_with_sale = parties_with_sale.drop(columns=['Customer Name'])
+    
+    parties_with_sale_report = Report.objects.get(service_name="all_parties_with_sale")
+    from report.views import save_as_csv
+
+    save_as_csv(parties_with_sale_report, None, parties_with_sale)
+    # =======================================================================
+
 
     updated_sales = pd.merge(
         df_sales,

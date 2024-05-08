@@ -119,7 +119,7 @@ def upload_excel_temp(excel_file):
 
 
 # TODO: fix duplicate data issue. If same report uploaded again then data appending
-def save_as_csv(report, excel_path):
+def save_as_csv(report, excel_path, df=None):
     file_path = settings.CSV_DIR / report.service_name
     Path(file_path).mkdir(parents=True, exist_ok=True)
 
@@ -129,7 +129,8 @@ def save_as_csv(report, excel_path):
     if func is None:
         func = getattr(data_frame, "default", None)
 
-    df = func(excel_path)
+    if df is None:
+        df = func(excel_path)
 
     if report.is_masterdata:
         # uploaded report column/date check
