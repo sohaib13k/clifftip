@@ -128,46 +128,31 @@
             </button>
           </form>
         </nav>
-
         
         <main class="content">
           <div class="container-fluid p-0">
             <h1 class="h3 mb-3">Dashboard</h1>
             <div class="container">
-              <h1>Report Data</h1>
+              <h1>All Parties data completion (missing count)</h1>
+
               <table id="report-table" class="table">
-                  <thead>
-                      <tr>
-                          <th>Column</th>
-                          <th>Number of Entries</th>
-                          <th>Number of Unique Entries</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <!-- Table rows will be dynamically generated here -->
-                  </tbody>
+                <tr>
+                    {% for column, count in result.items %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for column, count in result.items %}
+                    <td {% if count > 20 %} style="background-color: #ffcccc;"
+                        {% elif count >= 10 and count <= 20 %} style="background-color: #ffffcc;"
+                        {% else %} style="background-color: #ccffcc;"
+                        {% endif %}>
+                        {{ count }}
+                    </td>
+                    {% endfor %}
+                </tr>
               </table>
-          </div>
-      
-          <script>
-              // Parse the JSON data from the template context
-              const jsonData = {{ result|safe }};
-      
-              // Get the table body element
-              const tableBody = document.querySelector('#report-table tbody');
-      
-              // Iterate over the JSON data and generate table rows
-              Object.keys(jsonData).forEach(column => {
-                  const rowData = jsonData[column];
-                  const row = document.createElement('tr');
-                  row.innerHTML = `
-                      <td>${column}</td>
-                      <td>${rowData.number_of_entries}</td>
-                      <td>${rowData.number_of_unique_entries}</td>
-                  `;
-                  tableBody.appendChild(row);
-              });
-          </script>
+            </div>
           </div>
         </main>
       </div>

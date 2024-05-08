@@ -10,24 +10,23 @@ from report.models import Report
 
 @login_required
 def ddr(request):
-    report = Report.objects.get(id=4)
+    report = Report.objects.get(service_name="all_parties")
     latest_file = commonutil.get_latest_csv_from_dir(report)
 
-    columns_to_read = ["Company Name", "GST No.", "Mobile", "Sales Person"]
+    columns_to_read = ["Company Name", "Sales Person", "GST No.", "Mobile"]
 
     df = pd.DataFrame()
+    counts = {}
+
     if latest_file is not None:
+        # df = pd.read_csv(latest_file)
         df = pd.read_csv(latest_file, usecols=columns_to_read)
+        
+        total_entries = len(df)-1  # Total number of entries in the DataFrame
 
-    columns = df.columns
-    entry_counts = df.count()
-    unique_counts = df.nunique()
+        for column in df.columns:
+            column_count = df[column].count()  # Count of non-null values in the column
+            difference = total_entries - column_count  # Difference from total entries
+            counts[column] =  difference if difference>=0 else 0
 
-    result = {}
-    for column in columns:
-        result[column] = {
-            "number_of_entries": entry_counts[column],
-            "number_of_unique_entries": unique_counts[column],
-        }
-
-    return render(request, "ddr/ddr.html", {"result": result})
+    return render(request, "ddr/ddr.html", {"result": counts})
