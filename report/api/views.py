@@ -60,6 +60,12 @@ def view_filtered_report(request, report_id=None):
                 if start_year_month <= file_year_month <= end_year_month:
                     file_path = os.path.join(csv_directory, filename)
                     df = pd.read_csv(file_path)
+
+                    # filtering for a specific column
+                    column = request.GET.get("column")
+                    if column:
+                        df = df[[report.date_col, column]]
+
                     agg_data = pd.concat([agg_data, df], ignore_index=True)
 
     except FileNotFoundError:
