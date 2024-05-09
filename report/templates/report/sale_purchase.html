@@ -36,6 +36,9 @@
     
   </head>
   <body>
+    <div class="container mt-4 mb-4">
+        <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Reload without cache</a>
+    </div>
     <h2>Summary</h2>
     <div>Report name: {{ result.report }}</div>
     {% comment %}

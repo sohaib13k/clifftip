@@ -16,9 +16,12 @@
 
 </head>
 <body>
-    {% block content %}{% endblock %}
+  <div class="container mt-4 mb-4">
+    <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Reload without cache</a>
+  </div>
+  {% block content %}{% endblock %}
 
-		<script src="{% static 'js/app.js' %}"></script>
-    <script src="{% static 'js/custom/commonutil.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/custom/commonutil.js' %}"></script>
 </body>
 </html>
