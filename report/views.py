@@ -79,6 +79,7 @@ def upload(request):
     response = save_as_csv(report, temp_file_path)
     if isinstance(response, HttpResponse):
         return response
+    # TODO: above temp can now be deleted
 
     commonutil.uploaded_excel(excel_file, settings.REPORT_DIR / report.service_name)
 

@@ -63,57 +63,67 @@ class ReportView(LoginRequiredMixin, View):
         except FileNotFoundError:
             return JsonResponse(data={}, status=204)
 
-        filtered_data = agg_data[
-            (agg_data[report.date_col] >= start_date)
-            & (agg_data[report.date_col] <= end_date)
-        ]
+        filtered_data = pd.DataFrame()
+
+        if not agg_data.empty:
+            filtered_data = agg_data[
+                (agg_data[report.date_col] >= start_date)
+                & (agg_data[report.date_col] <= end_date)
+            ]
+
+        if not filtered_data.empty:
+            result = filtered_data.sort_values(report.date_col).to_json(
+                orient="records"
+            )
+        else:
+            result = "[]"
 
         return JsonResponse(
-            filtered_data.sort_values(report.date_col).to_json(orient="records"),
+            result,
             safe=False,
         )
 
-    def post(self, request):
-        # Create a new report
-        try:
-            data = json.loads(request.body)
-            report = Report.objects.create(
-                name=data["name"],
-                # Set other fields from data
-            )
-            return JsonResponse(
-                {"message": "Report created", "report_id": report.id}, status=201
-            )
-        except (KeyError, TypeError):
-            return JsonResponse({"error": "Invalid data"}, status=400)
+    # def post(self, request):
+    #     # Create a new report
+    #     try:
+    #         data = json.loads(request.body)
+    #         report = Report.objects.create(
+    #             name=data["name"],
+    #             # Set other fields from data
+    #         )
+    #         return JsonResponse(
+    #             {"message": "Report created", "report_id": report.id}, status=201
+    #         )
+    #     except (KeyError, TypeError):
+    #         return JsonResponse({"error": "Invalid data"}, status=400)
 
-    def put(self, request, report_id=None):
-        # Update an existing report
-        if not report_id:
-            return JsonResponse(
-                {"error": "Method PUT requires a report ID"}, status=400
-            )
-        try:
-            data = json.loads(request.body)
-            report = Report.objects.get(id=report_id)
-            report.name = data["name"]
-            # Update other fields from data
-            report.save()
-            return JsonResponse({"message": "Report updated"}, status=200)
-        except Report.DoesNotExist:
-            return JsonResponse({"error": "Report not found"}, status=404)
-        except KeyError:
-            return JsonResponse({"error": "Invalid data"}, status=400)
+    # def put(self, request, report_id=None):
+    #     # Update an existing report
+    #     if not report_id:
+    #         return JsonResponse(
+    #             {"error": "Method PUT requires a report ID"}, status=400
+    #         )
+    #     try:
+    #         data = json.loads(request.body)
+    #         report = Report.objects.get(id=report_id)
+    #         report.name = data["name"]
+    #         # Update other fields from data
+    #         report.save()
+    #         return JsonResponse({"message": "Report updated"}, status=200)
+    #     except Report.DoesNotExist:
+    #         return JsonResponse({"error": "Report not found"}, status=404)
+    #     except KeyError:
+    #         return JsonResponse({"error": "Invalid data"}, status=400)
 
-    def delete(self, request, report_id=None):
-        # Delete a report
-        if not report_id:
-            return JsonResponse(
-                {"error": "Method DELETE requires a report ID"}, status=400
-            )
-        try:
-            report = Report.objects.get(id=report_id)
-            report.delete()
-            return JsonResponse({"message": "Report deleted"}, status=200)
-        except Report.DoesNotExist:
-            return JsonResponse({"error": "Report not found"}, status=404)
+    # def delete(self, request, report_id=None):
+    #     # Delete a report
+    #     if not report_id:
+    #         return JsonResponse(
+    #             {"error": "Method DELETE requires a report ID"}, status=400
+    #         )
+    #     try:
+    #         report = Report.objects.get(id=report_id)
+    #         report.delete()
+    #         return JsonResponse({"message": "Report deleted"}, status=200)
+    #     except Report.DoesNotExist:
+    #         return JsonResponse({"error": "Report not found"}, status=404)
