@@ -1,44 +1,15 @@
+{% extends "commonutil/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
 
+{% block title %} Report | {{ result.report.name }} {% endblock %}
+
+{% block styles %}
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
-    
-    <!-- Choose your prefered color scheme -->
-    <link href="{% static 'css/light.css' %}" rel="stylesheet" />
-    {% comment %}
-    <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
-    {% endcomment %}
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
-    <style>
-        #spreadsheet {
-          height: 400px;
-          margin: 20px;
-        }
-        html, body {
-            height: 100%; /* Ensure the full height is available */
-            margin: 0; /* Remove default margin */
-            padding: 0; /* Remove default padding */
-        }
-        #spreadsheet {
-            height: calc(50vh - 40px); /* 100% of the viewport height minus some margin */
-            width: 98%; /* Full width of the viewport */
-            overflow: auto; /* Add scrollbars when content overflows */
-            margin: 20px; /* Margin around the spreadsheet */
-            border: solid;
-            border-width: thin;
-        }
-    </style>
-    
-  </head>
-  <body>
-    <div class="container mt-4 mb-4">
-        <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Reload without cache</a>
-    </div>
+{% endblock styles %}
+
+{% block content %}
+
     <h2>Summary</h2>
     <div>Report name: {{ result.report }}</div>
     {% comment %}
@@ -55,7 +26,9 @@
       Show/Hide Excel Data
     </button>
 
-    <button class="btn btn-primary" onclick="downloadExcel()">Download Excel</button>
+    {% include "commonutil/time_interval_select.html" %}
+
+    <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
 
     <div id="spreadsheet" class="handsontable" style="display: block"></div>
 
@@ -89,6 +62,13 @@
     </div>
     {% endfor %}
     
+    <script>
+        window.reportExcelJson = {{ report_excel_json|safe }};  // Make JSON data available globally
+        document.addEventListener("DOMContentLoaded", function () {
+            new handsontableManager('spreadsheet');
+        });
+    </script>
+
     <script>
         function cleanNumeric(value) {
             return parseFloat(value.replace(/[^0-9.-]+/g, ""));
@@ -191,68 +171,61 @@
         });
     </script>
 
+    {% comment %} date filter ajax {% endcomment %}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var jsonData = {{ result.report_excel_json|safe }};
-            var data = Object.values(jsonData); // Convert object of objects into an array of objects
-
-            var container = document.getElementById('spreadsheet');
-            var hot = new Handsontable(container, {
-                data: data,
-                rowHeaders: true,
-                colHeaders: [
-                    "SR NO", "Invoice No", "Invoice Date", "Customer Name", "Customer GSTN", "Item Code",
-                    "Item Name", "Quantity", "Rate", "Taxable Amt", "CGST", "SGST", "IGST", "Net Total",
-                    "Sales Person", "Branch", "Item Type"
-                ],
-                columns: [
-                    {data: 'SR NO', type: 'numeric'},
-                    {data: 'Invoice No', type: 'text'},
-                    {data: 'Invoice Date', type: 'date', dateFormat: 'MM/DD/YYYY'},
-                    {data: 'Customer Name', type: 'text'},
-                    {data: 'Customer GSTN', type: 'text'},
-                    {data: 'Item Code', type: 'text'},
-                    {data: 'Item Name', type: 'text'},
-                    {data: 'Quantity', type: 'numeric'},
-                    {data: 'Rate', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
-                    {data: 'Taxable Amt', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
-                    {data: 'CGST', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
-                    {data: 'SGST', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
-                    {data: 'IGST', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
-                    {data: 'Net Total', type: 'numeric', numericFormat: {pattern: '$0,0.00'}},
-                    {data: 'Sales Person', type: 'text'},
-                    {data: 'Branch', type: 'text'},
-                    {data: 'Item Type', type: 'text'}
-                ],
-                filters: true,
-                dropdownMenu: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                contextMenu: true,
-                licenseKey: 'non-commercial-and-evaluation' // specify the license key here
-            });
-        });
-
-        function downloadExcel() {
-            // Retrieve and log the JSON data
-            var jsonData = {{ result.report_excel_json|safe }};
+        $(document).ready(function() {
+            // Function to fetch and display data based on interval
+            function fetchAndDisplayData(interval) {
+                var requestData = {};
         
-            if (!Array.isArray(jsonData)) {
-                console.error('Data is not an array:', jsonData);
-                return; // Exit if data is not an array
+                if (interval == 'custom') {
+                    requestData = {
+                        start_date: '2024-01-15',
+                        end_date: '2024-02-15'
+                    };
+                } else {
+                    requestData = {
+                        interval: interval 
+                    };
+                }
+        
+                $.ajax({
+                    url: '/api/report/{{ result.report.id }}/',
+                    type: 'GET',
+                    data: requestData,
+                    dataType: 'json',
+                    success: function(data) {
+                        if ($.isEmptyObject(data)) {
+                            $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
+                            return;
+                        }
+        
+                        if (typeof data === 'string') {
+                            data = JSON.parse(data);
+                        }
+        
+                        if (Array.isArray(data)) {
+                            window.reportExcelJson = data;
+                            new handsontableManager('spreadsheet');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
+                    }
+                });
             }
         
-            // Continue with Excel file creation if data is correct
-            const worksheet = XLSX.utils.json_to_sheet(jsonData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-            XLSX.writeFile(workbook, "Report.xlsx");
-        }
+            // Trigger fetching and displaying data when the page loads with the default selected interval
+            fetchAndDisplayData($('#timeInterval').val());
         
+            // Event handler for when the select element's value changes
+            $('#timeInterval').change(function() {
+                fetchAndDisplayData($(this).val());
+            });
+        });               
     </script>
     
     <script src="{% static 'js/handsontable.full.min.js' %}"></script>
     <script src="{% static 'js/xlsx.full.min.js' %}"></script>
-    <script src="{% static 'js/app.js' %}"></script>
-  </body>
-</html>
+
+{% endblock content %}
