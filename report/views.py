@@ -172,10 +172,10 @@ def save_as_csv(report, excel_path, df=None):
 
             group.drop(columns=["Year", "Month"], inplace=True)
 
-            if csv_file_path.exists():
-                group.to_csv(csv_file_path, mode="a", header=False, index=False)
-            else:
-                group.to_csv(csv_file_path, mode="w", header=True, index=False)
+            # if csv_file_path.exists():
+            #     group.to_csv(csv_file_path, mode="a", header=False, index=False)
+            # else:
+            group.to_csv(csv_file_path, mode="w", header=True, index=False)
 
 
 @login_required
