@@ -63,7 +63,7 @@
     {% endfor %}
     
     <script>
-        window.reportExcelJson = {{ report_excel_json|safe }};  // Make JSON data available globally
+        window.reportExcelJson;
         document.addEventListener("DOMContentLoaded", function () {
             new handsontableManager('spreadsheet');
         });

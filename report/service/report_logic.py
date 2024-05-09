@@ -169,9 +169,13 @@ def temp(request, report):
     save_as_csv(parties_with_sale_report, None, parties_with_sale)
     # =======================================================================
 
-
     df_parties.rename(columns={"Branch":"Branch_duplicate"}, inplace=True)
     df_parties.rename(columns={"Branch.1":"Branch"}, inplace=True)
+
+    # Remove rows where 'GST No.' is blank or NaN
+    df_parties = df_parties[df_parties['GST No.'].notna() & (df_parties['GST No.'] != '')]
+    # taking first entry incase of duplicate
+    df_parties = df_parties.drop_duplicates(subset='GST No.', keep='first')
 
     updated_sales = pd.merge(
         df_sales,
@@ -194,10 +198,9 @@ def temp(request, report):
 
     save_as_csv(report, None, updated_sales)
 
-    report_excel = updated_sales.to_html(
-        classes="table table-striped", index=False, header=True
-    )
-    report_excel_json = updated_sales.to_json(orient="records")
+    # report_excel = updated_sales.to_html(
+    #     classes="table table-striped", index=False, header=True
+    # )
 
     temp = updated_sales.to_json(orient="table")
     output_directory = settings.BASE_DIR.parent / "data" / "json" / "report"
@@ -353,8 +356,7 @@ def temp(request, report):
         # "threshhold": threshhold,
         # "result": result,
         # "average": average,
-        "report_excel": report_excel,
-        "report_excel_json": report_excel_json,
+        # "report_excel": report_excel,
         "sales_analysis": sales_analysis,
         "branch_analysis": branch_analysis,
         "item_type_analysis": item_type_analysis,
