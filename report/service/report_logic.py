@@ -170,6 +170,9 @@ def temp(request, report):
     # =======================================================================
 
 
+    df_parties.rename(columns={"Branch":"Branch_duplicate"}, inplace=True)
+    df_parties.rename(columns={"Branch.1":"Branch"}, inplace=True)
+
     updated_sales = pd.merge(
         df_sales,
         df_parties[["GST No.", "Sales Person", "Branch"]],
@@ -188,6 +191,8 @@ def temp(request, report):
     updated_sales = updated_sales.drop("GST No.", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
     updated_sales = updated_sales[updated_sales["Sales Person"] != "General ID"]
+
+    save_as_csv(report, None, updated_sales)
 
     report_excel = updated_sales.to_html(
         classes="table table-striped", index=False, header=True
@@ -342,27 +347,6 @@ def temp(request, report):
     }
     all_chart_data_json = json.dumps(all_chart_data)
 
-    # render_data = render(
-    #     request,
-    #     "report/sale_register.html",
-    #     {
-    #         "report": report,
-    #         # "total": total,
-    #         # "threshhold": threshhold,
-    #         # "result": result,
-    #         # "average": average,
-    #         "report_excel": report_excel,
-    #         "report_excel_json": report_excel_json,
-    #         "sales_analysis": sales_analysis,
-    #         "branch_analysis": branch_analysis,
-    #         "item_type_analysis": item_type_analysis,
-    #         "individual_by_item_type_analysis": individual_by_item_type_analysis,
-    #         "branch_by_item_type_analysis": branch_by_item_type_analysis,
-    #         "all_chart_data_json": all_chart_data_json,
-    #         "myRange": range(1),
-    #     },
-    # )
-
     return {
         "report": report,
         # "total": total,
@@ -379,10 +363,6 @@ def temp(request, report):
         "all_chart_data_json": all_chart_data_json,
         "myRange": range(1),
     }
-
-
-    # with open(settings.BASE_DIR.parent / "data" / "html" / 'html.html', 'r') as f:
-    #     return HttpResponse(f.read(), content_type="text/html")
 
 
 def sale_purchase(request, report):

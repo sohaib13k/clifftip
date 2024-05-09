@@ -170,7 +170,8 @@ def save_as_csv(report, excel_path, df=None):
             filename = f"{int(year)}_{int(month):02d}.csv"
             csv_file_path = file_path / filename
 
-            # Check if file already exists
+            group.drop(columns=["Year", "Month"], inplace=True)
+
             if csv_file_path.exists():
                 group.to_csv(csv_file_path, mode="a", header=False, index=False)
             else:
