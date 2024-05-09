@@ -37,7 +37,11 @@ function handsontableManager(containerId) {
                 dropdownMenu: true,
                 manualColumnResize: true,
                 manualRowResize: true,
+                colWidths: 150,
+                columnSorting: true,
+                renderAllRows: false,
                 contextMenu: true,
+                batch: true,
                 licenseKey: 'non-commercial-and-evaluation'
             });
         } else {
