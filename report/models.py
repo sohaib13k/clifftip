@@ -6,6 +6,12 @@ from django.urls import reverse
 
 
 class Report(models.Model):
+    DATA_SOURCE_CHOICES = (
+        ("EXCEL", "Excel Upload"),
+        ("FORM", "Form"),
+        ("CUSTOM", "Custom Report"),
+    )
+
     name = models.CharField(max_length=127, unique=True)
     service_name = models.CharField(
         max_length=127,
@@ -33,6 +39,8 @@ class Report(models.Model):
     reports = models.ManyToManyField(
         "self", related_name="custom_report_parents", symmetrical=False, blank=True
     )
+    data_source = models.CharField(max_length=127, null=False, blank=False, choices=DATA_SOURCE_CHOICES)
+
 
     class Meta:
         verbose_name = "report"
@@ -60,12 +68,57 @@ class Report(models.Model):
         )
 
     @staticmethod
-    def get_accessible_reportlist(user, include_custom_report=False):
-        queryset = Report.objects.filter(
+    def get_accessible_reportlist(user):
+        return Report.objects.filter(
             Q(access_users=user) | Q(access_groups__in=user.groups.all())
         ).distinct()
 
-        if not include_custom_report:
-            queryset = queryset.filter(is_custom_report=False)
 
-        return queryset
+class Employee(models.Model):
+    DEPARTMENT_CHOICES = (
+        ("HR", "Human Resources"),
+        ("IT", "Information Technology"),
+        ("FIN", "Finance"),
+        ("OPS", "Operations"),
+        ("SL", "Sales"),
+    )
+
+    POSITION_CHOICES = (
+        ("Manager", "Manager"),
+        ("Engineer", "Engineer"),
+        ("Analyst", "Analyst"),
+        ("Assistant", "Assistant"),
+        ("Director", "Director"),
+        ("Sales", "Sales Person"),
+    )
+
+    employee_company_id = models.IntegerField(null=True, blank=True)
+    first_name = models.CharField(max_length=127, null=False)
+    last_name = models.CharField(max_length=127, null=True, blank=True)
+    position = models.CharField(max_length=127, choices=POSITION_CHOICES)
+    department = models.CharField(max_length=127, null=False, blank=False, choices=DEPARTMENT_CHOICES)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False)
+    created_date = models.DateTimeField(auto_now_add=True)
+    phone_number = models.CharField(max_length=127, null=True, blank=True)
+    manager_id = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="employees_managed")
+    supervisor_id = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees_supervised",
+    )
+
+    def __str__(self):
+        if self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return f"{self.first_name}"
+
+
+    class Meta:
+        verbose_name = "employee"
+        verbose_name_plural = "employees"
+
+    def get_absolute_url(self):
+        return reverse("employee_detail", kwargs={"pk": self.pk})

@@ -9,11 +9,12 @@ import pandas as pd
 import tempfile
 from django.core.files.storage import FileSystemStorage
 from report.service import data_frame
-from .models import Report
+from .models import Report, Employee
 from commonutil import commonutil
 from report.service import report_logic, upload_check
 import logging
 import os
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def report(request):
     View to fetch assigned reports
     """
     accessible_reports = Report.get_accessible_reportlist(
-        request.user, include_custom_report=True
+        request.user
     )
 
     return render(
@@ -40,9 +41,26 @@ def report(request):
 @login_required
 def upload(request):
     accessible_reports = Report.get_accessible_reportlist(
-        request.user, include_custom_report=False
+        request.user
     )
-    if request.method != "POST" or "excel_file" not in request.FILES:
+    if request.method != "POST":
+        sales_person = Employee.objects.filter(position="Sales")
+
+        return render(
+            request,
+            "report/other/upload_report.html",
+            {"accessible_reports": accessible_reports,"sales_person": sales_person},
+        )
+
+    if request.POST.get('form_type') == 'form_entry':
+        upload_form(request)
+        upload_url = reverse("report-upload")
+        return HttpResponse(
+            f"Data successfully saved! <hr> <a href='{upload_url}'>Upload more report</a>"
+        )
+
+
+    if request.POST.get('form_type') != 'excel_upload' or "excel_file" not in request.FILES:
         return render(
             request,
             "report/other/upload_report.html",
@@ -92,6 +110,53 @@ def upload(request):
     return HttpResponse(
         f"File uploaded successfully and saved! <hr> <a href='{upload_url}'>Upload more report</a>"
     )
+
+def upload_form(request):
+    sales_person = Employee.objects.filter(position="Sales").order_by('id')
+    report = Report.objects.get(service_name=request.POST.get('report'))
+    date = request.POST.get('reportDate')
+    data = []
+
+    # Assuming 'sales_person' is a list of employee objects available in the context
+    for person in sales_person:
+        person_id = str(person.id)  # Make sure it's a string, suitable for dictionary keys
+        person_value = request.POST.get(person_id, '')
+        data.append(person_value)
+
+    file_path = settings.CSV_DIR / report.service_name
+    Path(file_path).mkdir(parents=True, exist_ok=True)
+
+    file_path = file_path / (report.service_name + ".csv")
+
+    if not file_path.exists():
+        headers = ['Date'] + [person for person in sales_person]
+
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(headers)
+            writer.writerow([date] + data)
+
+    else:
+        new_headers  = ['Date'] + [person for person in sales_person]
+
+        with open(file_path, mode='r', newline='') as file:
+            reader = csv.reader(file)
+            current_headers = next(reader, [])  # Read the first row, which contains headers
+            all_data = list(reader)  # Read the rest of the data
+
+        # Compare current headers with new headers
+        if set(current_headers) != set(new_headers):
+            # If they are different, write new headers and all existing data plus the new row
+            with open(file_path, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(new_headers)
+                writer.writerows(all_data)
+                writer.writerow([date] + data)
+        else:
+            # If headers are the same, just append the new row
+            with open(file_path, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([date] + data)
 
 
 def increment_file_upload_limit(file_size, user):
