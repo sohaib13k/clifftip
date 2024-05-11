@@ -15,6 +15,8 @@ from report.service import report_logic, upload_check
 import logging
 import os
 import csv
+from django.template.loader import get_template
+from django.template import TemplateDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -264,14 +266,15 @@ def view_report(request, report_id):
 
     # if /url?cached=false, then fresh report will be generated and returned
     if cached_param is not None and cached_param.lower() == "false":
-        template = f"report/{service_name}.html"
+        try:
+            get_template(f"report/{service_name}.html")
+            template = f"report/{service_name}.html"
+        except TemplateDoesNotExist:
+            template = f"report/default.html"
 
         func = getattr(report_logic, service_name, None)
-
         if func is None:
-            template = f"report/default.html"
             func = getattr(report_logic, "default", None)
-
         result = func(request, report)
 
         render_html = render(

@@ -137,6 +137,35 @@ def bom_report(request, report):
     return result
 
 
+def churn_rate(request, report):
+    sale_purchase_model = Report.objects.get(service_name='sale_purchase')
+    all_parties_model = Report.objects.get(service_name='all_parties')
+
+    sale_purchase_csv = commonutil.get_latest_csv_from_dir(sale_purchase_model)
+    all_parties_csv = commonutil.get_latest_csv_from_dir(all_parties_model)
+    
+    merged_df = pd.DataFrame()
+    
+    if sale_purchase_csv is not None and all_parties_csv  is not None:
+        sales_prsn_filtered_parties = pd.read_csv(sale_purchase_csv).groupby("Sales Person")["Customer Name"].nunique().reset_index(name='Count')
+        sales_prsn_total_parties = pd.read_csv(all_parties_csv).groupby("Sales Person")["Company Name"].size().reset_index(name='Count')
+
+        merged_df = pd.merge(sales_prsn_filtered_parties, sales_prsn_total_parties, on="Sales Person", suffixes=('_Filtered', '_Total'))
+
+        merged_df['Ratio'] =((1 - (merged_df['Count_Filtered'] / merged_df['Count_Total']))*100).round(1).astype(str)+'%'
+
+        from report.views import save_as_csv
+        save_as_csv(report, None, merged_df)
+    
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": merged_df.to_json(orient="records"),
+        "report": report,
+    }
+
+    return result
+
+
 def temp(request, report):
     directory_path = settings.REPORT_DIR
     df_sales = pd.read_excel(directory_path / "sale_register" / "sale_reg.xlsx", skiprows=3)
@@ -201,13 +230,6 @@ def temp(request, report):
     # report_excel = updated_sales.to_html(
     #     classes="table table-striped", index=False, header=True
     # )
-
-    temp = updated_sales.to_json(orient="table")
-    output_directory = settings.BASE_DIR.parent / "data" / "json" / "report"
-    os.makedirs(output_directory, exist_ok=True)
-    compressed_file_path = output_directory / "data.json.gz"
-    with gzip.open(compressed_file_path, "wt", encoding="utf-8") as compressed_file:
-        compressed_file.write(temp)
 
     # Aggregating sales values
     individual_sales = (
