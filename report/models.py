@@ -76,26 +76,50 @@ class Report(models.Model):
 
 class Employee(models.Model):
     DEPARTMENT_CHOICES = (
-        ("HR", "Human Resources"),
-        ("IT", "Information Technology"),
-        ("FIN", "Finance"),
-        ("OPS", "Operations"),
+        ("PRD", "Production"),
+        ("DIS", "Dispatch"),
+        ("QA", "Quality"),
+        ("TLY", "Tally Calling"),
         ("SL", "Sales"),
+        ("HR", "H.R"),
+        ("PR", "Purchase"),
+        ("CF", "C&F"),
+        ("ACC", "Accounts"),
+        ("GD", "Godown"),
+        ("NSD", "New Sales Division"),
+        ("ECD", "Existing Client Division"),
+        ("CSD", "Cross Sales Division"),
+        ("BIL", "Billing"),
+        ("MNT", "Maintenence"),
+        ("IT", "I.T"),
     )
 
-    POSITION_CHOICES = (
-        ("Manager", "Manager"),
-        ("Engineer", "Engineer"),
-        ("Analyst", "Analyst"),
-        ("Assistant", "Assistant"),
-        ("Director", "Director"),
-        ("Sales", "Sales Person"),
+    TITLE_CHOICES = (
+        ("SE", "Sales Executive"),
+        ("TC", "Tally caller"),
+        ("ADM", "Admin"),
+        ("MO", "Machine Operator"),
+        ("AMO", "Ast. Machine Opt."),
+        ("HEL", "Helper"),
+        ("FI", "Floor Incharge"),
+        ("GI", "Godown Incharge"),
+        ("OFC", "Office"),
+        ("ACC", "Accountant"),
+        ("MIS", "Misc."),
+        ("PC", "Production Cordinator"),
+        ("PUR", "Purchase"),
+        ("DI", "Dispatch Incharge"),
+        ("MI", "Maintainance Incharge"),
+        ("QI", "Quality Incharge"),
+        ("BI", "Billing Incharge"),
+        ("SC", "Sales Cordinator"),
+        ("LM", "Lead Manager"),
     )
 
     employee_company_id = models.IntegerField(null=True, blank=True)
     first_name = models.CharField(max_length=127, null=False)
     last_name = models.CharField(max_length=127, null=True, blank=True)
-    position = models.CharField(max_length=127, choices=POSITION_CHOICES)
+    job_title = models.CharField(max_length=127, choices=TITLE_CHOICES)
     department = models.CharField(max_length=127, null=False, blank=False, choices=DEPARTMENT_CHOICES)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False)
     created_date = models.DateTimeField(auto_now_add=True)
