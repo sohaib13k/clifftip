@@ -44,7 +44,7 @@ def upload(request):
         request.user
     )
     if request.method != "POST":
-        sales_person = Employee.objects.filter(position="Sales")
+        sales_person = Employee.objects.filter(job_title="SE")
 
         return render(
             request,
@@ -296,7 +296,7 @@ def view_report(request, report_id):
 
         if not os.path.exists(settings.CACHED_TEMPLATE_DIR / service_name):
             os.makedirs(settings.CACHED_TEMPLATE_DIR / service_name, exist_ok=True)
-        with open(template_path, "w") as f:
+        with open(template_path, "w", encoding='utf-8') as f:
             f.write(content)
 
         return render_html
