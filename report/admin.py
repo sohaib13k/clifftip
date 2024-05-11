@@ -65,17 +65,17 @@ class ReportAdmin(admin.ModelAdmin):
 
 
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ["first_name", "last_name", "department", "position"]
+    list_display = ["first_name", "last_name", "department", "job_title"]
 
     search_fields = [
         "first_name",
         "last_name",
         "department",
-        "position",
+        "job_title",
         "phone_number",
     ]
 
-    list_filter = ["department", "position"]
+    list_filter = ["department", "job_title"]
 
     fieldsets = [
         (
@@ -91,7 +91,7 @@ class EmployeeAdmin(admin.ModelAdmin):
         (
             "Employment Details",
             {
-                "fields": ("employee_company_id", "position", "department"),
+                "fields": ("employee_company_id", "job_title", "department"),
             },
         ),
         (
