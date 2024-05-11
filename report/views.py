@@ -112,7 +112,7 @@ def upload(request):
     )
 
 def upload_form(request):
-    sales_person = Employee.objects.filter(position="Sales").order_by('id')
+    sales_person = Employee.objects.filter(job_title="SE").order_by('id')
     report = Report.objects.get(service_name=request.POST.get('report'))
     date = request.POST.get('reportDate')
     data = []
