@@ -23,6 +23,7 @@ load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir
 
 
 ### Deployment steps
+0. sudo timedatectl set-timezone Asia/Kolkata
 1. Create virtual env.
 2. Install dependencies from requirements.txt
 3. Install nginx
@@ -72,3 +73,22 @@ server {
 1.2 report.service.report_logic.py
 1.3 report.service.upload_check.py (optional)
 1.4 Create a view with same name
+
+### CI CD script
+```bash
+cd
+tar -czf projects.backup.tar.gz projects/
+cd /root/projects/clifftip/clifftip
+source ../.virtualenv/bin/activate
+git reset --hard
+git clean -df
+git pull
+echo "yes" | python manage.py collectstatic
+sudo rm -r /var/www/clifftip
+sleep 3
+echo "static removed"
+sudo mv ~/projects/clifftip/static/ /var/www/clifftip/
+pkill gunicorn
+gunicorn clifftip.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile /var/log/gunicorn/access.log --error-logfile /var/log/gunicorn/error.log &
+sudo systemctl restart nginx
+```
