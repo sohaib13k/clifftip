@@ -147,12 +147,12 @@ def churn_rate(request, report):
     merged_df = pd.DataFrame()
     
     if sale_purchase_csv is not None and all_parties_csv  is not None:
-        sales_prsn_filtered_parties = pd.read_csv(sale_purchase_csv).groupby("Sales Person")["Customer Name"].nunique().reset_index(name='Count')
-        sales_prsn_total_parties = pd.read_csv(all_parties_csv).groupby("Sales Person")["Company Name"].size().reset_index(name='Count')
+        sales_prsn_filtered_parties = pd.read_csv(sale_purchase_csv).groupby("Sales Person")["Customer Name"].nunique().reset_index(name='Count as per filter')
+        sales_prsn_total_parties = pd.read_csv(all_parties_csv).groupby("Sales Person")["Company Name"].size().reset_index(name='All parties')
 
-        merged_df = pd.merge(sales_prsn_filtered_parties, sales_prsn_total_parties, on="Sales Person", suffixes=('_Filtered', '_Total'))
+        merged_df = pd.merge(sales_prsn_filtered_parties, sales_prsn_total_parties, on="Sales Person")
 
-        merged_df['Ratio'] =((1 - (merged_df['Count_Filtered'] / merged_df['Count_Total']))*100).round(1).astype(str)+'%'
+        merged_df['Ratio'] =((1 - (merged_df['Count as per filter'] / merged_df['All parties']))*100).round(1).astype(str)+'%'
 
         from report.views import save_as_csv
         save_as_csv(report, None, merged_df)
