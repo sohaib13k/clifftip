@@ -2,6 +2,13 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Report
 import re
+from django.contrib.auth.models import User
+
+
+class UserSelectionForm(forms.Form):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(), required=True, label="Select User"
+    )
 
 
 class ReportForm(forms.ModelForm):
