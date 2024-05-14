@@ -5,11 +5,17 @@ from django.dispatch import receiver
 
 
 class UserProfile(models.Model):
+    AVAILABLE_THEME = (
+        ("light", "Light"),
+        ("dark", "Dark"),
+    )
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
     )
     used_storage = models.IntegerField(default=0, editable=False)  # Used storage in MB
     storage_limit = models.IntegerField(default=100, verbose_name="storage limit (MB)")  # Storage limit in MB, default 100MB
+    color_theme = models.CharField(max_length=127, null=True, blank=True, choices=AVAILABLE_THEME, default="light")
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

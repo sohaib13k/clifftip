@@ -1,134 +1,90 @@
+{% extends "commonutil/base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta name="description" content="content="End to end monitoring system"/>
-    <meta name="author" content="mavensoft.in" />
+{% block title %} Login | Clifftip {{ result.report.name }} {% endblock %}
 
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+{% block content %}
 
-    <title>Login | Clifftip</title>
+<main class="d-flex w-100 h-100">
+  <div class="container d-flex flex-column">
+    <div class="row vh-100">
+		  <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 mx-auto d-table h-100">
+        <div class="d-table-cell align-middle">
+          <div class="text-center mt-4">
+							<h1 class="h2">Welcome back!</h1>
+							<p class="lead">
+              Sign in to your account to continue
+            </p>
+          </div>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Choose your prefered color scheme -->
-    <link href="{% static 'css/light.css' %}" rel="stylesheet" />
-    {% comment %}
-    <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
-    {% endcomment %}
-    <link href="{% static 'css/custom/basestyles.css' %}" rel="stylesheet" />
-  </head>
-  <!--
-  HOW TO USE: 
-  data-theme: default (default), dark, light, colored
-  data-layout: fluid (default), boxed
-  data-sidebar-position: left (default), right
-  data-sidebar-layout: default (default), compact
--->
-
-  <body
-    data-theme="default"
-    data-layout="fluid"
-    data-sidebar-position="left"
-    data-sidebar-layout="default"
-  >
-    <main class="d-flex w-100 h-100 bg">
-      <div class="container d-flex flex-column">
-        <div class="row vh-100">
-          <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
-            <div class="d-table-cell align-middle">
-              <div class="text-center mt-4">
-                <!--<h1 class="h2">Welcome back, Charles</h1>-->
-                <p class="lead text-light">
-                  Sign in to your account to continue
-                </p>
-              </div>
-
-              <div class="card">
-                <div class="card-body">
-                  <div class="m-sm-4">
-                    {% comment %}
-                    <div class="text-center">
-                      <img
-                        src="img/avatars/avatar.jpg"
-                        alt="Charles Hall"
-                        class="img-fluid rounded-circle"
-                        width="132"
-                        height="132"
-                      />
-                    </div>
-                    {% endcomment %}
-                    <form action={% url 'login' %} method="post" enctype="multipart/form-data">
-                      {% csrf_token %}
-
-                      <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input
-                          class="form-control form-control-lg"
-                          type="name"
-                          name="email"
-                          placeholder="Enter your email"
-                          {% comment %} value="admin@clifftip.com" {% endcomment %}
-                        />
+          <div class="card">
+            <div class="card-body">
+              <div class="m-sm-3">
+                <form action={% url 'login' %} method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      <div class="alert-message">
+                        {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
-                      <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input
-                          class="form-control form-control-lg"
-                          type="password"
-                          name="password"
-                          placeholder="Enter your password"
-                          {% comment %} value="password" {% endcomment %}
-                        />
-                        <small>
-                          <a href="pages-reset-password.html"
-                            >Forgot password?</a
-                          >
-                        </small>
-                      </div>
-                      <div>
-                        <label class="form-check">
-                          <input
-                            class="form-check-input"
-                            type="checkbox"
-                            value="remember-me"
-                            name="remember-me"
-                            checked
-                          />
-                          <span class="form-check-label">
-                            Remember me next time
-                          </span>
-                        </label>
-                      </div>
-                      <button type="submit">Submit</button>
-
-                      {% comment %} <div class="text-center mt-3">
-                        <a href={% url 'login'  %} class="btn btn-lg btn-primary"
-                          >Sign in</a
-                        >
-                        <!-- <button type="submit" class="btn btn-lg btn-primary">Sign in</button> -->
-                      </div> {% endcomment %}
-                    </form>
+                    </div>                
+                  {% endif %}
+                  <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input
+                      class="form-control form-control-lg"
+                      type="text"
+                      name="username"
+                      id="username"  
+                      placeholder="Enter your username"
+                      value="{{ username|default:'' }}"
+                    />
                   </div>
-                </div>
+                  <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input
+                      class="form-control form-control-lg"
+                      type="password"
+                      name="password"
+                      id="password"
+                      placeholder="Enter your password"
+                    />
+                  </div>
+                  <div>
+                    <label class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        value="remember-me"
+                        name="remember-me"
+                      />
+                      <span class="form-check-label">
+                        Remember me next time
+                      </span>
+                    </label>
+                  </div>
+										<div class="d-grid gap-2 mt-3">
+                      <button type="submit" class="btn btn-lg btn-primary">Sign in</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
+  </div>
+</main>
 
-    <script src="{% static 'js/app.js' %}"></script>
-  </body>
-</html>
+<script>
+  {% if error %}
+    document.getElementById('password').focus();
+  {% else %}
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('username').focus();
+    });
+  {% endif %}
+</script>
+
+{% endblock %}

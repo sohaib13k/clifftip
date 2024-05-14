@@ -3,22 +3,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="End to end monitoring system">
+    <meta name="author" content="mavensoft.in">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
 		<link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
     <title>{% block title %}Clifftip{% endblock %}</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 		<link href="{% static 'css/custom/basestyles.css' %}" rel="stylesheet" />
-    <link href="{% static 'css/light.css' %}" rel="stylesheet" />
-    <!-- Commented out but ready if needed -->
-    <!-- <link href="{% static 'css/dark.css' %}" rel="stylesheet" /> -->
-
+    
+    {% if theme == 'dark' %}
+      <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
+    {% else %}
+      <link href="{% static 'css/light.css' %}" rel="stylesheet" />
+    {% endif %}
+  
 		{% block styles %}{% endblock %}
 
 </head>
-<body>
-  <div class="container mt-4 mb-4">
-    <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Reload without cache</a>
-  </div>
+<body data-theme="{% if theme == 'dark' %}dark{% else %}light{% endif %}" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+  
   {% block content %}{% endblock %}
 
   <script src="{% static 'js/app.js' %}"></script>

@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from account.views import change_color_theme
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,3 +31,6 @@ urlpatterns = [
 
 # api routes for report
 urlpatterns += [path("api/report/", include("report.api.urls"))]
+
+# route for profile views
+urlpatterns += [path("profile/theme/", change_color_theme, name="change_color_theme")]
