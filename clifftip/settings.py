@@ -119,9 +119,11 @@ LOGGING = {
     "handlers": {
         "file": {
             "level": "WARNING",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "filename": os.getenv("LOG_LOCATION"),
             "formatter": "simple",
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 50,  # Keep up to 5 backup files
         },
     },
     "formatters": {
@@ -131,6 +133,11 @@ LOGGING = {
     },
     "loggers": {
         "django": {
+            "handlers": ["file"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+        "": {
             "handlers": ["file"],
             "level": "WARNING",
             "propagate": True,

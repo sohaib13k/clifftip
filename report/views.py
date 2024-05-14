@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.urls import reverse
 from django.utils import timezone
 from pathlib import Path
@@ -248,18 +248,19 @@ def save_as_csv(report, excel_path, df=None):
 @login_required
 def view_report(request, report_id):
     if not Report.is_report_accessible(report_id, request.user):
-        return HttpResponse("Invalid report id passed.")
+        logger.debug(msg="Invalid report id passed.")
+        raise Http404
 
     try:
         report = Report.objects.get(id=report_id)
     except Report.DoesNotExist:
-        return HttpResponse(
-            "Report name could not be found. Please check the report ID."
-        )
+        logger.debug(msg="Report name could not be found. Please check the report ID.")
+        raise Http404
     except Report.MultipleObjectsReturned:
         # TODO: handle this scenario, when multiple objects returned
-        return HttpResponse("Multiple reports found. Please contact with admin.")
-
+        logger.error(msg="Multiple reports found. Please contact with admin.")
+        raise Exception
+        
     service_name = report.service_name
 
     cached_param = request.GET.get("cached", None)
