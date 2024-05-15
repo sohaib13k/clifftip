@@ -23,11 +23,28 @@
 		{% block styles %}{% endblock %}
 
 </head>
-<body data-theme="{% if theme == 'dark' %}dark{% else %}light{% endif %}" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<body data-theme="{{theme}}" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
   
   {% block content %}{% endblock %}
-
+  
   <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/datatables.js' %}"></script>
   <script src="{% static 'js/custom/commonutil.js' %}"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Datatables Orders
+        $("#datatables-orders").DataTable({
+            responsive: true,
+            aoColumnDefs: [{
+                bSortable: false,
+                aTargets: [-1]
+            }]
+        });
+    });
+  </script>
+  
+  {% block script %}{% endblock %}
+
 </body>
 </html>

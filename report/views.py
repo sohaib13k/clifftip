@@ -17,6 +17,7 @@ import os
 import csv
 from django.template.loader import get_template
 from django.template import TemplateDoesNotExist
+from account.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ def report(request):
         "report/other/report.html",
         {
             "accessible_reports": accessible_reports,
+            "theme": UserProfile.objects.get(user=request.user).color_theme,
         },
     )
 
@@ -51,7 +53,11 @@ def upload(request):
         return render(
             request,
             "report/other/upload_report.html",
-            {"accessible_reports": accessible_reports,"sales_person": sales_person},
+            {
+                "accessible_reports": accessible_reports,
+                "sales_person": sales_person,
+                "theme": UserProfile.objects.get(user=request.user).color_theme,
+            },
         )
 
     if request.POST.get('form_type') == 'form_entry':

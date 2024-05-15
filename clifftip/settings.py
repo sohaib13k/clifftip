@@ -37,7 +37,6 @@ ALLOWED_HOSTS = [os.getenv("ALLOWED_HOSTS")]
 
 INSTALLED_APPS = [
     # custom apps
-    "home",
     "ddr",
     "utilities",
     "account",

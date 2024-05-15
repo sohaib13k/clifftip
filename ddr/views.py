@@ -6,7 +6,7 @@ import json
 from commonutil import commonutil
 from django.contrib.auth.decorators import login_required
 from report.models import Report
-
+from account.models import UserProfile
 
 @login_required
 def ddr(request):
@@ -35,4 +35,12 @@ def ddr(request):
             difference = total_entries - column_count  # Difference from total entries
             counts[column] = difference if difference >= 0 else 0
 
-    return render(request, "ddr/ddr.html", {"result": counts, "report": report})
+    return render(
+        request,
+        "ddr/ddr.html",
+        {
+            "result": counts,
+            "report": report,
+            "theme": UserProfile.objects.get(user=request.user).color_theme,
+        },
+    )

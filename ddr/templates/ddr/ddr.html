@@ -1,171 +1,51 @@
+{% extends "commonutil/base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta
-      name="description"
-      content="End to end monitoring system"
-    />
-    <meta name="author" content="AdminKit" />
-    <meta
-      name="keywords"
-      content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web"
-    />
+{% block title %} Upload Report | Clifftip {{ result.report.name }} {% endblock %}
 
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
-
-    <link rel="canonical" href="https://demo.adminkit.io/pages-blank.html" />
-
-    <title>Home | Clifftip</title>
-
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Choose your prefered color scheme -->
-    <link href="{% static 'css/light.css' %}" rel="stylesheet" />
-    {% comment %}
-    <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
-    {% endcomment %}
-    <link href="{% static 'css/custom/basestyles.css' %}" rel="stylesheet" />
-  </head>
-  <!--
-  HOW TO USE: 
-  data-theme: default (default), dark, light, colored
-  data-layout: fluid (default), boxed
-  data-sidebar-position: left (default), right
-  data-sidebar-layout: default (default), compact
--->
-
-  <body
-    data-theme="default"
-    data-layout="fluid"
-    data-sidebar-position="left"
-    data-sidebar-layout="default"
-  >
-    <div class="wrapper">
-      <nav id="sidebar" class="sidebar js-sidebar">
-        <div class="sidebar-content js-simplebar">
-          <a class="sidebar-brand" href="#">
-            <span class="sidebar-brand-text align-middle">
-              Home {% comment %}
-              <sup
-                ><small class="badge bg-primary text-uppercase">Pro</small></sup
-              >
-              {% endcomment %}
-            </span>
-            <svg
-              class="sidebar-brand-icon align-middle"
-              width="32px"
-              height="32px"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FFFFFF"
-              stroke-width="1.5"
-              stroke-linecap="square"
-              stroke-linejoin="miter"
-              color="#FFFFFF"
-              style="margin-left: -3px"
-            >
-              <path d="M12 4L20 8.00004L12 12L4 8.00004L12 4Z"></path>
-              <path d="M20 12L12 16L4 12"></path>
-              <path d="M20 16L12 20L4 16"></path>
-            </svg>
-          </a>
-          <a class="sidebar-brand" href="{% url 'report-home' %}">
-            <span class="sidebar-brand-text align-middle">
-              Report {% comment %}
-              <sup
-                ><small class="badge bg-primary text-uppercase">Pro</small></sup
-              >
-              {% endcomment %}
-            </span>
-          </a>
-          <a class="sidebar-brand" href="{% url 'utilities-home' %}">
-            <span class="sidebar-brand-text align-middle">
-              Utilities {% comment %}
-              <sup
-                ><small class="badge bg-primary text-uppercase">Pro</small></sup
-              >
-              {% endcomment %}
-            </span>
-          </a>
-        </div>
-      </nav>
-
-      <div class="main">
-        <nav class="navbar navbar-expand navbar-light navbar-bg">
-          <a class="sidebar-toggle js-sidebar-toggle">
-            <i class="hamburger align-self-center"></i>
-          </a>
-
-          
-          <form class="d-none d-sm-inline-block">
-            <div class="input-group input-group-navbar">
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Search…"
-                aria-label="Search"
-              />
-              <button class="btn" type="button">
-                <i class="align-middle" data-feather="search"></i>
-              </button>
-            </div>
-          </form>
-          <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button class="btn" type="submit">
-              <i class="align-right">Logout</i>
-            </button>
-          </form>
-        </nav>
+{% block content %}
+	<div class="wrapper">
+	
+		{% include 'commonutil/sidebar.html' %}
+		
+		<div class="main">
+  		{% include 'commonutil/navbar.html' %}
         
-        <main class="content">
-          <div class="container-fluid p-0">
-            <h1 class="h3 mb-3">Dashboard</h1>
-            <div class="container">
-              <h1>All Parties data completion (missing count)</h1>
+      <main class="content">
+        <div class="container-fluid p-0">
+          <h1 class="h3 mb-3">Dashboard</h1>
+          <div class="container">
+            <h1>All Parties data completion (missing count)</h1>
 
-              <div style="overflow-x: auto;">
-                <table id="report-table" class="table">
-                    <tr>
-                        {% for column, count in result.items %}
-                        <th>{{ column }}</th>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        {% for column, count in result.items %}
-                        <td style="{% if count > 20 %} background-color: #ffcccc;
-                          {% elif count >= 10 and count <= 20 %} background-color: #ffffcc;
-                          {% else %} background-color: #ccffcc;
-                          {% endif %}">
-                          <a href="{% url 'report-view' report.id %}" style="display: block;
-                                                                      width: 100%;
-                                                                      height: 100%;
-                                                                      text-decoration: none;
-                                                                      color: inherit;">
-                              {{ count }}
-                          </a>
-                      </td>
-                        {% endfor %}
-                    </tr>
-                </table>
-              </div>
+            <div style="overflow-x: auto;">
+              <table id="report-table" class="table">
+                  <tr>
+                      {% for column, count in result.items %}
+                      <th>{{ column }}</th>
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                      {% for column, count in result.items %}
+                      <td style="{% if count > 20 %} background-color: #ffcccc;
+                        {% elif count >= 10 and count <= 20 %} background-color: #ffffcc;
+                        {% else %} background-color: #ccffcc;
+                        {% endif %}">
+                        <a href="{% url 'report-view' report.id %}" style="display: block;
+                                                                    width: 100%;
+                                                                    height: 100%;
+                                                                    text-decoration: none;
+                                                                    color: inherit;">
+                            {{ count }}
+                        </a>
+                    </td>
+                      {% endfor %}
+                  </tr>
+              </table>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
+  </div>
 
-    <script src="{% static 'js/app.js' %}"></script>
-  </body>
-</html>
+{% endblock %}

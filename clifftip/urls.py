@@ -17,12 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from account.views import change_color_theme
+from account.views import change_color_theme, profile
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("home.urls")),
-    path("home/", include("home.urls")),
+    path("", include("ddr.urls")),
     path("ddr/", include("ddr.urls")),
     path("utilities/", include("utilities.urls")),
     path("account/", include("account.urls")),
@@ -33,4 +32,7 @@ urlpatterns = [
 urlpatterns += [path("api/report/", include("report.api.urls"))]
 
 # route for profile views
-urlpatterns += [path("profile/theme/", change_color_theme, name="change_color_theme")]
+urlpatterns += [
+    path("profile/theme/", change_color_theme, name="change_color_theme"),
+    path("profile/", profile, name="profile")
+]

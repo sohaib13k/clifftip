@@ -1,51 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report view</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-      .custom-report-true {
-        background-color: lightblue;
-      }
+{% extends "commonutil/base.html" %}
+{% load static %}
 
-      .custom-report-false {
-        background-color: #a7dbb5;
-      }
+{% block title %} View Report | Clifftip {{ result.report.name }} {% endblock %}
 
-      a {
-        text-decoration: none; /* Remove underline */
-        color: #333; /* Your desired color */
-      }
-      
-    </style>
-</head>
-<body>
-  <div class="container mt-5">
-    <h1>Report view</h1>
-    <ul class="list-unstyled">
-      <li class="mb-3"><a href="{% url 'report-upload' %}" class="btn btn-primary">Upload report</a></li>
-      <hr>
-      <li class="mb-3">View Report</li>
-      <div class="row">
-          {% for report in accessible_reports %}
-          <div class="col-md-4 col-sm-6 mb-4">
-            <div class="card">
-              <div class="card-header {% if report.is_custom_report %}custom-report-true{% else %}custom-report-false{% endif %}">
-                <a href="{% url 'report-view' report.id %}?cached=true">
-                  <h5 class="card-title mb-0">{{ report.name }}</h5>
-                </a>
+{% block content %}
+	<div class="wrapper">
+	
+		{% include 'commonutil/sidebar.html' %}
+		
+		<div class="main">
+  		{% include 'commonutil/navbar.html' %}
+
+			<main class="content">
+				<div class="container-fluid p-0">
+          <div class="mb-3">
+						<h1 class="h3 d-inline align-middle">View report</h1>
+					</div>
+
+          <div class="row">
+
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Custom report</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                  {% for report in accessible_reports %}
+                    {% if report.is_custom_report %}
+                    {% comment %} TODO: Remove underline {% endcomment %}
+                    <a href="{% url 'report-view' report.id %}?cached=true">
+                      <li class="list-group-item">{{ report.name }}</li>
+                    </a>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
               </div>
             </div>
-          </div>
-          {% endfor %}
-        </div>
-      </ul>
-    </div>
 
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Uploaded report</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                  {% for report in accessible_reports %}
+                    {% if not report.is_custom_report %}
+                    <a href="{% url 'report-view' report.id %}?cached=true">
+                      <li class="list-group-item">{{ report.name }}</li>
+                    </a>
+                    {% endif %}
+                  {% endfor %}
+
+                </ul>
+              </div>
+            </div>
+            
+          </div>
+				</div>
+			</main>
+
+		</div>
+	</div>
+{% endblock %}

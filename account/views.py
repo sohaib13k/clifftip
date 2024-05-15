@@ -28,7 +28,7 @@ def user_login(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return redirect("home-home")
+        return redirect("ddr-home")
     else:
         return render(
             request, "account/login.html", {"error": "Invalid username or password", "username":username}
@@ -67,4 +67,13 @@ def change_color_theme(request):
     return JsonResponse(
         {"message": "Theme updated successfully.", "theme": user_profile.color_theme},
         status=200,
+    )
+
+
+@login_required
+def profile(request):
+    return render(
+        request,
+        "account/profile.html",
+        {"theme": UserProfile.objects.get(user=request.user).color_theme},
     )

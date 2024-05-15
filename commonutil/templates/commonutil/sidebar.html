@@ -1,0 +1,75 @@
+{% load static %}
+<nav id="sidebar" class="sidebar js-sidebar">
+    <div class="sidebar-content js-simplebar">
+        <a class="sidebar-brand" href={% url 'ddr-home' %}>
+            <span class="sidebar-brand-text align-middle">
+                Clifftip
+            </span>
+            <svg class="sidebar-brand-icon align-middle" width="32px" height="32px" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5"
+                stroke-linecap="square" stroke-linejoin="miter" color="#FFFFFF" style="margin-left: -3px">
+                <path d="M12 4L20 8.00004L12 12L4 8.00004L12 4Z"></path>
+                <path d="M20 12L12 16L4 12"></path>
+                <path d="M20 16L12 20L4 16"></path>
+            </svg>
+        </a>
+
+        <div class="sidebar-user">
+            <div class="d-flex justify-content-center">
+                <div class="flex-shrink-0">
+                    <img src="{% static 'img/avatars/avatar.svg' %}" class="avatar img-fluid rounded me-1" alt={{ request.user.username }} />
+                </div>
+                <div class="flex-grow-1 ps-2">
+                    <a class="sidebar-user-title dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        {{ request.user.username }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-start">
+                        <a class="dropdown-item" href={% url 'profile' %}><i class="align-middle me-1" data-feather="user"></i> Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href={% url 'logout' %}><i class="align-middle me-1" data-feather="log-out"></i> Log out</a>
+                    </div>
+
+                    <div class="sidebar-user-subtitle">{% if request.user.is_superuser %} Administrator {% else %} Staff {% endif %}</div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-header">
+                Pages
+            </li>
+
+            <li class="sidebar-item {% if page == 'dashboard' %}active{% endif %}">
+                <a class="sidebar-link" href={% url 'ddr-home' %}>
+                    <i class="align-middle" data-feather="trending-up"></i> <span class="align-middle">Dashboard</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item {% if page == 'report' %}active{% endif %}">
+                <a data-bs-target="#report" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                    <i class="align-middle" data-feather="bar-chart-2"></i> <span class="align-middle">Report</span>
+                </a>
+                <ul id="report" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                    <li class="sidebar-item {% if sub_page == 'report-view' %}active{% endif %}"><a class="sidebar-link" href={% url 'report-home' %}>View</a></li>
+                    <li class="sidebar-item {% if sub_page == 'report-upload' %}active{% endif %}"><a class="sidebar-link" href={% url 'report-upload' %}>Upload</a></li>
+                </ul>
+            </li>
+
+
+            <li class="sidebar-item {% if page == 'utilities' %}active{% endif %}">
+                <a data-bs-target="#utilities" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                    <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Utilities</span>
+                </a>
+                <ul id="utilities" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                    <li class="sidebar-item {% if sub_page == 'utilities-excel-viewer' %}active{% endif %}"><a class="sidebar-link" href={% url 'utilities-excel-viewer' %}>Excel Viewer</a></li>
+                </ul>
+            </li>
+
+            <li class="sidebar-item {% if page == 'profile' %}active{% endif %}">
+                <a class="sidebar-link" href={% url 'profile' %}>
+                    <i class="align-middle" data-feather="user"></i> <span class="align-middle">Profile</span>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+</nav>
