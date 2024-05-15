@@ -31,6 +31,9 @@ urlpatterns = [
 # api routes for report
 urlpatterns += [path("api/report/", include("report.api.urls"))]
 
+# api routes for dashboard views
+urlpatterns += [path("api/ddr/", include("ddr.api.urls"))]
+
 # route for profile views
 urlpatterns += [
     path("profile/theme/", change_color_theme, name="change_color_theme"),
