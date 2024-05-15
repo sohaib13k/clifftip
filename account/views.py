@@ -51,7 +51,6 @@ def change_color_theme(request):
     except:
         return JsonResponse({"error": "Invalid payload"}, status=400)
 
-    print(theme)
     if not theme:
         return JsonResponse({"error": "payload missing"}, status=400)
 
