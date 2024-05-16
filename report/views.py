@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -266,63 +267,34 @@ def view_report(request, report_id):
         # TODO: handle this scenario, when multiple objects returned
         logger.error(msg="Multiple reports found. Please contact with admin.")
         raise Exception
-        
+
     service_name = report.service_name
-
     cached_param = request.GET.get("cached", None)
+    user_theme = UserProfile.objects.get(user=request.user).color_theme
 
-    # if /url?cached=false, then fresh report will be generated and returned
+    cache_key = f"preprocessed_report_data_{report_id}"
     if cached_param is not None and cached_param.lower() == "false":
-        try:
-            get_template(f"report/{service_name}.html")
-            template = f"report/{service_name}.html"
-        except TemplateDoesNotExist:
-            template = f"report/default.html"
+        cache.delete(cache_key)
 
+    report_data = cache.get(cache_key)
+    if report_data is None:
         func = getattr(report_logic, service_name, None)
         if func is None:
             func = getattr(report_logic, "default", None)
-        result = func(request, report)
+        report_data = func(request, report)
+        cache.set(cache_key, report_data, timeout=604800)  # Cache for 7 days
 
-        render_html = render(
-            request,
-            template,
-            {
-                "result": result,
-                "theme": UserProfile.objects.get(user=request.user).color_theme,
-            },
-        )
+    try:
+        get_template(f"report/{service_name}.html")
+        template = f"report/{service_name}.html"
+    except TemplateDoesNotExist:
+        template = f"report/default.html"
 
-        content = render_html.content.decode("utf-8")
-
-        template_path = (
-            settings.CACHED_TEMPLATE_DIR / service_name / f"{service_name}.html"
-        )
-
-        if template_path.exists():
-            commonutil.rename_file_with_unique_suffix(
-                template_path,
-                f"{service_name}.html",
-                settings.CACHED_TEMPLATE_DIR,
-                report,
-            )
-
-        if not os.path.exists(settings.CACHED_TEMPLATE_DIR / service_name):
-            os.makedirs(settings.CACHED_TEMPLATE_DIR / service_name, exist_ok=True)
-        with open(template_path, "w", encoding='utf-8') as f:
-            f.write(content)
-
-        return render_html
-
-    else:
-        template_path = (
-            settings.CACHED_TEMPLATE_DIR / service_name / f"{service_name}.html"
-        )
-        if template_path.exists():
-            with open(template_path, "r") as f:
-                return HttpResponse(f.read(), content_type="text/html")
-        else:
-            # Redirect to the same view with cached=false
-            redirect_url = reverse("report-view", kwargs={"report_id": report_id})
-            redirect_url_with_param = f"{redirect_url}?cached=false"
-            return redirect(redirect_url_with_param)
+    return render(
+        request,
+        template,
+        {
+            "result": report_data,
+            "theme": user_theme,
+        },
+    )

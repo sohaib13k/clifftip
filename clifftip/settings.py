@@ -19,7 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # custom paths
 REPORT_DIR = BASE_DIR.parent / "data" / "reports"
 CSV_DIR = BASE_DIR.parent / "data" / "csv"
-CACHED_TEMPLATE_DIR = BASE_DIR.parent / "data" / "template"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -90,6 +89,20 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+
+# Caching
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": BASE_DIR.parent / "data" / "cache",
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000,
+            "CULL_FREQUENCY": 100,
+        },
     }
 }
 
