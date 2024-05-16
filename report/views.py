@@ -1,4 +1,4 @@
-from django.core.cache import cache
+from django.core.cache import caches
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -273,16 +273,19 @@ def view_report(request, report_id):
     user_theme = UserProfile.objects.get(user=request.user).color_theme
 
     cache_key = f"preprocessed_report_data_{report_id}"
-    if cached_param is not None and cached_param.lower() == "false":
-        cache.delete(cache_key)
+    file_cache = caches['file_based']
 
-    report_data = cache.get(cache_key)
+    if cached_param is not None and cached_param.lower() == "false":
+        file_cache.delete(cache_key)
+
+    report_data = file_cache.get(cache_key)
     if report_data is None:
         func = getattr(report_logic, service_name, None)
         if func is None:
             func = getattr(report_logic, "default", None)
         report_data = func(request, report)
-        cache.set(cache_key, report_data, timeout=604800)  # Cache for 7 days
+
+        file_cache.set(cache_key, report_data, timeout=604800)  # Cache for 7 days
 
     try:
         get_template(f"report/{service_name}.html")

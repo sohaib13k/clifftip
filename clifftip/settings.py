@@ -97,13 +97,17 @@ DATABASES = {
 
 CACHES = {
     "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "",
+    },
+    "file_based": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": BASE_DIR.parent / "data" / "cache",
         "OPTIONS": {
             "MAX_ENTRIES": 1000,
             "CULL_FREQUENCY": 100,
         },
-    }
+    },
 }
 
 
