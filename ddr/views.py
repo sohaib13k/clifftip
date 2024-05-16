@@ -7,7 +7,7 @@ from commonutil import commonutil
 from django.contrib.auth.decorators import login_required
 from report.models import Report
 from account.models import UserProfile
-from .models import SelectedColumns
+from .models import AllPartiesSelectedColumns, AllPartiesThreshold
 
 
 @login_required
@@ -23,10 +23,15 @@ def ddr(request):
     df_all_parties = pd.DataFrame()
     counts = {}
 
-    selected_columns_record = SelectedColumns.objects.filter(user=request.user).first()
+    selected_columns_record = AllPartiesSelectedColumns.objects.filter(
+        user=request.user
+    ).first()
     selected_columns = (
         json.loads(selected_columns_record.columns) if selected_columns_record else []
     )
+
+    all_parties_thresholds = AllPartiesThreshold.objects.first()
+    thresholds = all_parties_thresholds.__dict__ if all_parties_thresholds else {}
 
     if csv_all_parties_with_sale is not None:
         df_all_parties = pd.read_csv(csv_all_parties_with_sale)
@@ -49,6 +54,7 @@ def ddr(request):
             "result": counts,
             "report": report,
             "selected_columns": selected_columns,
+            "threshold": thresholds,
             "theme": UserProfile.objects.get(user=request.user).color_theme,
         },
     )

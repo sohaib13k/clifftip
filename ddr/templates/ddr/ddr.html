@@ -13,7 +13,7 @@
       position: relative;
       display: inline-block;
     }
-    
+
     .dropdown-content {
       display: none;
       position: absolute;
@@ -25,21 +25,33 @@
       z-index: 1;
       padding: 10px;
     }
-    
+
     .dropdown-content .form-check {
       margin: 5px 0;
     }
-    
+
     .show {
       display: block;
     }
-    
+
     .dropdown-footer {
       position: sticky;
       bottom: 0;
       background-color: #f9f9f9;
       padding: 10px;
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.1);
+    }
+
+    .number-input-group-danger {
+      background-color: #ffcccc;
+    }
+
+    .number-input-group-action {
+      background-color: #ffffcc;
+    }
+
+    .number-input-group-acceptable {
+      background-color: #ccffcc;
     }
   </style>
 {% endblock %}
@@ -51,7 +63,11 @@
       {% include 'commonutil/navbar.html' %}
       <main class="content">
         <div class="container-fluid p-0">
-          <h1 class="h3 mb-3">Dashboard</h1>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3 mb-0">Dashboard</h1>
+            <button class="btn btn-primary my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions"
+              aria-controls="offcanvasWithBothOptions">Dashboard Configuration</button>
+          </div>
           <div class="row">
             <div class="col-xl-6 col-xxl-5 d-flex">
               <div class="w-100">
@@ -87,10 +103,10 @@
                                 <th class="report-column" data-column="{{ column }}">{{ column }}</th>
                               {% endfor %}
                             </tr>
-                            <tr>
+                            <tr id="report-row">
                               {% for column, count in result.items %}
-                              <td class="report-column" data-column="{{ column }}" style="{% if count > 20 %} background-color: #ffcccc;
-                                {% elif count >= 10 and count <= 20 %} background-color: #ffffcc;
+                              <td class="report-column" data-column="{{ column }}" style="{% if count > threshold.danger %} background-color: #ffcccc;
+                                {% elif count >= threshold.action and count <= threshold.danger %} background-color: #ffffcc;
                                 {% else %} background-color: #ccffcc;
                                 {% endif %}">
                                 <a href="{% url 'report-view' report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
@@ -113,93 +129,191 @@
     </div>
   </div>
 
+  <!-- Offcanvas content with input spinners and save button -->
+  <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
+    aria-labelledby="offcanvasWithBothOptionsLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Dashboard Configuration</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <p>
+        <h6 class="card-title" id="offcanvasWithBothOptionsLabel">All Parties data completion</h5>
+        <!-- Number Input Spinners -->
+        <div class="mb-3">
+          <label class="form-label">Danger</label>
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
+            <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ threshold.danger|default:0 }}">
+            <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Action</label>
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
+            <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ threshold.action|default:0 }}">
+            <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Acceptable</label>
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
+            <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ threshold.acceptable|default:0 }}">
+            <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <button class="btn btn-success" id="save-values">Save</button>
+      </p>
+    </div>
+  </div>
+
   <script>
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
-        return cookieValue;
       }
+      return cookieValue;
+    }
 
-    
-      $(document).ready(function(){
-          const csrftoken = getCookie('csrftoken');
+    function increment(id) {
+      let input = document.getElementById(id);
+      input.value = parseInt(input.value) + 1;
+    }
 
-            // Pre-select checkboxes based on selected_columns and then clear it
-            var selectedColumns = {{ selected_columns|safe }};
-            selectedColumns.forEach(function(column) {
-                $('.column-checkbox[value="' + column + '"]').prop('checked', true);
-            });
-            // selectedColumns = [];
-            
-          // Handle dropdown open/close on click
-          $('#dropdownButton').click(function(event){
-              event.stopPropagation();
-              $('#dropdownContent').toggleClass('show');
-          });
+    function decrement(id) {
+      let input = document.getElementById(id);
+      if (input.value > 0) {
+        input.value = parseInt(input.value) - 1;
+      }
+    }
 
-          // Handle save button click
-          $('#save-columns').click(function(){
-              var selectedColumns = [];
-              $('.column-checkbox:checked').each(function(){
-                  selectedColumns.push($(this).val());
-              });
+    document.getElementById('save-values').addEventListener('click', function() {
+      const csrftoken = getCookie('csrftoken');
+      const data = {
+        threshold: {
+          danger: document.getElementById('danger-value').value,
+          action: document.getElementById('action-value').value,
+          acceptable: document.getElementById('acceptable-value').value
+        },
+        methodName: 'save_all_parties_ddr_threshold',
+      };
 
-              $.ajax({
-                  url: "{% url 'ddr-api-saveEntity' %}",
-                  method: "POST",
-                  headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify({
-                    columns: selectedColumns,
-                    report_id: {{report.id}},
-                    methodName: 'save_selected_columns',
-                }),
-                  success: function(response) {
-                      // Optionally handle the response from the backend
-                  }
-              });
-
-              // Close the dropdown
-              $('#dropdownContent').removeClass('show');
-          });
-
-          // Handle column checkbox change
-          $('.column-checkbox').change(function(){
-              var selectedColumns = [];
-              $('.column-checkbox:checked').each(function(){
-                  selectedColumns.push($(this).val());
-              });
-
-              $('.report-column').each(function(){
-                  var column = $(this).data('column');
-                  if (selectedColumns.includes(column)) {
-                      $(this).show();
-                  } else {
-                      $(this).hide();
-                  }
-              });
-          });
-
-          // Initially hide columns based on default selections (if needed)
-          $('.column-checkbox').change();
-
-          // Close the dropdown if the user clicks outside of it
-          $(window).click(function(event) {
-              if (!event.target.matches('#dropdownButton') && !event.target.closest('.dropdown-content')) {
-                  $('#dropdownContent').removeClass('show');
-              }
-          });
+      $.ajax({
+        url: "{% url 'ddr-api-saveEntity' %}",
+        method: "POST",
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(data),
+        success: function(response) {
+          // Update the table cells dynamically
+          updateTable(response.threshold);
+        },
+        error: function(error) {
+          console.error('Error:', error);
+        }
       });
-    </script>
+    });
+
+    function updateTable(thresholds) {
+      $('#report-row .report-column').each(function() {
+        const column = $(this).data('column');
+        let value = parseInt($(this).find('a').text());
+
+        if (value > thresholds.danger) {
+          $(this).css('background-color', '#ffcccc');
+        } else if (value >= thresholds.action && value <= thresholds.danger) {
+          $(this).css('background-color', '#ffffcc');
+        } else {
+          $(this).css('background-color', '#ccffcc');
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      const csrftoken = getCookie('csrftoken');
+
+      // Pre-select checkboxes based on selected_columns and then clear it
+      var selectedColumns = {{ selected_columns|safe }};
+      selectedColumns.forEach(function(column) {
+        $('.column-checkbox[value="' + column + '"]').prop('checked', true);
+      });
+
+      // Handle dropdown open/close on click
+      $('#dropdownButton').click(function(event) {
+        event.stopPropagation();
+        $('#dropdownContent').toggleClass('show');
+      });
+
+      // Handle save button click for columns
+      $('#save-columns').click(function() {
+        var selectedColumns = [];
+        $('.column-checkbox:checked').each(function() {
+          selectedColumns.push($(this).val());
+        });
+
+        $.ajax({
+          url: "{% url 'ddr-api-saveEntity' %}",
+          method: "POST",
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+          },
+          data: JSON.stringify({
+            columns: selectedColumns,
+            report_id: {{report.id}},
+            methodName: 'save_all_parties_ddr_selected_columns',
+          }),
+          success: function(response) {
+            // Optionally handle the response from the backend
+          }
+        });
+
+        // Close the dropdown
+        $('#dropdownContent').removeClass('show');
+      });
+
+      // Handle column checkbox change
+      $('.column-checkbox').change(function() {
+        var selectedColumns = [];
+        $('.column-checkbox:checked').each(function() {
+          selectedColumns.push($(this).val());
+        });
+
+        $('.report-column').each(function() {
+          var column = $(this).data('column');
+          if (selectedColumns.includes(column)) {
+            $(this).show();
+          } else {
+            $(this).hide();
+          }
+        });
+      });
+
+      // Initially hide columns based on default selections (if needed)
+      $('.column-checkbox').change();
+
+      // Close the dropdown if the user clicks outside of it
+      $(window).click(function(event) {
+        if (!event.target.matches('#dropdownButton') && !event.target.closest('.dropdown-content')) {
+          $('#dropdownContent').removeClass('show');
+        }
+      });
+    });
+  </script>
 {% endblock %}
