@@ -1,119 +1,120 @@
-{% extends "commonutil/base.html" %}
+{% extends 'commonutil/base.html' %}
 {% load static %}
 
-{% block title %} Dashboard | Clifftip {{ result.report.name }} {% endblock %}
+{% block title %}
+  Dashboard | Clifftip {{ result.report.name }}
+{% endblock %}
 
 {% block styles %}
-    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-    <style>
-        /* Basic styling for dropdown and table */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            max-height: 200px; /* Approx 6-7 items */
-            overflow-y: auto;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            padding: 10px;
-        }
-
-        .dropdown-content .form-check {
-            margin: 5px 0;
-        }
-
-        .show {
-            display: block;
-        }
-
-        .dropdown-footer {
-            position: sticky;
-            bottom: 0;
-            background-color: #f9f9f9;
-            padding: 10px;
-            box-shadow: 0px -2px 4px 0px rgba(0,0,0,0.1);
-        }
-    </style>
-{% endblock styles %}
+  <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+  <style>
+    /* Basic styling for dropdown and table */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 160px;
+      max-height: 200px; /* Approx 6-7 items */
+      overflow-y: auto;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      padding: 10px;
+    }
+    
+    .dropdown-content .form-check {
+      margin: 5px 0;
+    }
+    
+    .show {
+      display: block;
+    }
+    
+    .dropdown-footer {
+      position: sticky;
+      bottom: 0;
+      background-color: #f9f9f9;
+      padding: 10px;
+      box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
-    <div class="wrapper">
-        {% include 'commonutil/sidebar.html' %}
-        <div class="main">
-            {% include 'commonutil/navbar.html' %}
-            <main class="content">
-                <div class="container-fluid p-0">
-                    <h1 class="h3 mb-3">Dashboard</h1>
-                    <div class="row">
-                        <div class="col-xl-6 col-xxl-5 d-flex">
-                            <div class="w-100">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col mt-0">
-                                                        <h5 class="card-title">All Parties data completion</h5>
-                                                    </div>
-                                                    <div class="col mt-0 text-right">
-                                                        <div class="dropdown">
-                                                            <button class="btn btn-primary" id="dropdownButton">Columns</button>
-                                                            <div id="dropdownContent" class="dropdown-content">
-                                                                {% for column, count in result.items %}
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}">
-                                                                    <label class="form-check-label" for="check{{ forloop.counter }}">
-                                                                        {{ column }}
-                                                                    </label>
-                                                                </div>
-                                                                {% endfor %}
-                                                                <div class="dropdown-footer">
-                                                                    <button id="save-columns" class="btn btn-success">Save</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div style="overflow-x: auto;">
-                                                    <table id="report-table" class="table">
-                                                        <tr>
-                                                            {% for column, count in result.items %}
-                                                            <th class="report-column" data-column="{{ column }}">{{ column }}</th>
-                                                            {% endfor %}
-                                                        </tr>
-                                                        <tr>
-                                                            {% for column, count in result.items %}
-                                                            <td class="report-column" data-column="{{ column }}" style="{% if count > 20 %} background-color: #ffcccc;
-                                                                {% elif count >= 10 and count <= 20 %} background-color: #ffffcc;
-                                                                {% else %} background-color: #ccffcc;
-                                                                {% endif %}">
-                                                                <a href="{% url 'report-view' report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                                                                    {{ count }}
-                                                                </a>
-                                                            </td>
-                                                            {% endfor %}
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+  <div class="wrapper">
+    {% include 'commonutil/sidebar.html' %}
+    <div class="main">
+      {% include 'commonutil/navbar.html' %}
+      <main class="content">
+        <div class="container-fluid p-0">
+          <h1 class="h3 mb-3">Dashboard</h1>
+          <div class="row">
+            <div class="col-xl-6 col-xxl-5 d-flex">
+              <div class="w-100">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="card">
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col mt-0">
+                            <h5 class="card-title">All Parties data completion</h5>
+                          </div>
+                          <div class="col mt-0 text-right">
+                            <div class="dropdown">
+                              <button class="btn btn-primary" id="dropdownButton">Columns</button>
+                              <div id="dropdownContent" class="dropdown-content">
+                                {% for column, count in result.items %}
+                                  <div class="form-check">
+                                    <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
+                                    <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
+                                  </div>
+                                {% endfor %}
+                                <div class="dropdown-footer">
+                                  <button id="save-columns" class="btn btn-success">Save</button>
                                 </div>
+                              </div>
                             </div>
+                          </div>
                         </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
+                        <div style="overflow-x: auto;">
+                          <table id="report-table" class="table">
+                            <tr>
+                              {% for column, count in result.items %}
+                                <th class="report-column" data-column="{{ column }}">{{ column }}</th>
+                              {% endfor %}
+                            </tr>
+                            <tr>
+                              {% for column, count in result.items %}
+                                <td class="report-column"
+                                  data-column="{{ column }}"
+                                  style="{% if count > 20 %}
 
-    <script>
+                                  {% elif count >= 10 and count <= 20 %}
+
+                                  {% endif %}">
+                                  <a href="{% url 'report-view' report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">{{ count }}</a>
+                                </td>
+                              {% endfor %}
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
       function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

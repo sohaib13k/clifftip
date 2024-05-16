@@ -1,234 +1,221 @@
-{% extends "commonutil/base.html" %}
+{% extends 'commonutil/base.html' %}
 {% load static %}
-
-{% block title %} Report | {{ result.report.name }} {% endblock %}
-
+{% block title %}
+  Report | {{ result.report.name }}
+{% endblock %}
 {% block styles %}
-    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-    <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
-{% endblock styles %}
-
+  <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+  <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
+{% endblock %}
 {% block content %}
-    <div class="container mt-4 mb-4">
+  <div class="wrapper">
+    {% include 'commonutil/sidebar.html' %}
+    <div class="main">
+      {% include 'commonutil/navbar.html' %}
+      <div class="container mt-4 mb-4">
         <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Reload without cache</a>
-    </div>
-
-    <h2>Summary</h2>
-    <div>Report name: {{ result.report }}</div>
-    {% comment %}
-    <div>Threshhold: {{ threshhold }}</div>
-    <div>Total: {{ total}}</div>
-    <div>Average: {{ average }}</div>
-    <div style="color: red">Result: {{ result}}</div>
-    {% endcomment %}
-
-    <h2>Excel Data</h2>
-    <hr />
-
-    <button class="btn btn-primary" id="toggleButton">
-      Show/Hide Excel Data
-    </button>
-
-    {% include "commonutil/time_interval_select.html" %}
-
-    <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
-
-    <div id="spreadsheet" class="handsontable" style="display: block"></div>
-
-    <hr />
-    <div class="table-responsive">{{ result.sales_analysis|safe }}</div>
-    <div class="table-responsive">{{ result.branch_analysis|safe }}</div>
-    <div class="table-responsive">{{ result.item_type_analysis|safe }}</div>
-    <div class="table-responsive">
-      {{ result.individual_by_item_type_analysis|safe }}
-    </div>
-    <div class="table-responsive">{{ result.branch_by_item_type_analysis|safe }}</div>
-
-    <h2>Chart</h2>
-    {% for i in result.myRange %}
-    <div class="col-12 col-lg-6">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-title">Individual sale</h5>
-          {% comment %}
-          <h6 class="card-subtitle text-muted">
-            A column chart uses vertical bars to display data and is used to
-            compare values across {% endcomment %} categories.
-          </h6>
+      </div>
+      <div class="container my-5">
+        <h2 class="mb-4">Summary</h2>
+        <div>Report name: {{ result.report }}</div>
+        {% comment %}
+        <div>Threshhold: {{ threshhold }}</div>
+        <div>Total: {{ total }}</div>
+        <div>Average: {{ average }}</div>
+        <div style="color: red">Result: {{ result }}</div>
+        {% endcomment %}
+        <h2 class="mt-5">Excel Data</h2>
+        <div class="d-flex justify-content-between mb-2">
+          <button class="btn btn-primary" id="toggleButton">Show/Hide Excel Data</button>
+          {% include 'commonutil/time_interval_select.html' %}
+          <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
         </div>
-        <div class="card-body">
-          <div class="chart w-100">
-            <div id="apexcharts-column"></div>
+        <div id="spreadsheet" class="handsontable" style="display: block"></div>
+        <hr />
+        <div class="table-responsive">{{ result.sales_analysis|safe }}</div>
+        <div class="table-responsive">{{ result.branch_analysis|safe }}</div>
+        <div class="table-responsive">{{ result.item_type_analysis|safe }}</div>
+        <div class="table-responsive">{{ result.individual_by_item_type_analysis|safe }}</div>
+        <div class="table-responsive">{{ result.branch_by_item_type_analysis|safe }}</div>
+        <h2>Chart</h2>
+        {% for i in result.myRange %}
+          <div class="col-12 col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">Individual sale</h5>
+                {% comment %}
+                <h6 class="card-subtitle text-muted">A column chart uses vertical bars to display data and is used to compare values across{% endcomment %}categories.</h6>
+              </div>
+              <div class="card-body">
+                <div class="chart w-100">
+                  <div id="apexcharts-column"></div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
+  </div>
+  <script>
+    window.reportExcelJson
+    document.addEventListener('DOMContentLoaded', function () {
+      new handsontableManager('spreadsheet')
+    })
+  </script>
+  <script>
+    function cleanNumeric(value) {
+      return parseFloat(value.replace(/[^0-9.-]+/g, ''))
+    }
     
-    <script>
-        window.reportExcelJson;
-        document.addEventListener("DOMContentLoaded", function () {
-            new handsontableManager('spreadsheet');
-        });
-    </script>
-
-    <script>
-        function cleanNumeric(value) {
-            return parseFloat(value.replace(/[^0-9.-]+/g, ""));
+    document.addEventListener('DOMContentLoaded', function () {
+      // Parse the JSON data from the Django context
+      var chartData = JSON.parse('{{ result.all_chart_data_json|safe }}')
+    
+      // Prepare data and labels
+      var data = chartData.individual_chart_data.data.map(cleanNumeric)
+      var labels = chartData.individual_chart_data.labels
+    
+      // Combine the arrays: 'data' and 'labels'
+      var combined = data.map(function (value, index) {
+        return {
+          value: value,
+          label: labels[index]
         }
-        
-        document.addEventListener("DOMContentLoaded", function() {
-            // Parse the JSON data from the Django context
-            var chartData = JSON.parse('{{ result.all_chart_data_json|safe }}');
-        
-            // Prepare data and labels
-            var data = chartData.individual_chart_data.data.map(cleanNumeric);
-            var labels = chartData.individual_chart_data.labels;
-        
-            // Combine the arrays: 'data' and 'labels'
-            var combined = data.map(function(value, index) {
-                return {
-                    value: value,
-                    label: labels[index]
-                };
-            });
-        
-            // Sort combined array by the 'value' in descending order
-            combined.sort(function(a, b) {
-                return b.value - a.value; // For descending sort
-            });
-        
-            // Separate them back out
-            var sortedData = combined.map(function(item) {
-                return item.value;
-            });
-            var sortedLabels = combined.map(function(item) {
-                return item.label;
-            });
-        
-        
-            // Column chart options
-            var options = {
-                chart: {
-                    height: 350,
-                    type: "bar",
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        endingShape: "rounded",
-                        columnWidth: "55%",
-                    },
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    show: true,
-                    width: 2,
-                    colors: ["transparent"]
-                },
-                series: [{
-                    name: "Net Total Sales",
-                    data: sortedData // Ensure this data is numeric
-                }],
-                xaxis: {
-                    categories: sortedLabels
-                },
-                yaxis: {
-                    title: {
-                        text: "Net Total (₹)"
-                    }
-                },
-                fill: {
-                    opacity: 1
-                },
-                tooltip: {
-                    shared: true,
-                    intersect: false, // Ensure this is set to false
-                    y: {
-                        formatter: function(val) {
-                            return new Intl.NumberFormat('en-IN', {
-                                maximumFractionDigits: 2,
-                                style: 'currency',
-                                currency: 'INR'
-                            }).format(val);
-                        }
-                    }
-                }
-            };
-        
-            var chart = new ApexCharts(document.querySelector("#apexcharts-column"), options);
-            chart.render();
-        });
-        
-        
-        
-        document.getElementById('toggleButton').addEventListener('click', function() {
-            var content = document.getElementById('spreadsheet');
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-            } else {
-                content.style.display = 'none';
-            }
-        });
-    </script>
-
-    {% comment %} date filter ajax {% endcomment %}
-    <script>
-        $(document).ready(function() {
-            // Function to fetch and display data based on interval
-            function fetchAndDisplayData(interval) {
-                var requestData = {};
-        
-                if (interval == 'custom') {
-                    requestData = {
-                        start_date: '2024-01-15',
-                        end_date: '2024-02-15'
-                    };
-                } else {
-                    requestData = {
-                        interval: interval 
-                    };
-                }
-        
-                $.ajax({
-                    url: '/api/report/{{ result.report.id }}/',
-                    type: 'GET',
-                    data: requestData,
-                    dataType: 'json',
-                    success: function(data) {
-                        if ($.isEmptyObject(data)) {
-                            $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
-                            return;
-                        }
-        
-                        if (typeof data === 'string') {
-                            data = JSON.parse(data);
-                        }
-        
-                        if (Array.isArray(data)) {
-                            window.reportExcelJson = data;
-                            new handsontableManager('spreadsheet');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
-                    }
-                });
-            }
-        
-            // Trigger fetching and displaying data when the page loads with the default selected interval
-            fetchAndDisplayData($('#timeInterval').val());
-        
-            // Event handler for when the select element's value changes
-            $('#timeInterval').change(function() {
-                fetchAndDisplayData($(this).val());
-            });
-        });               
-    </script>
+      })
     
-    <script src="{% static 'js/handsontable.full.min.js' %}"></script>
-    <script src="{% static 'js/xlsx.full.min.js' %}"></script>
-
-{% endblock content %}
+      // Sort combined array by the 'value' in descending order
+      combined.sort(function (a, b) {
+        return b.value - a.value // For descending sort
+      })
+    
+      // Separate them back out
+      var sortedData = combined.map(function (item) {
+        return item.value
+      })
+      var sortedLabels = combined.map(function (item) {
+        return item.label
+      })
+    
+      // Column chart options
+      var options = {
+        chart: {
+          height: 350,
+          type: 'bar'
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            endingShape: 'rounded',
+            columnWidth: '55%'
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+        },
+        series: [
+          {
+            name: 'Net Total Sales',
+            data: sortedData // Ensure this data is numeric
+          }
+        ],
+        xaxis: {
+          categories: sortedLabels
+        },
+        yaxis: {
+          title: {
+            text: 'Net Total (₹)'
+          }
+        },
+        fill: {
+          opacity: 1
+        },
+        tooltip: {
+          shared: true,
+          intersect: false, // Ensure this is set to false
+          y: {
+            formatter: function (val) {
+              return new Intl.NumberFormat('en-IN', {
+                maximumFractionDigits: 2,
+                style: 'currency',
+                currency: 'INR'
+              }).format(val)
+            }
+          }
+        }
+      }
+    
+      var chart = new ApexCharts(document.querySelector('#apexcharts-column'), options)
+      chart.render()
+    })
+    
+    document.getElementById('toggleButton').addEventListener('click', function () {
+      var content = document.getElementById('spreadsheet')
+      if (content.style.display === 'none') {
+        content.style.display = 'block'
+      } else {
+        content.style.display = 'none'
+      }
+    })
+  </script>
+  {% comment %}date filter ajax{% endcomment %}
+  <script>
+    $(document).ready(function () {
+      // Function to fetch and display data based on interval
+      function fetchAndDisplayData(interval) {
+        var requestData = {}
+    
+        if (interval == 'custom') {
+          requestData = {
+            start_date: '2024-01-15',
+            end_date: '2024-02-15'
+          }
+        } else {
+          requestData = {
+            interval: interval
+          }
+        }
+    
+        $.ajax({
+          url: '/api/report/{{ result.report.id }}/',
+          type: 'GET',
+          data: requestData,
+          dataType: 'json',
+          success: function (data) {
+            if ($.isEmptyObject(data)) {
+              $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>')
+              return
+            }
+    
+            if (typeof data === 'string') {
+              data = JSON.parse(data)
+            }
+    
+            if (Array.isArray(data)) {
+              window.reportExcelJson = data
+              new handsontableManager('spreadsheet')
+            }
+          },
+          error: function (xhr, status, error) {
+            $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>')
+          }
+        })
+      }
+    
+      // Trigger fetching and displaying data when the page loads with the default selected interval
+      fetchAndDisplayData($('#timeInterval').val())
+    
+      // Event handler for when the select element's value changes
+      $('#timeInterval').change(function () {
+        fetchAndDisplayData($(this).val())
+      })
+    })
+  </script>
+  <script src="{% static 'js/handsontable.full.min.js' %}"></script>
+  <script src="{% static 'js/xlsx.full.min.js' %}"></script>
+{% endblock %}

@@ -1,24 +1,24 @@
-{% extends "commonutil/base.html" %}
+{% extends 'commonutil/base.html' %}
 {% load static %}
 
-{% block title %} View Report | Clifftip {{ result.report.name }} {% endblock %}
+{% block title %}
+  View Report | Clifftip {{ result.report.name }}
+{% endblock %}
 
 {% block content %}
-	<div class="wrapper">
-	
-		{% include 'commonutil/sidebar.html' %}
-		
-		<div class="main">
-  		{% include 'commonutil/navbar.html' %}
+  <div class="wrapper">
+    {% include 'commonutil/sidebar.html' %}
 
-			<main class="content">
-				<div class="container-fluid p-0">
+    <div class="main">
+      {% include 'commonutil/navbar.html' %}
+
+      <main class="content">
+        <div class="container-fluid p-0">
           <div class="mb-3">
-						<h1 class="h3 d-inline align-middle">View report</h1>
-					</div>
+            <h1 class="h3 d-inline align-middle">View report</h1>
+          </div>
 
           <div class="row">
-
             <div class="col-12 col-md-6 col-lg-4">
               <div class="card">
                 <div class="card-header">
@@ -27,10 +27,8 @@
                 <ul class="list-group list-group-flush">
                   {% for report in accessible_reports %}
                     {% if report.is_custom_report %}
-                    {% comment %} TODO: Remove underline {% endcomment %}
-                    <a href="{% url 'report-view' report.id %}?cached=true">
-                      <li class="list-group-item">{{ report.name }}</li>
-                    </a>
+                      {% comment %}TODO: Remove underline{% endcomment %}
+                      <a href="{% url 'report-view' report.id %}?cached=true"><li class="list-group-item">{{ report.name }}</li></a>
                     {% endif %}
                   {% endfor %}
                 </ul>
@@ -45,20 +43,15 @@
                 <ul class="list-group list-group-flush">
                   {% for report in accessible_reports %}
                     {% if not report.is_custom_report %}
-                    <a href="{% url 'report-view' report.id %}?cached=true">
-                      <li class="list-group-item">{{ report.name }}</li>
-                    </a>
+                      <a href="{% url 'report-view' report.id %}?cached=true"><li class="list-group-item">{{ report.name }}</li></a>
                     {% endif %}
                   {% endfor %}
-
                 </ul>
               </div>
             </div>
-            
           </div>
-				</div>
-			</main>
-
-		</div>
-	</div>
+        </div>
+      </main>
+    </div>
+  </div>
 {% endblock %}

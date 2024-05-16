@@ -287,7 +287,10 @@ def view_report(request, report_id):
         render_html = render(
             request,
             template,
-            {"result": result},
+            {
+                "result": result,
+                "theme": UserProfile.objects.get(user=request.user).color_theme,
+            },
         )
 
         content = render_html.content.decode("utf-8")

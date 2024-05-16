@@ -1,50 +1,56 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="End to end monitoring system">
-    <meta name="author" content="mavensoft.in">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-		<link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
-    <title>{% block title %}Clifftip{% endblock %}</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="End to end monitoring system" />
+    <meta name="author" content="mavensoft.in" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon" />
+    <title>
+      {% block title %}
+        Clifftip
+      {% endblock %}
+    </title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-		<link href="{% static 'css/custom/basestyles.css' %}" rel="stylesheet" />
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link href="{% static 'css/custom/basestyles.css' %}" rel="stylesheet" />
+
     {% if theme == 'dark' %}
       <link href="{% static 'css/dark.css' %}" rel="stylesheet" />
     {% else %}
       <link href="{% static 'css/light.css' %}" rel="stylesheet" />
     {% endif %}
-  
-		{% block styles %}{% endblock %}
 
-</head>
-<body data-theme="{{theme}}" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
-  
-  {% block content %}{% endblock %}
-  
-  <script src="{% static 'js/app.js' %}"></script>
-  <script src="{% static 'js/datatables.js' %}"></script>
-  <script src="{% static 'js/custom/commonutil.js' %}"></script>
+    {% block styles %}
+    {% endblock %}
+  </head>
+  <body data-theme="{{ theme }}" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+    {% block content %}
+    {% endblock %}
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/datatables.js' %}"></script>
+    <script src="{% static 'js/custom/commonutil.js' %}"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
         // Datatables Orders
-        $("#datatables-orders").DataTable({
-            responsive: true,
-            aoColumnDefs: [{
-                bSortable: false,
-                aTargets: [-1]
-            }]
-        });
-    });
-  </script>
-  
-  {% block script %}{% endblock %}
+        $('#datatables-orders').DataTable({
+          responsive: true,
+          aoColumnDefs: [
+            {
+              bSortable: false,
+              aTargets: [-1]
+            }
+          ]
+        })
+      })
+    </script>
 
-</body>
+    {% block script %}
+    {% endblock %}
+  </body>
 </html>

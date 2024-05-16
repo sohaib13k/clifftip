@@ -1,141 +1,135 @@
-{% extends "commonutil/base.html" %}
+{% extends 'commonutil/base.html' %}
 {% load static %}
 
-{% block title %} Upload Report | Clifftip {{ result.report.name }} {% endblock %}
+{% block title %}
+  Upload Report | Clifftip {{ result.report.name }}
+{% endblock %}
 
 {% block content %}
-	<div class="wrapper">
-	
-		{% include 'commonutil/sidebar.html' %}
-		
-		<div class="main">
-  		{% include 'commonutil/navbar.html' %}
+  <div class="wrapper">
+    {% include 'commonutil/sidebar.html' %}
 
+    <div class="main">
+      {% include 'commonutil/navbar.html' %}
 
-			<main class="content">
-				<div class="container-fluid p-0">
+      <main class="content">
+        <div class="container-fluid p-0">
+          <div class="mb-3">
+            <h1 class="h3 d-inline align-middle">Upload report</h1>
+          </div>
 
-					<div class="mb-3">
-						<h1 class="h3 d-inline align-middle">Upload report</h1>
-					</div>
+          <div class="card">
+            <div class="card-header pb-0">
+              <div class="card-actions float-end">
+                <div class="dropdown position-relative">
+                  <a href="#" data-bs-toggle="dropdown" data-bs-display="static"><i class="align-middle" data-feather="more-horizontal"></i></a>
 
-					<div class="card">
-						<div class="card-header pb-0">
-							<div class="card-actions float-end">
-								<div class="dropdown position-relative">
-									<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-										<i class="align-middle" data-feather="more-horizontal"></i>
-									</a>
-
-									<div class="dropdown-menu dropdown-menu-end">
-										<a class="dropdown-item" href="#">Action</a>
-										<a class="dropdown-item" href="#">Another action</a>
-										<a class="dropdown-item" href="#">Something else here</a>
-									</div>
-								</div>
-							</div>
-							<h5 class="card-title mb-0">Report</h5>
-						</div>
-						<div class="card-body">
-							<table id="datatables-orders" class="table table-responsive table-striped" width="100%">
-								<thead>
-									<tr>
-										<th>Id</th>
-										<th>Report Name</th>
-										<th>Last Upload Date</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-
-                                    {% for report in accessible_reports %}
-                                        {% if not report.is_custom_report %}
-                                            {% if "EXCEL" in report.data_source %}
-                                                <tr>
-                                                    <td><strong>{{ report.id }}</strong></td>
-                                                    <td>{{ report.name }}</td>
-                                                    <td>{{ report.report_last_updated_tmstmp|date:"d-m-Y g:i A"}}</td>
-                                                    <td class="py-0">
-                                                        <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="form_type" value="excel_upload">
-                                                            <input type="hidden" name="report_id" value="{{ report.id }}">
-                                                            <div class="row">
-                                                                <div class="col-md-8 mb-1 mt-1">
-                                                                    <input class="form-control" type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls">
-                                                                </div>
-                                                                <div class="col-md-4 mb-1 mt-1">
-                                                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                                                </div>
-                                                            </div>
-                                                        </form>
-                                                        {% comment %} <a href="#" class="btn btn-primary btn-sm">View</a>
-                                                        <a href="#" class="btn btn-primary btn-sm">Edit</a> {% endcomment %}
-                                                    </td>
-                                                </tr>
-                                            
-                                            {% else %}
-                                                <tr>
-                                                    <td><strong>{{ report.id }}</strong></td>
-                                                    <td>{{ report.name }}</td>
-                                                    <td>{{ report.report_last_updated_tmstmp|date:"d-m-Y g:i A"}}</td>
-                                                    <td class="py-0">
-                                                        <a href='#' data-bs-toggle="modal" data-bs-target="#defaultModalPrimary">
-                                                            Click here to enter data
-                                                        </a>
-                                                        <div class="modal fade" id="defaultModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title">Form</h5>
-                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <div class="modal-body m-3">
-                                                                        <form method="post" action="{% url 'report-upload' %}">
-                                                                            {% csrf_token %}
-                                                                            <input type="hidden" name="form_type" value="form_entry">
-                                                                            <input type="hidden" name="report" value="ageing_report">
-                                                                            <div class="form-row mb-3">
-                                                                                <div class="col-md-4">
-                                                                                    <label for="reportDate">Select Date:</label>
-                                                                                </div>
-                                                                                <div class="col-md-8">
-                                                                                    <input type="date" class="form-control" id="reportDate" name="reportDate">
-                                                                                </div>
-                                                                            </div>
-                                                                            {% for person in sales_person %}
-                                                                            <div class="form-row">
-                                                                                <div class="col-md-4">
-                                                                                    <label for="{{ person.id }}">{{ person }}</label>
-                                                                                </div>
-                                                                                <div class="col-md-8">
-                                                                                    <input type="text" class="form-control" id="{{ person.id }}" name="{{ person.id }}">
-                                                                                </div>
-                                                                            </div>
-                                                                            {% endfor %}
-                                                                            <button type="submit" class="btn btn-primary mt-3">Submit</button>
-                                                                        </form> 
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                                
-								</tbody>
-							</table>
-						</div>
-					</div>
-
-				</div>
-			</main>
-		</div>
-	</div>
-
+                  <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                  </div>
+                </div>
+              </div>
+              <h5 class="card-title mb-0">Report</h5>
+            </div>
+            <div class="card-body">
+              <table id="datatables-orders" class="table table-responsive table-striped" width="100%">
+                <thead>
+                  <tr>
+                    <th>Id</th>
+                    <th>Report Name</th>
+                    <th>Last Upload Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for report in accessible_reports %}
+                    {% if not report.is_custom_report %}
+                      {% if 'EXCEL' in report.data_source %}
+                        <tr>
+                          <td>
+                            <strong>{{ report.id }}</strong>
+                          </td>
+                          <td>{{ report.name }}</td>
+                          <td>{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}</td>
+                          <td class="py-0">
+                            <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
+                              {% csrf_token %}
+                              <input type="hidden" name="form_type" value="excel_upload" />
+                              <input type="hidden" name="report_id" value="{{ report.id }}" />
+                              <div class="row">
+                                <div class="col-md-8 mb-1 mt-1">
+                                  <input class="form-control" type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" />
+                                </div>
+                                <div class="col-md-4 mb-1 mt-1">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </div>
+                            </form>
+                            {% comment %} <a href="#" class="btn btn-primary btn-sm">View</a>
+                            <a href="#" class="btn btn-primary btn-sm">Edit</a> {% endcomment %}
+                          </td>
+                        </tr>
+                      {% else %}
+                        <tr>
+                          <td>
+                            <strong>{{ report.id }}</strong>
+                          </td>
+                          <td>{{ report.name }}</td>
+                          <td>{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}</td>
+                          <td class="py-0">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#defaultModalPrimary">Click here to enter data</a>
+                            <div class="modal fade" id="defaultModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title">Form</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body m-3">
+                                    <form method="post" action="{% url 'report-upload' %}">
+                                      {% csrf_token %}
+                                      <input type="hidden" name="form_type" value="form_entry" />
+                                      <input type="hidden" name="report" value="ageing_report" />
+                                      <div class="form-row mb-3">
+                                        <div class="col-md-4">
+                                          <label for="reportDate">Select Date:</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                          <input type="date" class="form-control" id="reportDate" name="reportDate" />
+                                        </div>
+                                      </div>
+                                      {% for person in sales_person %}
+                                        <div class="form-row">
+                                          <div class="col-md-4">
+                                            <label for="{{ person.id }}">{{ person }}</label>
+                                          </div>
+                                          <div class="col-md-8">
+                                            <input type="text" class="form-control" id="{{ person.id }}" name="{{ person.id }}" />
+                                          </div>
+                                        </div>
+                                      {% endfor %}
+                                      <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                                    </form>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
 {% endblock %}
