@@ -89,15 +89,14 @@
                             </tr>
                             <tr>
                               {% for column, count in result.items %}
-                                <td class="report-column"
-                                  data-column="{{ column }}"
-                                  style="{% if count > 20 %}
-
-                                  {% elif count >= 10 and count <= 20 %}
-
-                                  {% endif %}">
-                                  <a href="{% url 'report-view' report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">{{ count }}</a>
-                                </td>
+                              <td class="report-column" data-column="{{ column }}" style="{% if count > 20 %} background-color: #ffcccc;
+                                {% elif count >= 10 and count <= 20 %} background-color: #ffffcc;
+                                {% else %} background-color: #ccffcc;
+                                {% endif %}">
+                                <a href="{% url 'report-view' report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                    {{ count }}
+                                </a>
+                              </td>
                               {% endfor %}
                             </tr>
                           </table>
