@@ -14,7 +14,7 @@ get_random_secret_key()
 ```
 
 2. adding wsgi configuration as per below.
-### wsgi configuration for pythonanywhere depoyment
+### wsgi configuration
 
 ```python
 from dotenv import load_dotenv
@@ -28,10 +28,9 @@ load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir
 2. Install dependencies from requirements.txt
 3. Install nginx
 ```bash
-4. gunicorn --bind 0.0.0.0:8000 wsgi:application
+4.0 gunicorn clifftip.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile /var/log/gunicorn/access.log --error-logfile /var/log/gunicorn/error.log &
 4.1 When git pull- 
 4.1.1 pkill gunicorn
-4.1.2 gunicorn --bind 0.0.0.0:8000 myproject.wsgi:application
 4.1.3 sudo systemctl restart nginx
 ```
 5. Remove the default server block. Create a new configuration file in /etc/nginx/sites-available/ and symlink it to /etc/nginx/sites-enabled/
@@ -39,7 +38,9 @@ load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir
 ```bash
 server {
     listen 80;
-    server_name your_domain.com;
+    server_name sohaibk.me www.sohaibk.me
+
+    client_max_body_size 10M;
 
     location / {
         proxy_pass http://localhost:8000;
@@ -48,6 +49,14 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+
+  location /static/ {
+       alias /var/www/clifftip/;
+  }
+  
+  location /favicon.ico {
+      alias /var/www/clifftip/img/favicon.ico;
+  }
 }
 ```
 ```bash
