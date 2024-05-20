@@ -24,7 +24,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     flatpickr(".flatpickr-range", {
       mode: "range",
-      dateFormat: "d-m-Y"
+      dateFormat: "d-m-Y",
+      allowInput: true,
     });
     flatpickr(".flatpickr-time", {
       enableTime: true,
