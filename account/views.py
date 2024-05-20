@@ -20,6 +20,9 @@ def user_register(request):
 
 
 def user_login(request):
+    if request.user.is_authenticated:
+        return redirect("ddr-home")
+    
     if request.method != "POST":
         return render(request, "account/login.html")
 

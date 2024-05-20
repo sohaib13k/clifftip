@@ -25,6 +25,7 @@
         <div style="color: red">Result: {{ result }}</div>
         {% endcomment %}
         <h2 class="mt-5">Excel Data</h2>
+
         <div class="d-flex justify-content-between mb-2">
           <button class="btn btn-primary" id="toggleButton">Show/Hide Excel Data</button>
           {% include 'commonutil/time_interval_select.html' %}
@@ -63,6 +64,7 @@
       new handsontableManager('spreadsheet')
     })
   </script>
+  
   <script>
     function cleanNumeric(value) {
       return parseFloat(value.replace(/[^0-9.-]+/g, ''))
@@ -71,11 +73,11 @@
     document.addEventListener('DOMContentLoaded', function () {
       // Parse the JSON data from the Django context
       var chartData = JSON.parse('{{ result.all_chart_data_json|safe }}')
-    
+  
       // Prepare data and labels
       var data = chartData.individual_chart_data.data.map(cleanNumeric)
       var labels = chartData.individual_chart_data.labels
-    
+  
       // Combine the arrays: 'data' and 'labels'
       var combined = data.map(function (value, index) {
         return {
@@ -83,12 +85,12 @@
           label: labels[index]
         }
       })
-    
+  
       // Sort combined array by the 'value' in descending order
       combined.sort(function (a, b) {
         return b.value - a.value // For descending sort
       })
-    
+  
       // Separate them back out
       var sortedData = combined.map(function (item) {
         return item.value
@@ -96,7 +98,7 @@
       var sortedLabels = combined.map(function (item) {
         return item.label
       })
-    
+  
       // Column chart options
       var options = {
         chart: {
@@ -149,11 +151,11 @@
           }
         }
       }
-    
+  
       var chart = new ApexCharts(document.querySelector('#apexcharts-column'), options)
       chart.render()
     })
-    
+  
     document.getElementById('toggleButton').addEventListener('click', function () {
       var content = document.getElementById('spreadsheet')
       if (content.style.display === 'none') {
@@ -163,59 +165,14 @@
       }
     })
   </script>
-  {% comment %}date filter ajax{% endcomment %}
-  <script>
-    $(document).ready(function () {
-      // Function to fetch and display data based on interval
-      function fetchAndDisplayData(interval) {
-        var requestData = {}
-    
-        if (interval == 'custom') {
-          requestData = {
-            start_date: '2024-01-15',
-            end_date: '2024-02-15'
-          }
-        } else {
-          requestData = {
-            interval: interval
-          }
-        }
-    
-        $.ajax({
-          url: '/api/report/{{ result.report.id }}/',
-          type: 'GET',
-          data: requestData,
-          dataType: 'json',
-          success: function (data) {
-            if ($.isEmptyObject(data)) {
-              $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>')
-              return
-            }
-    
-            if (typeof data === 'string') {
-              data = JSON.parse(data)
-            }
-    
-            if (Array.isArray(data)) {
-              window.reportExcelJson = data
-              new handsontableManager('spreadsheet')
-            }
-          },
-          error: function (xhr, status, error) {
-            $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>')
-          }
-        })
-      }
-    
-      // Trigger fetching and displaying data when the page loads with the default selected interval
-      fetchAndDisplayData($('#timeInterval').val())
-    
-      // Event handler for when the select element's value changes
-      $('#timeInterval').change(function () {
-        fetchAndDisplayData($(this).val())
-      })
-    })
-  </script>
+  
+{% endblock %}
+
+{% block script %}
   <script src="{% static 'js/handsontable.full.min.js' %}"></script>
   <script src="{% static 'js/xlsx.full.min.js' %}"></script>
+  <script>
+    var reportId = {{ result.report.id }};
+  </script>
+  <script src="{% static 'js/custom/datePickerSettings.js' %}"></script>  
 {% endblock %}

@@ -1,4 +1,3 @@
-from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from ..models import AllPartiesSelectedColumns, AllPartiesThreshold
@@ -6,7 +5,6 @@ import json
 
 
 @login_required
-@csrf_protect
 def saveEntity(request):
     if request.method != "POST":
         return JsonResponse({"status": "error"}, status=405)
