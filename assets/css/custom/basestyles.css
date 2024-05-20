@@ -25,3 +25,8 @@ body {
 .custom-report-false {
   background-color: lightgreen;
 }
+
+.custom-sidebar-brand {
+  font-size: 1.5rem;
+  text-decoration: none;
+}
