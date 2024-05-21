@@ -12,9 +12,15 @@ from .models import AllPartiesSelectedColumns, AllPartiesThreshold
 
 @login_required
 def ddr(request):
-    csv_all_parties_with_sale = commonutil.get_latest_csv_from_dir(
-        Report.objects.get(service_name="all_parties_with_sale")
+    accessible_reports = Report.get_accessible_reportlist(
+        request.user
     )
+
+    csv_collection = 
+    for report in accessible_reports:
+        csv_collection = commonutil.get_latest_csv_from_dir(
+            Report.objects.get(service_name=report.service_name)
+        )
 
     report = Report.objects.get(service_name="all_parties_with_sale")
 
