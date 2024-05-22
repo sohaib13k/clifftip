@@ -130,7 +130,7 @@
 
   <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel" style="overflow-y: auto; background-color: #F5F7FB;">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Dashboard Configuration</h5>
+      <h4 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Dashboard Configuration</h4>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -317,96 +317,60 @@
       // Initially hide columns based on default selections (if needed)
       $('.column-checkbox').change();
     });
+			
   </script>
 
-  
   <script>
-    var apiUrl = '{% url 'report-datefilter-api' 1 %}';
-
     document.addEventListener("DOMContentLoaded", function() {
-      var requestData = {};
-      requestData = {
-        start_date: startDate,
-        end_date: endDate
-      }
-  
-      $.ajax({
-        url: apiUrl,
-        type: 'GET',
-        data: requestData,
-        dataType: 'json',
-        success: function (data) {
-          if ($.isEmptyObject(data)) {
-            $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
-            return;
-          }
-
-          if (typeof data === 'string') {
-            data = JSON.parse(data);
-          }
-
-          if (Array.isArray(data)) {
-            window.reportExcelJson = data;
-            new handsontableManager('spreadsheet');
-          }
+      new Chart(document.getElementById("chartjs-bar"), {
+        type: "bar",
+        data: {
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+          datasets: [{
+            label: "Last year",
+            backgroundColor: window.theme.primary,
+            borderColor: window.theme.primary,
+            hoverBackgroundColor: window.theme.primary,
+            hoverBorderColor: window.theme.primary,
+            data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79],
+            barPercentage: .75,
+            categoryPercentage: .5
+          }, {
+            label: "This year",
+            backgroundColor: "#dee2e6",
+            borderColor: "#dee2e6",
+            hoverBackgroundColor: "#dee2e6",
+            hoverBorderColor: "#dee2e6",
+            data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68],
+            barPercentage: .75,
+            categoryPercentage: .5
+          }]
         },
-        error: function (xhr, status, error) {
-          $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
+        options: {
+          maintainAspectRatio: false,
+          legend: {
+            display: false
+          },
+          scales: {
+            yAxes: [{
+              gridLines: {
+                display: false
+              },
+              stacked: false,
+              ticks: {
+                stepSize: 20
+              }
+            }],
+            xAxes: [{
+              stacked: false,
+              gridLines: {
+                color: "transparent"
+              }
+            }]
+          }
         }
       });
-
-
-
-			// Bar chart
-			new Chart(document.getElementById("chartjs-bar"), {
-				type: "bar",
-				data: {
-					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-					datasets: [{
-						label: "Last year",
-						backgroundColor: window.theme.primary,
-						borderColor: window.theme.primary,
-						hoverBackgroundColor: window.theme.primary,
-						hoverBorderColor: window.theme.primary,
-						data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}, {
-						label: "This year",
-						backgroundColor: "#dee2e6",
-						borderColor: "#dee2e6",
-						hoverBackgroundColor: "#dee2e6",
-						hoverBorderColor: "#dee2e6",
-						data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}]
-				},
-				options: {
-					maintainAspectRatio: false,
-					legend: {
-						display: false
-					},
-					scales: {
-						yAxes: [{
-							gridLines: {
-								display: false
-							},
-							stacked: false,
-							ticks: {
-								stepSize: 20
-							}
-						}],
-						xAxes: [{
-							stacked: false,
-							gridLines: {
-								color: "transparent"
-							}
-						}]
-					}
-				}
-			});
-		});
-
+    });
   </script>
 {% endblock %}
+  
