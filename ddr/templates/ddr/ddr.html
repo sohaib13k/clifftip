@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-  Dashboard | Clifftip {{ result.report.name }}
+  Dashboard | Clifftip
 {% endblock %}
 
 {% block styles %}
@@ -83,7 +83,7 @@
                             <div class="dropdown">
                               <button class="btn btn-primary" id="dropdownButton">Columns</button>
                               <div id="dropdownContent" class="dropdown-content">
-                                {% for column, count in result.items %}
+                                {% for column, count in result.all_parties_with_sale.counts.items %}
                                   <div class="form-check">
                                     <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
                                     <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
@@ -99,17 +99,17 @@
                         <div style="overflow-x: auto;">
                           <table id="report-table" class="table">
                             <tr>
-                              {% for column, count in result.items %}
+                              {% for column, count in result.all_parties_with_sale.counts.items %}
                                 <th class="report-column" data-column="{{ column }}">{{ column }}</th>
                               {% endfor %}
                             </tr>
                             <tr id="report-row">
-                              {% for column, count in result.items %}
-                              <td class="report-column" data-column="{{ column }}" style="{% if count > threshold.danger %} background-color: #ffcccc;
-                                {% elif count >= threshold.action and count <= threshold.danger %} background-color: #ffffcc;
+                              {% for column, count in result.all_parties_with_sale.counts.items %}
+                              <td class="report-column" data-column="{{ column }}" style="{% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
+                                {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
                                 {% else %} background-color: #ccffcc;
                                 {% endif %}">
-                                <a href="{% url 'report-view' report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                <a href="{% url 'report-view' result.all_parties_with_sale.report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
                                     {{ count }}
                                 </a>
                               </td>
@@ -144,7 +144,7 @@
           <label class="form-label">Danger</label>
           <div class="input-group">
             <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
-            <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ threshold.danger|default:0 }}">
+            <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
             <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
           </div>
         </div>
@@ -153,7 +153,7 @@
           <label class="form-label">Action</label>
           <div class="input-group">
             <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
-            <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ threshold.action|default:0 }}">
+            <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
             <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
           </div>
         </div>
@@ -162,7 +162,7 @@
           <label class="form-label">Acceptable</label>
           <div class="input-group">
             <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
-            <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ threshold.acceptable|default:0 }}">
+            <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
             <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
           </div>
         </div>
@@ -249,7 +249,7 @@
       const csrftoken = getCookie('csrftoken');
 
       // Pre-select checkboxes based on selected_columns and then clear it
-      var selectedColumns = {{ selected_columns|safe }};
+      var selectedColumns = {{ result.all_parties_with_sale.selected_columns|safe }};
       selectedColumns.forEach(function(column) {
         $('.column-checkbox[value="' + column + '"]').prop('checked', true);
       });
@@ -276,7 +276,7 @@
           },
           data: JSON.stringify({
             columns: selectedColumns,
-            report_id: {{report.id}},
+            report_id: {{result.all_parties_with_sale.report.id}},
             methodName: 'save_all_parties_ddr_selected_columns',
           }),
           success: function(response) {

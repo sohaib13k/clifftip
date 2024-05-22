@@ -1,66 +1,50 @@
+from django.core.cache import caches
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.conf import settings
-import pandas as pd
-import json
-from commonutil import commonutil
 from django.contrib.auth.decorators import login_required
 from report.models import Report
 from account.models import UserProfile
-from .models import AllPartiesSelectedColumns, AllPartiesThreshold
+from ddr.service import report_logic
 
 
 @login_required
 def ddr(request):
-    accessible_reports = Report.get_accessible_reportlist(
-        request.user
-    )
+    accessible_reports = Report.get_accessible_reportlist(request.user)
 
-    csv_collection = 
+    cached_param = request.GET.get("cached", None)
+    cached_param = "false"
+    file_cache = caches["file_based"]
+
+    result = {}
+
     for report in accessible_reports:
-        csv_collection = commonutil.get_latest_csv_from_dir(
-            Report.objects.get(service_name=report.service_name)
-        )
+        cache_key = f"preprocessed_report_data_ddr_{report.id}"
 
-    report = Report.objects.get(service_name="all_parties_with_sale")
+        if cached_param is not None and cached_param.lower() == "false":
+            file_cache.delete(cache_key)
 
-    # columns_to_read = ["Company Name", "Sales Person", "GST No.", "Mobile"]
+        report_data = file_cache.get(cache_key)
+        
+        service_name = report.service_name
 
-    df_all_parties = pd.DataFrame()
-    counts = {}
+        if report_data is None:
+            func = getattr(report_logic, service_name, None)
+            if func is None:
+                func = getattr(report_logic, "default", None)
+            report_data = func(request, report)
 
-    selected_columns_record = AllPartiesSelectedColumns.objects.filter(
-        user=request.user
-    ).first()
-    selected_columns = (
-        json.loads(selected_columns_record.columns) if selected_columns_record else []
-    )
+            file_cache.set(cache_key, report_data, timeout=604800)  # Cache for 7 days
 
-    all_parties_thresholds = AllPartiesThreshold.objects.first()
-    thresholds = all_parties_thresholds.__dict__ if all_parties_thresholds else {}
+        result[service_name] = report_data
 
-    if csv_all_parties_with_sale is not None:
-        df_all_parties = pd.read_csv(csv_all_parties_with_sale)
-
-        total_entries = (
-            len(df_all_parties) - 1
-        )  # Total number of entries in the DataFrame
-
-        for column in df_all_parties.columns:
-            column_count = df_all_parties[
-                column
-            ].count()  # Count of non-null values in the column
-            difference = total_entries - column_count  # Difference from total entries
-            counts[column] = difference if difference >= 0 else 0
+    user_theme = UserProfile.objects.get(user=request.user).color_theme
 
     return render(
         request,
         "ddr/ddr.html",
         {
-            "result": counts,
-            "report": report,
-            "selected_columns": selected_columns,
-            "threshold": thresholds,
-            "theme": UserProfile.objects.get(user=request.user).color_theme,
+            "result": result,
+            "theme": user_theme,
         },
     )
