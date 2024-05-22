@@ -61,10 +61,12 @@ def view_filtered_report(request, report_id=None):
                     file_path = os.path.join(csv_directory, filename)
                     df = pd.read_csv(file_path)
 
-                    # filtering for a specific column
-                    column = request.GET.get("column")
-                    if column:
-                        df = df[[report.date_col, column]]
+                    # Fetching specific columns from the request
+                    columns = request.GET.getlist("columns")
+                    if columns:
+                        if report.date_col not in columns:
+                            columns.append(report.date_col)
+                        df = df[columns]
 
                     agg_data = pd.concat([agg_data, df], ignore_index=True)
 

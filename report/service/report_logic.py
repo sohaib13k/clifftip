@@ -181,6 +181,7 @@ def temp(request, report):
 
 
     # saving data for DDR view (temporary code)===============================
+    # TODO: remove
     parties_with_sale = pd.merge(
             df_parties,
             df_sales[["Customer Name"]],

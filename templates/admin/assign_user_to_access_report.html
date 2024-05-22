@@ -1,6 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h2>Select user to assign reports</h2>
+<h2>Select user to apply selected action</h2>
 <form method="post" action="">
     {% csrf_token %}
     {{ form.as_p }}

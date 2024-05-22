@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
   
         $.ajax({
-          url: '/api/report/' + reportId + '/', // reportId should be defined elsewhere
+          url: apiUrl,
           type: 'GET',
           data: requestData,
           dataType: 'json',

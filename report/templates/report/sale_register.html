@@ -50,6 +50,7 @@
 
   {% comment %}date filter ajax{% endcomment %}
   <script>
+    var apiUrl = '{% url 'report-datefilter-api' result.report.id %}';
     $(document).ready(function () {
       // Function to fetch and display data based on interval
       function fetchAndDisplayData(interval) {
@@ -65,31 +66,6 @@
             interval: interval
           }
         }
-    
-        $.ajax({
-          url: '/api/report/{{ result.report.id }}/',
-          type: 'GET',
-          data: requestData,
-          dataType: 'json',
-          success: function (data) {
-            if ($.isEmptyObject(data)) {
-              $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>')
-              return
-            }
-    
-            if (typeof data === 'string') {
-              data = JSON.parse(data)
-            }
-    
-            if (Array.isArray(data)) {
-              window.reportExcelJson = data
-              new handsontableManager('spreadsheet')
-            }
-          },
-          error: function (xhr, status, error) {
-            $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>')
-          }
-        })
       }
     
       // Trigger fetching and displaying data when the page loads with the default selected interval
