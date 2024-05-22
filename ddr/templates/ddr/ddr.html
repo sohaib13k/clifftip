@@ -75,20 +75,6 @@
                   <div class="card-body">
                     <div class="d-flex justify-content-between">
                       <h5 class="card-title">All Parties data completion</h5>
-                      <div class="dropdown">
-                        <button class="btn btn-primary" id="dropdownButton">Columns</button>
-                        <div id="dropdownContent" class="dropdown-content">
-                          {% for column, count in result.all_parties_with_sale.counts.items %}
-                            <div class="form-check">
-                              <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
-                              <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
-                            </div>
-                          {% endfor %}
-                          <div class="dropdown-footer">
-                            <button id="save-columns" class="btn btn-success">Save</button>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                     <div style="overflow-x: auto;">
                       <table id="report-table" class="table" style="border-collapse: collapse; width: 100%;">
@@ -142,47 +128,63 @@
     </div>
   </div>
 
-  <!-- Offcanvas content with input spinners and save button -->
-  <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
-    aria-labelledby="offcanvasWithBothOptionsLabel">
+  <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel" style="overflow-y: auto; background-color: #F5F7FB;">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Dashboard Configuration</h5>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <p>
-        <h6 class="card-title" id="offcanvasWithBothOptionsLabel">All Parties data completion</h5>
-        <!-- Number Input Spinners -->
-        <div class="mb-3">
-          <label class="form-label">Danger</label>
-          <div class="input-group">
-            <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
-            <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
-            <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
+  
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="card-title mb-0">All Parties data completion</h6>
+          <button class="btn btn-success" id="save-values">Save</button>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Danger</label>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
+              <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
+              <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Action</label>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
+              <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
+              <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Acceptable</label>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
+              <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
+              <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
+            </div>
           </div>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Action</label>
-          <div class="input-group">
-            <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
-            <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
-            <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
+      </div>
+  
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">DataTables Ajax Sourced Data</h5>
+          <button id="save-columns" class="btn btn-success">Save</button>
+        </div>
+        <div class="card-body" style="max-height: 15em; overflow-y: auto;">
+          <div class="checkbox-list p-2 rounded border">
+            {% for column, count in result.all_parties_with_sale.counts.items %}
+              <div class="form-check mb-2">
+                <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
+                <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
+              </div>
+            {% endfor %}
           </div>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Acceptable</label>
-          <div class="input-group">
-            <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
-            <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
-            <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
-          </div>
-        </div>
-
-        <!-- Save Button -->
-        <button class="btn btn-success" id="save-values">Save</button>
-      </p>
+      </div>
+  
     </div>
   </div>
 
@@ -257,7 +259,10 @@
         }
       });
     }
+  </script>
 
+
+  <script>
     $(document).ready(function() {
       const csrftoken = getCookie('csrftoken');
 
@@ -267,19 +272,13 @@
         $('.column-checkbox[value="' + column + '"]').prop('checked', true);
       });
 
-      // Handle dropdown open/close on click
-      $('#dropdownButton').click(function(event) {
-        event.stopPropagation();
-        $('#dropdownContent').toggleClass('show');
-      });
-
       // Handle save button click for columns
       $('#save-columns').click(function() {
         var selectedColumns = [];
         $('.column-checkbox:checked').each(function() {
           selectedColumns.push($(this).val());
         });
-
+  
         $.ajax({
           url: "{% url 'ddr-api-saveEntity' %}",
           method: "POST",
@@ -296,18 +295,15 @@
             // Optionally handle the response from the backend
           }
         });
-
-        // Close the dropdown
-        $('#dropdownContent').removeClass('show');
       });
-
+  
       // Handle column checkbox change
       $('.column-checkbox').change(function() {
         var selectedColumns = [];
         $('.column-checkbox:checked').each(function() {
           selectedColumns.push($(this).val());
         });
-
+  
         $('.report-column').each(function() {
           var column = $(this).data('column');
           if (selectedColumns.includes(column)) {
@@ -317,21 +313,50 @@
           }
         });
       });
-
+  
       // Initially hide columns based on default selections (if needed)
       $('.column-checkbox').change();
-
-      // Close the dropdown if the user clicks outside of it
-      $(window).click(function(event) {
-        if (!event.target.matches('#dropdownButton') && !event.target.closest('.dropdown-content')) {
-          $('#dropdownContent').removeClass('show');
-        }
-      });
     });
   </script>
 
+  
   <script>
+    var apiUrl = '{% url 'report-datefilter-api' 1 %}';
+
     document.addEventListener("DOMContentLoaded", function() {
+      var requestData = {};
+      requestData = {
+        start_date: startDate,
+        end_date: endDate
+      }
+  
+      $.ajax({
+        url: apiUrl,
+        type: 'GET',
+        data: requestData,
+        dataType: 'json',
+        success: function (data) {
+          if ($.isEmptyObject(data)) {
+            $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
+            return;
+          }
+
+          if (typeof data === 'string') {
+            data = JSON.parse(data);
+          }
+
+          if (Array.isArray(data)) {
+            window.reportExcelJson = data;
+            new handsontableManager('spreadsheet');
+          }
+        },
+        error: function (xhr, status, error) {
+          $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
+        }
+      });
+
+
+
 			// Bar chart
 			new Chart(document.getElementById("chartjs-bar"), {
 				type: "bar",
