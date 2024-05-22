@@ -77,7 +77,6 @@ def all_parties_with_sale(request, report):
 
     all_parties_thresholds = AllPartiesThreshold.objects.first()
     thresholds = all_parties_thresholds.__dict__ if all_parties_thresholds else {}
-    print(">>>>>>>",thresholds)
     counts = {}
     total_entries = len(parties_with_sale) - 1
     for column in parties_with_sale.columns:
