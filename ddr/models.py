@@ -21,3 +21,8 @@ class AllPartiesThreshold(models.Model):
 class BomReportOldDataVisibility(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     count = models.IntegerField(default=7)
+
+
+class RoutingReportOldDataVisibility(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    count = models.IntegerField(default=7)

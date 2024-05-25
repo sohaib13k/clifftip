@@ -13,6 +13,7 @@ from ddr.models import (
     AllPartiesSelectedColumns,
     AllPartiesThreshold,
     BomReportOldDataVisibility,
+    RoutingReportOldDataVisibility,
 )
 
 
@@ -43,6 +44,45 @@ def bom_report(request, report):
     for file in csv_files:
         df = pd.read_csv(file)
         output = report_logic.bom_report(request, report, df)
+        del output["data"]
+        output["report_upload_date"] = pd.to_datetime(
+            file.stat().st_ctime, unit="s"
+        ).strftime("%d-%m-%Y")
+        output["total"] = output["data_unlock"] + output["data_lock"]
+        items.append(output)
+
+    result = {
+        "items": items,
+        "visibility_count": visibility_count,
+        "report": report,
+    }
+
+    return result
+
+
+def routing_report(request, report):
+    visibility_count_obj = RoutingReportOldDataVisibility.objects.first()
+    visibility_count = visibility_count_obj.count if visibility_count_obj else 7
+
+    csv_dir = settings.CSV_DIR / report.service_name
+
+    if not os.path.exists(csv_dir):
+        result = {
+            "items": [],
+            "report": report,
+        }
+        return result
+
+    csv_files = sorted(
+        csv_dir.glob("*.csv"), key=lambda x: x.stat().st_mtime, reverse=True
+    )
+
+    csv_files = csv_files[:visibility_count]
+
+    items = []
+    for file in csv_files:
+        df = pd.read_csv(file)
+        output = report_logic.routing_report(request, report, df)
         del output["data"]
         output["report_upload_date"] = pd.to_datetime(
             file.stat().st_ctime, unit="s"

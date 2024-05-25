@@ -4,6 +4,7 @@ from ..models import (
     AllPartiesSelectedColumns,
     AllPartiesThreshold,
     BomReportOldDataVisibility,
+    RoutingReportOldDataVisibility,
 )
 import json
 import logging
@@ -67,6 +68,23 @@ def save_bom_report_visibility_count(request, request_body):
 
         selected_columns_record, created = (
             BomReportOldDataVisibility.objects.get_or_create(user=request.user)
+        )
+        selected_columns_record.count = int(visibility_count)
+        selected_columns_record.save()
+
+        return JsonResponse({"status": "success", "message": visibility_count})
+
+    except Exception as e:
+        logger.error(e)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def save_routing_report_visibility_count(request, request_body):
+    try:
+        visibility_count = request_body.get("visibility_count", None)
+
+        selected_columns_record, created = (
+            RoutingReportOldDataVisibility.objects.get_or_create(user=request.user)
         )
         selected_columns_record.count = int(visibility_count)
         selected_columns_record.save()

@@ -13,7 +13,6 @@ def ddr(request):
     accessible_reports = Report.get_accessible_reportlist(request.user)
 
     cached_param = request.GET.get("cached", None)
-    cached_param = "false"
     file_cache = caches["file_based"]
 
     result = {}
@@ -25,7 +24,7 @@ def ddr(request):
             file_cache.delete(cache_key)
 
         report_data = file_cache.get(cache_key)
-        
+
         service_name = report.service_name
 
         if report_data is None:
