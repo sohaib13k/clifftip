@@ -247,24 +247,7 @@
           </div>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Bom Report (Visibility count)</h5>
-          <button id="save-bom-visibility" class="btn btn-success">Save</button>
-        </div>
-        <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-          <div class="checkbox-list p-2 rounded border">
-            {% for column, count in result.all_parties_with_sale.counts.items %}
-              <div class="form-check mb-2">
-                <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
-                <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-  
+      
     </div>
   </div>
 
