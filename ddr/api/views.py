@@ -1,7 +1,14 @@
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
-from ..models import AllPartiesSelectedColumns, AllPartiesThreshold
+from ..models import (
+    AllPartiesSelectedColumns,
+    AllPartiesThreshold,
+    BomReportOldDataVisibility,
+)
 import json
+import logging
+
+logger = logging.getLogger("__name__")
 
 
 @login_required
@@ -52,3 +59,20 @@ def save_all_parties_ddr_threshold(request, request_body):
     threshold_obj.save()
 
     return JsonResponse({"status": "success", "threshold": thresholds})
+
+
+def save_bom_report_visibility_count(request, request_body):
+    try:
+        visibility_count = request_body.get("visibility_count", None)
+
+        selected_columns_record, created = (
+            BomReportOldDataVisibility.objects.get_or_create(user=request.user)
+        )
+        selected_columns_record.count = int(visibility_count)
+        selected_columns_record.save()
+
+        return JsonResponse({"status": "success", "message": visibility_count})
+
+    except Exception as e:
+        logger.error(e)
+        return JsonResponse({"status": "error"}, status=500)

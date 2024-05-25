@@ -52,6 +52,7 @@ def bom_report(request, report):
 
     result = {
         "items": items,
+        "visibility_count": visibility_count,
         "report": report,
     }
 
