@@ -16,3 +16,8 @@ class AllPartiesThreshold(models.Model):
     danger = models.IntegerField(default=0)
     action = models.IntegerField(default=0)
     acceptable = models.IntegerField(default=0)
+
+
+class BomReportOldDataVisibility(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    count = models.IntegerField(default=7)

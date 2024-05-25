@@ -6,21 +6,52 @@ import json
 import os
 from commonutil import commonutil
 from report.commonutil import append_total, add_percentage_column
+from report.service import report_logic
 from django.conf import settings
 from report.models import Report
-from ddr.models import AllPartiesSelectedColumns, AllPartiesThreshold
+from ddr.models import (
+    AllPartiesSelectedColumns,
+    AllPartiesThreshold,
+    BomReportOldDataVisibility,
+)
 
 
 def default(request, report):
-    latest_file = commonutil.get_latest_csv_from_dir(report)
+    return report_logic.default(request, report)
 
-    df = pd.DataFrame()
-    if latest_file is not None:
-        df = pd.read_csv(latest_file)
+
+def bom_report(request, report):
+    visibility_count_obj = BomReportOldDataVisibility.objects.first()
+    visibility_count = visibility_count_obj.count if visibility_count_obj else 7
+
+    csv_dir = settings.CSV_DIR / report.service_name
+
+    if not os.path.exists(csv_dir):
+        result = {
+            "items": [],
+            "report": report,
+        }
+        return result
+
+    csv_files = sorted(
+        csv_dir.glob("*.csv"), key=lambda x: x.stat().st_mtime, reverse=True
+    )
+
+    csv_files = csv_files[:visibility_count]
+
+    items = []
+    for file in csv_files:
+        df = pd.read_csv(file)
+        output = report_logic.bom_report(request, report, df)
+        del output["data"]
+        output["report_upload_date"] = pd.to_datetime(
+            file.stat().st_ctime, unit="s"
+        ).strftime("%d-%m-%Y")
+        output["total"] = output["data_unlock"] + output["data_lock"]
+        items.append(output)
 
     result = {
-        # "table": df.to_html(classes="table table-striped", index=False, header=False),
-        "data": df.to_json(orient="records"),
+        "items": items,
         "report": report,
     }
 

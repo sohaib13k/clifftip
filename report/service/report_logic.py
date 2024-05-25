@@ -79,13 +79,14 @@ def item_type_finished_goods(request, report):
     return result
 
 
-def routing_report(request, report):
-    latest_file = commonutil.get_latest_csv_from_dir(report)
+def routing_report(request, report, df=None):
+    if df is None:
+        latest_file = commonutil.get_latest_csv_from_dir(report)
 
-    df = pd.DataFrame()
-    if latest_file is not None:
-        df = pd.read_csv(latest_file)
-
+        df = pd.DataFrame()
+        if latest_file is not None:
+            df = pd.read_csv(latest_file)
+        
     lock_counts = df["Lock/Unlock"].value_counts().to_dict()
     locked_count = lock_counts.get("Lock", 0)
     unlocked_count = lock_counts.get("Unlock", 0)
@@ -108,12 +109,13 @@ def routing_report(request, report):
     return result
 
 
-def bom_report(request, report):
-    latest_file = commonutil.get_latest_csv_from_dir(report)
+def bom_report(request, report, df=None):
+    if df is None:
+        latest_file = commonutil.get_latest_csv_from_dir(report)
 
-    df = pd.DataFrame()
-    if latest_file is not None:
-        df = pd.read_csv(latest_file)
+        df = pd.DataFrame()
+        if latest_file is not None:
+            df = pd.read_csv(latest_file)
 
     lock_counts = df["Lock/Unlock"].value_counts().to_dict()
     locked_count = lock_counts.get("Lock", 0)

@@ -68,6 +68,7 @@
             <button class="btn btn-primary my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Configuration</button>
           </div>
           <div class="row">
+
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex flex-column">
               <div class="w-100">
                 <div class="card">
@@ -105,6 +106,7 @@
               </div>
           
               <div class="w-100">
+
                 <div class="card">
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Sale Register (Net Total)</h5>
@@ -121,17 +123,45 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="card">
+                  {% comment %} next card {% endcomment %}
+                </div>
+
               </div>
-
-
-              {% comment %} next card {% endcomment %}
-
             </div>
           
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex">
               
               <div class="w-100">
-                <div class="card">
+
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="card-title">Bom Report</h5>
+                    </div>
+                    <table class="table table-striped table-bordered table-sm">
+                        <tr>
+                          <th>Date</th>
+                          {% for item in result.bom_report.items%}
+                            <td class="text-end">{{ item.report_upload_date }}</td>
+                          {% endfor %}
+                        </tr>
+                        <tr>
+                          <th>Lock/Total</th>
+                          {% for item in result.bom_report.items%}
+                            <td class="text-end">{{ item.data_lock }} / {{ item.total }}</td>
+                          {% endfor %}
+                        </tr>
+                        <tr>
+                          <th>Percentage</th>
+                          {% for item in result.bom_report.items%}
+                            <td class="text-end">{{ item.data_lock_percent|floatformat:2 }}%</td>
+                          {% endfor %}
+                        </tr>
+                    </table>
+                  </div>
+
+                {% comment %} <div class="card">
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Sale register (Net total)</h5>
                     <div class="btn-group btn-group-sm mb-4" role="group" aria-label="Time Period Selection">
@@ -146,13 +176,13 @@
                       <canvas id="sale-register-total-sales"></canvas>
                     </div>
                   </div>
+                </div> {% endcomment %}
+                
+                <div class="card">
+                  {% comment %} next card {% endcomment %}
                 </div>
+
               </div>
-
-              <div class="w-100">Hello{% comment %} next card {% endcomment %}</div>
-              <div class="w-100">Hello{% comment %} next card {% endcomment %}</div>
-              <div class="w-100">Hello{% comment %} next card {% endcomment %}</div>
-
             </div>
           </div>
           
@@ -205,6 +235,23 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">All Parties (choose columns)</h5>
           <button id="save-columns" class="btn btn-success">Save</button>
+        </div>
+        <div class="card-body" style="max-height: 15em; overflow-y: auto;">
+          <div class="checkbox-list p-2 rounded border">
+            {% for column, count in result.all_parties_with_sale.counts.items %}
+              <div class="form-check mb-2">
+                <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
+                <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Bom Report (Visibility count)</h5>
+          <button id="save-bom-visibility" class="btn btn-success">Save</button>
         </div>
         <div class="card-body" style="max-height: 15em; overflow-y: auto;">
           <div class="checkbox-list p-2 rounded border">
@@ -373,7 +420,7 @@
       columns: "Net Total"
     };
 
-    function updateChart(view) {
+    {% comment %} function updateChart(view) {
       var labels = [];
       var data = [];
       var aggregatedData = {};
@@ -447,7 +494,7 @@
           }
         }
       });
-    }
+    } {% endcomment %}
     
     function populateLineChart(view) {
       var labels = [];
@@ -644,8 +691,8 @@
           }
           if (Array.isArray(data)) {
             window.reportData = data;
-            updateChart('week'); // Default view
-            populateLineChart('week'); // Populate the line chart
+            {% comment %} updateChart('week'); {% endcomment %}
+            populateLineChart('week');
           }
         },
         error: function (xhr, status, error) {

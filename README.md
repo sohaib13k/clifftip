@@ -37,6 +37,16 @@ load_dotenv(dotenv_path=path + '/.env') # path is projects root-dir. or base-dir
 6. Set up Nginx to proxy requests to Gunicorn:
 ```bash
 server {
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_proxied any;
+    gzip_min_length 256;
+    gzip_vary on;
+    gzip_disable "msie6";
+    gzip_comp_level 6;
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    
     listen 80;
     server_name sohaibk.me www.sohaibk.me
 
