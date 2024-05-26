@@ -107,29 +107,31 @@ function handsontableManager(containerId) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const scrollableContainer = document.getElementById('scrollable-container');
+    const scrollableContainers = document.querySelectorAll('.scrollable-container');
     const scrollAlert = document.getElementById('scroll-alert');
     let alertTimeout;
 
-    scrollableContainer.addEventListener('wheel', function (e) {
-        if (e.deltaY !== 0 && !e.shiftKey) {
-            // Show alert message
-            scrollAlert.style.display = 'block';
+    scrollableContainers.forEach(container => {
+        container.addEventListener('wheel', function (e) {
+            if (e.deltaY !== 0 && !e.shiftKey) {
+                // Show alert message
+                scrollAlert.style.display = 'block';
 
-            // Clear previous timeout
-            clearTimeout(alertTimeout);
+                // Clear previous timeout
+                clearTimeout(alertTimeout);
 
-            // Hide alert message after 3 seconds
-            alertTimeout = setTimeout(function () {
-                scrollAlert.style.display = 'none';
-            }, 3000);
-        }
+                // Hide alert message after 3 seconds
+                alertTimeout = setTimeout(function () {
+                    scrollAlert.style.display = 'none';
+                }, 3000);
+            }
 
-        // Horizontal scrolling with Shift key
-        if (e.shiftKey) {
-            scrollableContainer.scrollLeft += e.deltaY;
-            e.preventDefault();
-        }
+            // Horizontal scrolling with Shift key
+            if (e.shiftKey) {
+                container.scrollLeft += e.deltaY;
+                e.preventDefault();
+            }
+        });
     });
 
     // Close the alert when the close button is clicked
