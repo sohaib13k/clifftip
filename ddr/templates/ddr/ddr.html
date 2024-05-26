@@ -75,17 +75,20 @@
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex flex-column">
               <div class="w-100">
                 <div class="card">
-                  <div class="card-header">
-                    <h5 class="card-title">All Parties data completion</h5>
-                  </div>
-                    
-                    <div style="overflow-x: auto;" class="scrollable-container">
-                      <table id="report-table">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <h5 class="card-title">All Parties data completion</h5>
+                    </div>
+                    <div style="overflow-x: auto;">
+                      <table id="report-table" class="table" style="border-collapse: collapse; width: 100%;">
+                        <thead>
                           <tr>
                             {% for column, count in result.all_parties_with_sale.counts.items %}
                               <th class="report-column" style="padding: 0.6em; white-space: nowrap; border: 1px solid white; background-color: #96D4D4; text-align: left;" data-column="{{ column }}">{{ column }}</th>
                             {% endfor %}
                           </tr>
+                        </thead>
+                        <tbody>
                           <tr id="report-row">
                             {% for column, count in result.all_parties_with_sale.counts.items %}
                               <td class="report-column" data-column="{{ column }}" style="padding: 0.6em; border: 1px solid white; {% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
@@ -98,7 +101,9 @@
                               </td>
                             {% endfor %}
                           </tr>
+                        </tbody>
                       </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -137,7 +142,7 @@
                   <div class="card-header">
                     <h5 class="card-title">Bom Report</h5>
                   </div>
-                  <div class="table-responsive scrollable-container" style="max-height: 400px; overflow-y: auto;">
+                  <div class="table-responsive" id="scrollable-container" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-striped table-bordered table-sm">
                         <tr>
                           <th>Date</th>
@@ -170,7 +175,7 @@
                   <div class="card-header">
                     <h5 class="card-title">Routing Report</h5>
                   </div>
-                  <div class="table-responsive scrollable-container" style="max-height: 400px; overflow-y: auto;">
+                  <div class="table-responsive" id="scrollable-container" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-striped table-bordered table-sm">
                         <tr>
                           <th>Date</th>
