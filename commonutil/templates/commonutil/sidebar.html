@@ -48,7 +48,7 @@
                 <a data-bs-target="#report" data-bs-toggle="collapse" class="sidebar-link collapsed">
                     <i class="align-middle" data-feather="bar-chart-2"></i> <span class="align-middle">Report</span>
                 </a>
-                <ul id="report" class="sidebar-dropdown list-unstyled collapse {% if sub_page %} show {% endif %}" data-bs-parent="#sidebar">
+                <ul id="report" class="sidebar-dropdown list-unstyled collapse {% if page == 'report' and sub_page %} show {% endif %}" data-bs-parent="#sidebar">
                     <li class="sidebar-item {% if sub_page == 'report-view' %}active{% endif %}"><a class="sidebar-link" href={% url 'report-home' %}>View</a></li>
                     <li class="sidebar-item {% if sub_page == 'report-upload' %}active{% endif %}"><a class="sidebar-link" href={% url 'report-upload' %}>Upload</a></li>
                 </ul>
@@ -59,7 +59,7 @@
                 <a data-bs-target="#utilities" data-bs-toggle="collapse" class="sidebar-link collapsed">
                     <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Utilities</span>
                 </a>
-                <ul id="utilities" class="sidebar-dropdown list-unstyled collapse {% if sub_page %} show {% endif %}" data-bs-parent="#sidebar">
+                <ul id="utilities" class="sidebar-dropdown list-unstyled collapse {% if page == 'utilities' and sub_page %} show {% endif %}" data-bs-parent="#sidebar">
                     <li class="sidebar-item {% if sub_page == 'utilities-excel-viewer' %}active{% endif %}"><a class="sidebar-link" href={% url 'utilities-excel-viewer' %}>Excel Viewer</a></li>
                 </ul>
             </li>
