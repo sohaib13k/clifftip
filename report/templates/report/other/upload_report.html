@@ -59,11 +59,9 @@
                               <input type="hidden" name="form_type" value="excel_upload" />
                               <input type="hidden" name="report_id" value="{{ report.id }}" />
                               <div class="row">
-                                <div class="col-md-8 mb-1 mt-1">
-                                  <input class="form-control" type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" />
-                                </div>
-                                <div class="col-md-4 mb-1 mt-1">
-                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                  <div class="input-group">
+                                    <input type="file" class="form-control" type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" >
+                                    <button class="btn btn-primary" type="submit">Submit</button>
                                 </div>
                               </div>
                             </form>
