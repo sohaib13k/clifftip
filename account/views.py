@@ -22,7 +22,7 @@ def user_register(request):
 def user_login(request):
     if request.user.is_authenticated:
         return redirect("ddr-home")
-    
+
     if request.method != "POST":
         return render(request, "account/login.html")
 
@@ -34,7 +34,9 @@ def user_login(request):
         return redirect("ddr-home")
     else:
         return render(
-            request, "account/login.html", {"error": "Invalid username or password", "username":username}
+            request,
+            "account/login.html",
+            {"error": "Invalid username or password", "username": username},
         )
 
 
@@ -77,5 +79,8 @@ def profile(request):
     return render(
         request,
         "account/profile.html",
-        {"theme": UserProfile.objects.get(user=request.user).color_theme},
+        {
+            "theme": UserProfile.objects.get(user=request.user).color_theme,
+            "page": "profile",
+        },
     )

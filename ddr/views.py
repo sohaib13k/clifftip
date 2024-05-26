@@ -45,5 +45,6 @@ def ddr(request):
         {
             "result": result,
             "theme": user_theme,
+            "page":"ddr"
         },
     )

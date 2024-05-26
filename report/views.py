@@ -28,9 +28,7 @@ def report(request):
     """
     View to fetch assigned reports
     """
-    accessible_reports = Report.get_accessible_reportlist(
-        request.user
-    )
+    accessible_reports = Report.get_accessible_reportlist(request.user)
 
     return render(
         request,
@@ -38,6 +36,8 @@ def report(request):
         {
             "accessible_reports": accessible_reports,
             "theme": UserProfile.objects.get(user=request.user).color_theme,
+            "page": "report",
+            "sub_page": "report-view",
         },
     )
 
@@ -45,9 +45,7 @@ def report(request):
 # TODO: verify function name using regex- only alphanumeric with space allowed
 @login_required
 def upload(request):
-    accessible_reports = Report.get_accessible_reportlist(
-        request.user
-    )
+    accessible_reports = Report.get_accessible_reportlist(request.user)
     if request.method != "POST":
         sales_person = Employee.objects.filter(job_title="SE")
 
@@ -58,18 +56,22 @@ def upload(request):
                 "accessible_reports": accessible_reports,
                 "sales_person": sales_person,
                 "theme": UserProfile.objects.get(user=request.user).color_theme,
+                "page": "report",
+                "sub_page": "report-upload",
             },
         )
 
-    if request.POST.get('form_type') == 'form_entry':
+    if request.POST.get("form_type") == "form_entry":
         upload_form(request)
         upload_url = reverse("report-upload")
         return HttpResponse(
             f"Data successfully saved! <hr> <a href='{upload_url}'>Upload more report</a>"
         )
 
-
-    if request.POST.get('form_type') != 'excel_upload' or "excel_file" not in request.FILES:
+    if (
+        request.POST.get("form_type") != "excel_upload"
+        or "excel_file" not in request.FILES
+    ):
         return render(
             request,
             "report/other/upload_report.html",
@@ -113,23 +115,26 @@ def upload(request):
     increment_file_upload_limit(file_size_mb, request.user)
 
     report.report_last_updated_tmstmp = timezone.now()
-    report.save(update_fields=['report_last_updated_tmstmp'])
+    report.save(update_fields=["report_last_updated_tmstmp"])
 
     upload_url = reverse("report-upload")
     return HttpResponse(
         f"File uploaded successfully and saved! <hr> <a href='{upload_url}'>Upload more report</a>"
     )
 
+
 def upload_form(request):
-    sales_person = Employee.objects.filter(job_title="SE").order_by('id')
-    report = Report.objects.get(service_name=request.POST.get('report'))
-    date = request.POST.get('reportDate')
+    sales_person = Employee.objects.filter(job_title="SE").order_by("id")
+    report = Report.objects.get(service_name=request.POST.get("report"))
+    date = request.POST.get("reportDate")
     data = []
 
     # Assuming 'sales_person' is a list of employee objects available in the context
     for person in sales_person:
-        person_id = str(person.id)  # Make sure it's a string, suitable for dictionary keys
-        person_value = request.POST.get(person_id, '')
+        person_id = str(
+            person.id
+        )  # Make sure it's a string, suitable for dictionary keys
+        person_value = request.POST.get(person_id, "")
         data.append(person_value)
 
     file_path = settings.CSV_DIR / report.service_name
@@ -138,32 +143,34 @@ def upload_form(request):
     file_path = file_path / (report.service_name + ".csv")
 
     if not file_path.exists():
-        headers = ['Date'] + [person for person in sales_person]
+        headers = ["Date"] + [person for person in sales_person]
 
-        with open(file_path, mode='w', newline='') as file:
+        with open(file_path, mode="w", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(headers)
             writer.writerow([date] + data)
 
     else:
-        new_headers  = ['Date'] + [person for person in sales_person]
+        new_headers = ["Date"] + [person for person in sales_person]
 
-        with open(file_path, mode='r', newline='') as file:
+        with open(file_path, mode="r", newline="") as file:
             reader = csv.reader(file)
-            current_headers = next(reader, [])  # Read the first row, which contains headers
+            current_headers = next(
+                reader, []
+            )  # Read the first row, which contains headers
             all_data = list(reader)  # Read the rest of the data
 
         # Compare current headers with new headers
         if set(current_headers) != set(new_headers):
             # If they are different, write new headers and all existing data plus the new row
-            with open(file_path, mode='w', newline='') as file:
+            with open(file_path, mode="w", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow(new_headers)
                 writer.writerows(all_data)
                 writer.writerow([date] + data)
         else:
             # If headers are the same, just append the new row
-            with open(file_path, mode='a', newline='') as file:
+            with open(file_path, mode="a", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow([date] + data)
 
@@ -273,7 +280,7 @@ def view_report(request, report_id):
     user_theme = UserProfile.objects.get(user=request.user).color_theme
 
     cache_key = f"preprocessed_report_data_{report_id}"
-    file_cache = caches['file_based']
+    file_cache = caches["file_based"]
 
     if cached_param is not None and cached_param.lower() == "false":
         file_cache.delete(cache_key)
