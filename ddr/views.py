@@ -45,6 +45,9 @@ def ddr(request):
         {
             "result": result,
             "theme": user_theme,
-            "page":"ddr"
+            "page": "ddr",
+            "accessible_reports": [
+                report.service_name for report in accessible_reports
+            ],
         },
     )

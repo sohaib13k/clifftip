@@ -73,130 +73,136 @@
           <div class="row">
 
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex flex-column">
-              <div class="w-100">
-                <div class="card">
-                  <div class="card-header">
-                    <h5 class="card-title">All Parties data completion</h5>
-                  </div>
-                  <div style="overflow-x: auto; margin: 0; padding: 0;" class="scrollable-container">
-                    <table id="report-table" class="table" style="border-collapse: collapse; width: 100%; margin: 0; padding: 0;">
-                        <tr>
-                            {% for column, count in result.all_parties_with_sale.counts.items %}
-                              <th class="report-column" style="padding: 0.6em; white-space: nowrap; border: 1px solid white; background-color: #96D4D4; text-align: left;" data-column="{{ column }}">{{ column }}</th>
-                            {% endfor %}
-                          </tr>
-                          <tr id="report-row">
-                            {% for column, count in result.all_parties_with_sale.counts.items %}
-                              <td class="report-column" data-column="{{ column }}" style="padding: 0.6em; border: 1px solid white; {% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
-                                {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
-                                {% else %} background-color: #ccffcc;
-                                {% endif %}">
-                                <a href="{% url 'report-view' result.all_parties_with_sale.report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                                  {{ count }}
-                                </a>
-                              </td>
-                            {% endfor %}
-                          </tr>
-                      </table>
+              {% if "all_parties_with_sale" in accessible_reports %}
+                <div class="w-100">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="card-title">All Parties data completion</h5>
+                    </div>
+                    <div style="overflow-x: auto; margin: 0; padding: 0;" class="scrollable-container">
+                      <table id="report-table" class="table" style="border-collapse: collapse; width: 100%; margin: 0; padding: 0;">
+                          <tr>
+                              {% for column, count in result.all_parties_with_sale.counts.items %}
+                                <th class="report-column" style="padding: 0.6em; white-space: nowrap; border: 1px solid white; background-color: #96D4D4; text-align: left;" data-column="{{ column }}">{{ column }}</th>
+                              {% endfor %}
+                            </tr>
+                            <tr id="report-row">
+                              {% for column, count in result.all_parties_with_sale.counts.items %}
+                                <td class="report-column" data-column="{{ column }}" style="padding: 0.6em; border: 1px solid white; {% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
+                                  {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
+                                  {% else %} background-color: #ccffcc;
+                                  {% endif %}">
+                                  <a href="{% url 'report-view' result.all_parties_with_sale.report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                    {{ count }}
+                                  </a>
+                                </td>
+                              {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
                   </div>
                 </div>
-              </div>
+              {% endif %}
           
-              <div class="w-100">
-
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Sale Register (Net Total)</h5>
-                    <div class="btn-group btn-group-sm mb-4" role="group" aria-label="Time Period Selection">
-                      <button type="button" class="btn btn-secondary" onclick="populateLineChart('day')">Day</button>
-                      <button type="button" class="btn btn-secondary" onclick="populateLineChart('week')">Week</button>
-                      <button type="button" class="btn btn-secondary" onclick="populateLineChart('month')">Month</button>
-                      <button type="button" class="btn btn-secondary" onclick="populateLineChart('year')">Year</button>
+              {% if "sale_register" in accessible_reports %}
+                <div class="w-100">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <h5 class="card-title">Sale Register (Net Total)</h5>
+                      <div class="btn-group btn-group-sm mb-4" role="group" aria-label="Time Period Selection">
+                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('day')">Day</button>
+                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('week')">Week</button>
+                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('month')">Month</button>
+                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('year')">Year</button>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="chart w-100">
+                        <div id="apexcharts-line"></div>
+                      </div>
                     </div>
                   </div>
-                  <div class="card-body">
-                    <div class="chart w-100">
-                      <div id="apexcharts-line"></div>
-                    </div>
+
+                  <div class="card">
+                    {% comment %} next card {% endcomment %}
                   </div>
-                </div>
 
-                <div class="card">
-                  {% comment %} next card {% endcomment %}
                 </div>
-
-              </div>
+              {% endif %}
             </div>
           
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex">
-              
               <div class="w-100">
 
-                <div class="card">
-                  <div class="card-header">
-                    <h5 class="card-title">Bom Report</h5>
+                {% if "bom_report" in accessible_reports %}
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="card-title">Bom Report</h5>
+                    </div>
+                    <div class="table-responsive" id="scrollable-container" style="max-height: 400px; overflow-y: auto;">
+                      <table class="table table-striped table-bordered table-sm">
+                          <tr>
+                            <th>Date</th>
+                            {% for item in result.bom_report.items%}
+                              <td class="text-end" style="white-space: nowrap;">{{ item.report_upload_date }}</td>
+                            {% endfor %}
+                          </tr>
+                          <tr>
+                            <th>Lock/Total</th>
+                            {% for item in result.bom_report.items%}
+                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
+                            {% endfor %}
+                          </tr>
+                          <tr>
+                            <th>Percentage</th>
+                            {% for item in result.bom_report.items%}
+                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock_percent|floatformat:2 }}%</td>
+                            {% endfor %}
+                            <td>
+                              <div style="height:25px;">
+                                  <canvas id="bom-chart-percentage-trend"></canvas>
+                              </div>
+                          </td>
+                          </tr>
+                      </table>
+                    </div>
                   </div>
-                  <div class="table-responsive" id="scrollable-container" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-striped table-bordered table-sm">
-                        <tr>
-                          <th>Date</th>
-                          {% for item in result.bom_report.items%}
-                            <td class="text-end" style="white-space: nowrap;">{{ item.report_upload_date }}</td>
-                          {% endfor %}
-                        </tr>
-                        <tr>
-                          <th>Lock/Total</th>
-                          {% for item in result.bom_report.items%}
-                            <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
-                          {% endfor %}
-                        </tr>
-                        <tr>
-                          <th>Percentage</th>
-                          {% for item in result.bom_report.items%}
-                            <td class="text-end" style="white-space: nowrap;">{{ item.data_lock_percent|floatformat:2 }}%</td>
-                          {% endfor %}
-                          <td>
-                            <div style="height:25px;">
-                                <canvas id="bom-chart-percentage-trend"></canvas>
-                            </div>
-                        </td>
-                        </tr>
-                    </table>
-                  </div>
-                </div>
+                {% endif %}  
 
-                <div class="card">
-                  <div class="card-header">
-                    <h5 class="card-title">Routing Report</h5>
+                {% if "routing_report" in accessible_reports %}
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="card-title">Routing Report</h5>
+                    </div>
+                    <div class="table-responsive" id="scrollable-container" style="max-height: 400px; overflow-y: auto;">
+                      <table class="table table-striped table-bordered table-sm">
+                          <tr>
+                            <th>Date</th>
+                            {% for item in result.routing_report.items%}
+                              <td class="text-end" style="white-space: nowrap;">{{ item.report_upload_date }}</td>
+                            {% endfor %}
+                          </tr>
+                          <tr>
+                            <th>Lock/Total</th>
+                            {% for item in result.routing_report.items%}
+                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
+                            {% endfor %}
+                          </tr>
+                          <tr>
+                            <th>Percentage</th>
+                            {% for item in result.routing_report.items%}
+                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock_percent|floatformat:2 }}%</td>
+                            {% endfor %}
+                            <td>
+                              <div style="height:25px;">
+                                  <canvas id="routing-chart-percentage-trend"></canvas>
+                              </div>
+                          </td>
+                          </tr>
+                      </table>
+                    </div>
                   </div>
-                  <div class="table-responsive" id="scrollable-container" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-striped table-bordered table-sm">
-                        <tr>
-                          <th>Date</th>
-                          {% for item in result.routing_report.items%}
-                            <td class="text-end" style="white-space: nowrap;">{{ item.report_upload_date }}</td>
-                          {% endfor %}
-                        </tr>
-                        <tr>
-                          <th>Lock/Total</th>
-                          {% for item in result.routing_report.items%}
-                            <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
-                          {% endfor %}
-                        </tr>
-                        <tr>
-                          <th>Percentage</th>
-                          {% for item in result.routing_report.items%}
-                            <td class="text-end" style="white-space: nowrap;">{{ item.data_lock_percent|floatformat:2 }}%</td>
-                          {% endfor %}
-                          <td>
-                            <div style="height:25px;">
-                                <canvas id="routing-chart-percentage-trend"></canvas>
-                            </div>
-                        </td>
-                        </tr>
-                    </table>
-                  </div>
-                </div>
+                {% endif %}
 
                 {% comment %} <div class="card">
                   <div class="card-header d-flex justify-content-between align-items-center">
@@ -243,83 +249,91 @@
     </div>
     <div class="offcanvas-body">
   
-      <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h6 class="card-title mb-0">All Parties (global threshold)</h6>
-          <button class="btn btn-success" id="save-values">Save</button>
-        </div>
-        <div class="card-body">
-          <div class="mb-3">
-            <label class="form-label">Danger</label>
-            <div class="input-group">
-              <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
-              <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
-              <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
-            </div>
+      {% if "all_parties_with_sale" in accessible_reports %}
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="card-title mb-0">All Parties (global threshold)</h6>
+            <button class="btn btn-success" id="save-values">Save</button>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Action</label>
-            <div class="input-group">
-              <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
-              <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
-              <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Acceptable</label>
-            <div class="input-group">
-              <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
-              <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
-              <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">All Parties (choose columns)</h5>
-          <button id="save-columns" class="btn btn-success">Save</button>
-        </div>
-        <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-          <div class="checkbox-list p-2 rounded border">
-            {% for column, count in result.all_parties_with_sale.counts.items %}
-              <div class="form-check mb-2">
-                <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
-                <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Danger</label>
+              <div class="input-group">
+                <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
+                <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
+                <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
               </div>
-            {% endfor %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Action</label>
+              <div class="input-group">
+                <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
+                <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
+                <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Acceptable</label>
+              <div class="input-group">
+                <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
+                <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
+                <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
       
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Bom Report (Visibility count)</h5>
-          <button id="save-bom-visibility" class="btn btn-success">Save</button>
-        </div>
-        <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-          <div class="input-group">
-            <button class="btn btn-outline-secondary" type="button" onclick="decrement('bom-visibility-value')">-</button>
-            <input type="text" class="form-control text-center" id="bom-visibility-value" value="{{ result.bom_report.visibility_count|default:7 }}">
-            <button class="btn btn-outline-secondary" type="button" onclick="increment('bom-visibility-value')">+</button>
+      {% if "all_parties_with_sale" in accessible_reports %}
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">All Parties (choose columns)</h5>
+            <button id="save-columns" class="btn btn-success">Save</button>
+          </div>
+          <div class="card-body" style="max-height: 15em; overflow-y: auto;">
+            <div class="checkbox-list p-2 rounded border">
+              {% for column, count in result.all_parties_with_sale.counts.items %}
+                <div class="form-check mb-2">
+                  <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
+                  <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
+      
+      {% if "bom_report" in accessible_reports %}
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Bom Report (Visibility count)</h5>
+            <button id="save-bom-visibility" class="btn btn-success">Save</button>
+          </div>
+          <div class="card-body" style="max-height: 15em; overflow-y: auto;">
+            <div class="input-group">
+              <button class="btn btn-outline-secondary" type="button" onclick="decrement('bom-visibility-value')">-</button>
+              <input type="text" class="form-control text-center" id="bom-visibility-value" value="{{ result.bom_report.visibility_count|default:7 }}">
+              <button class="btn btn-outline-secondary" type="button" onclick="increment('bom-visibility-value')">+</button>
+            </div>
+          </div>
+        </div>
+      {% endif %}
 
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Routing Report (Visibility count)</h5>
-          <button id="save-routing-visibility" class="btn btn-success">Save</button>
-        </div>
-        <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-          <div class="input-group">
-            <button class="btn btn-outline-secondary" type="button" onclick="decrement('routing-visibility-value')">-</button>
-            <input type="text" class="form-control text-center" id="routing-visibility-value" value="{{ result.routing_report.visibility_count|default:7 }}">
-            <button class="btn btn-outline-secondary" type="button" onclick="increment('routing-visibility-value')">+</button>
+      {% if "routing_report" in accessible_reports %}
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Routing Report (Visibility count)</h5>
+            <button id="save-routing-visibility" class="btn btn-success">Save</button>
+          </div>
+          <div class="card-body" style="max-height: 15em; overflow-y: auto;">
+            <div class="input-group">
+              <button class="btn btn-outline-secondary" type="button" onclick="decrement('routing-visibility-value')">-</button>
+              <input type="text" class="form-control text-center" id="routing-visibility-value" value="{{ result.routing_report.visibility_count|default:7 }}">
+              <button class="btn btn-outline-secondary" type="button" onclick="increment('routing-visibility-value')">+</button>
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
       
     </div>
   </div>
