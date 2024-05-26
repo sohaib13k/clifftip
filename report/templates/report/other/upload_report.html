@@ -51,9 +51,9 @@
                           <td>
                             <strong>{{ report.id }}</strong>
                           </td>
-                          <td>{{ report.name }}</td>
-                          <td>{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}</td>
-                          <td class="py-0">
+                          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ report.name }}</td>
+                          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}</td>
+                          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="py-0">
                             <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
                               {% csrf_token %}
                               <input type="hidden" name="form_type" value="excel_upload" />
