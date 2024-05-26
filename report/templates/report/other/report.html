@@ -21,14 +21,14 @@
           <div class="row">
             <div class="col-12 col-md-6 col-lg-4">
               <div class="card">
-                <div class="card-header">
-                  <h5 class="card-title mb-0">Custom report</h5>
+                <div class="card-header bg-primary">
+                  <h5 class="card-title mb-0 text-white">Custom report</h5>
                 </div>
                 <ul class="list-group list-group-flush">
                   {% for report in accessible_reports %}
                     {% if report.is_custom_report %}
                       {% comment %}TODO: Remove underline{% endcomment %}
-                      <a href="{% url 'report-view' report.id %}?cached=true"><li class="list-group-item">{{ report.name }}</li></a>
+                      <a class="text-decoration-none" href="{% url 'report-view' report.id %}?cached=true"><li class="list-group-item">{{ report.name }}</li></a>
                     {% endif %}
                   {% endfor %}
                 </ul>
@@ -37,13 +37,13 @@
 
             <div class="col-12 col-md-6 col-lg-4">
               <div class="card">
-                <div class="card-header">
-                  <h5 class="card-title mb-0">Uploaded report</h5>
+                <div class="card-header bg-primary">
+                  <h5 class="card-title mb-0 text-white">Uploaded report</h5>
                 </div>
                 <ul class="list-group list-group-flush">
                   {% for report in accessible_reports %}
                     {% if not report.is_custom_report %}
-                      <a href="{% url 'report-view' report.id %}?cached=true"><li class="list-group-item">{{ report.name }}</li></a>
+                      <a class="text-decoration-none" href="{% url 'report-view' report.id %}?cached=true"><li class="list-group-item">{{ report.name }}</li></a>
                     {% endif %}
                   {% endfor %}
                 </ul>
