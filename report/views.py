@@ -306,5 +306,7 @@ def view_report(request, report_id):
         {
             "result": report_data,
             "theme": user_theme,
+            "page": "report",
+            "sub_page": "report-view",
         },
     )
