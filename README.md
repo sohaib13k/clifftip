@@ -7,6 +7,12 @@ SECRET_KEY="5t36rsv1_(-$q025a!7_=(*sbsij^dss_)8v&znnr5kzqgroz0"
 ALLOWED_HOSTS="clifftip.mavensoft.in"
 LOG_LOCATION="/var/log/gunicorn/django.log"
 
+HOST="host/ip"
+NAME="db_name"
+USER="db_username"
+PASSWORD="db_password"
+PORT=""
+
 ```
 ```python
 from django.core.management.utils import get_random_secret_key  

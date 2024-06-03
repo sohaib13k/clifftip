@@ -6,10 +6,21 @@ from django.contrib.auth.decorators import login_required
 from report.models import Report
 from account.models import UserProfile
 from ddr.service import report_logic
+from django.db import connections
+import logging
 
+logger = logging.getLogger(__name__)
 
 @login_required
 def ddr(request):
+
+    cursor = connections['mssql'].cursor()
+    cursor.execute("SELECT * FROM dbo.tbl_payrollempPermissions")
+    rows = cursor.fetchall()
+    for row in rows:
+        logger.debug(row)
+    
+
     accessible_reports = Report.get_accessible_reportlist(request.user)
 
     cached_param = request.GET.get("cached", None)
