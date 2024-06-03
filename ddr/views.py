@@ -15,11 +15,9 @@ logger = logging.getLogger(__name__)
 def ddr(request):
 
     cursor = connections['mssql'].cursor()
-    cursor.execute("SELECT * FROM dbo.tbl_payrollempPermissions")
-    rows = cursor.fetchall()
-    for row in rows:
-        logger.debug(row)
-    
+    cursor.execute("SELECT GETDATE()")
+    current_time = cursor.fetchone()
+    logger.error(f"Current Date and Time: {current_time}")
 
     accessible_reports = Report.get_accessible_reportlist(request.user)
 

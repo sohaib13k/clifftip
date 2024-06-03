@@ -92,13 +92,13 @@ DATABASES = {
     },
     "mssql": {
         "ENGINE": "mssql",
-        "HOST": os.getenv("HOST"),
-        "NAME": os.getenv("NAME"),
-        "USER": os.getenv("USER"),
-        "PASSWORD": os.getenv("PASSWORD"),
-        "PORT": os.getenv("PORT"),  # Default port- 1433
+        "HOST": os.getenv("MSSQL_HOST"),
+        "NAME": os.getenv("MSSQL_DB_NAME"),
+        "USER": os.getenv("MSSQL_USERNAME"),
+        "PASSWORD": os.getenv("MSSQL_PASSWORD"),
+        "PORT": os.getenv("MSSQL_PORT", "1433"),  # Default port- 1433
         "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
+            "driver": os.getenv("MSSQL_DRIVER"),
         },
     },
 }
