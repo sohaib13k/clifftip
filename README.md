@@ -7,11 +7,12 @@ SECRET_KEY="5t36rsv1_(-$q025a!7_=(*sbsij^dss_)8v&znnr5kzqgroz0"
 ALLOWED_HOSTS="clifftip.mavensoft.in"
 LOG_LOCATION="/var/log/gunicorn/django.log"
 
-HOST="host/ip"
-NAME="db_name"
-USER="db_username"
-PASSWORD="db_password"
-PORT=""
+MSSQL_HOST=""
+MSSQL_DB_NAME=""
+MSSQL_USERNAME=""
+MSSQL_PASSWORD=""
+MSSQL_PORT=""
+MSSQL_DRIVER="ODBC Driver 17 for SQL Server"
 
 ```
 ```python
@@ -84,6 +85,8 @@ server {
 11. python manage.py migrate
 12. python manage.py createsuperuser
 ```
+13. Azure mssql server provision
+14. Install necessary dependencies - https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver16&tabs=ubuntu18-install%2Calpine17-install%2Cdebian8-install%2Credhat7-13-install%2Crhel7-offline#18
 
 ### Report upload conventions
 |Report name|ferquency|req.|
