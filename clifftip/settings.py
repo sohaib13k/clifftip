@@ -13,12 +13,20 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+# Azure blob storage for temp storing mssql backup file
+AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+AZURE_STORAGE_ACCOUNT = os.getenv("AZURE_STORAGE_ACCOUNT")
+AZURE_SQL_SERVER = os.getenv("AZURE_SQL_SERVER")
+AZURE_SQL_USERNAME = os.getenv("AZURE_SQL_USERNAME")
+AZURE_SQL_PASSWORD = os.getenv("AZURE_SQL_PASSWORD")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # custom paths
 REPORT_DIR = BASE_DIR.parent / "data" / "reports"
 CSV_DIR = BASE_DIR.parent / "data" / "csv"
+DB_BACKUP_DIR = BASE_DIR.parent / "data" / "db-backup"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/

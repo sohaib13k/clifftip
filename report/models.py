@@ -1,3 +1,8 @@
+from django.utils.timezone import localtime, now
+from time import localtime
+from pathlib import Path
+from shutil import copyfile, rmtree
+from django.utils.timezone import localtime
 from django.db.models import Q
 from django.db import models
 from django.conf import settings
@@ -20,27 +25,38 @@ class Report(models.Model):
         help_text="Name of this model service method",
     )
     is_masterdata = models.BooleanField(default=False, verbose_name="Master data sheet")
-    is_datetime_merged = models.BooleanField(default=False, verbose_name="Same column for date & time")
-    date_col = models.CharField(max_length=127, null=True, blank=True, verbose_name="Date column header")
-    time_col = models.CharField(max_length=127, null=True, blank=True, verbose_name="Time column header")
+    is_datetime_merged = models.BooleanField(
+        default=False, verbose_name="Same column for date & time"
+    )
+    date_col = models.CharField(
+        max_length=127, null=True, blank=True, verbose_name="Date column header"
+    )
+    time_col = models.CharField(
+        max_length=127, null=True, blank=True, verbose_name="Time column header"
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False
     )
     created_date = models.DateTimeField(auto_now_add=True)
     model_last_updated_tmstmp = models.DateTimeField(auto_now=True)
-    report_last_updated_tmstmp = models.DateTimeField(null=True, editable=False, verbose_name="report last uploaded")
+    report_last_updated_tmstmp = models.DateTimeField(
+        null=True, editable=False, verbose_name="report last uploaded"
+    )
     access_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="accessible_reports_users", blank=True
     )
     access_groups = models.ManyToManyField(
         Group, related_name="accessible_reports_groups", blank=True
     )
-    is_custom_report = models.BooleanField(default=False, verbose_name="customised report")
+    is_custom_report = models.BooleanField(
+        default=False, verbose_name="customised report"
+    )
     reports = models.ManyToManyField(
         "self", related_name="custom_report_parents", symmetrical=False, blank=True
     )
-    data_source = models.CharField(max_length=127, null=False, blank=False, choices=DATA_SOURCE_CHOICES)
-
+    data_source = models.CharField(
+        max_length=127, null=False, blank=False, choices=DATA_SOURCE_CHOICES
+    )
 
     class Meta:
         verbose_name = "report"
@@ -120,11 +136,21 @@ class Employee(models.Model):
     first_name = models.CharField(max_length=127, null=False)
     last_name = models.CharField(max_length=127, null=True, blank=True)
     job_title = models.CharField(max_length=127, choices=TITLE_CHOICES)
-    department = models.CharField(max_length=127, null=False, blank=False, choices=DEPARTMENT_CHOICES)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False)
+    department = models.CharField(
+        max_length=127, null=False, blank=False, choices=DEPARTMENT_CHOICES
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, editable=False
+    )
     created_date = models.DateTimeField(auto_now_add=True)
     phone_number = models.CharField(max_length=127, null=True, blank=True)
-    manager_id = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="employees_managed")
+    manager_id = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees_managed",
+    )
     supervisor_id = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -139,10 +165,44 @@ class Employee(models.Model):
         else:
             return f"{self.first_name}"
 
-
     class Meta:
         verbose_name = "employee"
         verbose_name_plural = "employees"
 
     def get_absolute_url(self):
         return reverse("employee_detail", kwargs={"pk": self.pk})
+
+
+def get_upload_to(instance, filename):
+    ext = filename.split(".")[-1]
+    current_time = localtime(now())
+    formatted_time = current_time.strftime("%d-%m-%Y_%H-%M-%S")
+    filename = f"{formatted_time}.{ext}"
+    return Path("temp") / filename
+
+
+class DBBackup(models.Model):
+    db_dump = models.FileField(upload_to=get_upload_to)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        local_time = localtime(self.uploaded_at)
+        return local_time.strftime("%d-%m-%Y %I:%M:%S %p")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        source = Path(self.db_dump.path)
+        destination_dir = settings.DB_BACKUP_DIR
+        if not destination_dir.exists():
+            destination_dir.mkdir(parents=True, exist_ok=True)
+
+        destination = destination_dir / source.name
+        copyfile(source, destination)
+
+        if source.exists():
+            source.unlink()
+
+        temp_dir = source.parent
+        if not any(temp_dir.iterdir()):  # Check if directory is empty
+            rmtree(temp_dir)

@@ -18,3 +18,4 @@ tzdata==2024.1
 xlrd==2.0.1
 mssql-django==1.5
 pyodbc==5.1.0
+azure-storage-blob==12.20.0

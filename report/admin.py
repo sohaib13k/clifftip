@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Report, Employee
+from .models import Report, Employee, DBBackup
 from .forms import ReportForm
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
@@ -172,5 +172,10 @@ class EmployeeAdmin(admin.ModelAdmin):
     ]
 
 
+class DBBackupAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Employee, EmployeeAdmin)
+admin.site.register(DBBackup, DBBackupAdmin)
