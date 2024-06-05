@@ -7,15 +7,15 @@ SECRET_KEY="5t36rsv1_(-$q025a!7_=(*sbsij^dss_)8v&znnr5kzqgroz0"
 ALLOWED_HOSTS="clifftip.mavensoft.in"
 LOG_LOCATION="/var/log/gunicorn/django.log"
 
-MSSQL_HOST=""
-MSSQL_DB_NAME=""
-MSSQL_USERNAME=""
+MSSQL_HOST="clifftip.database.windows.net"
+MSSQL_DB_NAME="erp-dump-clifftip"
+MSSQL_USERNAME="laughing-elephant"
 MSSQL_PASSWORD=""
-MSSQL_PORT=""
+MSSQL_PORT="1433"
 MSSQL_DRIVER="ODBC Driver 17 for SQL Server"
 
 AZURE_STORAGE_CONNECTION_STRING=""
-AZURE_STORAGE_CONTAINER_NAME=""
+AZURE_STORAGE_CONTAINER_NAME="clifftip-erp-backup"
 
 # AZURE_STORAGE_ACCOUNT_NAME=""
 # AZURE_STORAGE_ACCOUNT_KEY=""
@@ -61,10 +61,9 @@ server {
     gzip_buffers 16 8k;
     gzip_http_version 1.1;
     
-    listen 80;
-    server_name sohaibk.me www.sohaibk.me
+    server_name clifftip.mavensoft.in;
 
-    client_max_body_size 10M;
+    client_max_body_size 200M;
 
     location / {
         proxy_pass http://localhost:8000;
@@ -74,13 +73,17 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-  location /static/ {
-       alias /var/www/clifftip/;
-  }
-  
-  location /favicon.ico {
-      alias /var/www/clifftip/img/favicon.ico;
-  }
+    location /static/ {
+        alias /var/www/clifftip/;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+
+    location /favicon.ico {
+        alias /var/www/clifftip/img/favicon.ico;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
 }
 ```
 ```bash
@@ -112,7 +115,7 @@ server {
 ### CI CD script
 ```bash
 cd
-tar -czf projects.backup.tar.gz projects/
+tar -czf bckp/clifftip.backup.tar.gz projects/clifftip/
 cd /root/projects/clifftip/clifftip
 source ../.virtualenv/bin/activate
 git reset --hard
@@ -120,10 +123,7 @@ git clean -df
 git pull
 echo "yes" | python manage.py collectstatic
 sudo rm -r /var/www/clifftip
-sleep 3
-echo "static removed"
 sudo mv ~/projects/clifftip/static/ /var/www/clifftip/
-pkill gunicorn
-gunicorn clifftip.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile /var/log/gunicorn/access.log --error-logfile /var/log/gunicorn/error.log &
+gunicorn clifftip.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 300 --access-logfile /var/log/gunicorn/clifftip/access.log --error-logfile /var/log/gunicorn/clifftip/error.log &
 sudo systemctl restart nginx
 ```

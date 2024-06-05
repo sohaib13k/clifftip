@@ -6,7 +6,6 @@ from django.conf import settings
 from django.utils.timezone import localtime, now
 from time import localtime
 from pathlib import Path
-from shutil import copyfile, rmtree
 from django.utils.timezone import localtime
 from django.db.models import Q
 from django.db import models
