@@ -226,5 +226,9 @@ def extract_and_upload_to_azure(file_path, blob_name):
             with open(os.path.join(root, filename), "rb") as data:
                 blob_client.upload_blob(data, overwrite=True)
 
-    os.remove(file_path)
-    shutil.rmtree(extracted_path)
+    if os.path.exists(extracted_path):
+        shutil.rmtree(extracted_path)
+
+    temp_folder = Path(file_path).parent
+    if os.path.exists(temp_folder):
+        shutil.rmtree(temp_folder)
