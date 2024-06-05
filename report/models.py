@@ -1,3 +1,8 @@
+import shutil
+import zipfile
+import os
+from azure.storage.blob import BlobServiceClient
+from django.conf import settings
 from django.utils.timezone import localtime, now
 from time import localtime
 from pathlib import Path
@@ -192,17 +197,34 @@ class DBBackup(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        source = Path(self.db_dump.path)
-        destination_dir = settings.DB_BACKUP_DIR
-        if not destination_dir.exists():
-            destination_dir.mkdir(parents=True, exist_ok=True)
+        file_path = self.db_dump.path
 
-        destination = destination_dir / source.name
-        copyfile(source, destination)
+        if file_path.endswith(".zip"):
+            blob_name = Path(file_path).name
+            extract_and_upload_to_azure(file_path, blob_name)
 
-        if source.exists():
-            source.unlink()
 
-        temp_dir = source.parent
-        if not any(temp_dir.iterdir()):  # Check if directory is empty
-            rmtree(temp_dir)
+def extract_and_upload_to_azure(file_path, blob_name):
+    with zipfile.ZipFile(file_path, "r") as zip_ref:
+        extracted_path = file_path.replace(".zip", "")
+        zip_ref.extractall(extracted_path)
+
+    blob_service_client = BlobServiceClient.from_connection_string(
+        settings.AZURE_STORAGE_CONNECTION_STRING
+    )
+    container_client = blob_service_client.get_container_client(
+        settings.AZURE_STORAGE_CONTAINER_NAME
+    )
+
+    for root, dirs, files in os.walk(extracted_path):
+        for filename in files:
+            file_path_on_blob = os.path.join(root, filename).replace(
+                extracted_path, blob_name
+            )
+            blob_client = container_client.get_blob_client(file_path_on_blob)
+
+            with open(os.path.join(root, filename), "rb") as data:
+                blob_client.upload_blob(data, overwrite=True)
+
+    os.remove(file_path)
+    shutil.rmtree(extracted_path)

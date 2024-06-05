@@ -13,13 +13,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
-# Azure blob storage for temp storing mssql backup file
-AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-AZURE_STORAGE_ACCOUNT = os.getenv("AZURE_STORAGE_ACCOUNT")
-AZURE_SQL_SERVER = os.getenv("AZURE_SQL_SERVER")
-AZURE_SQL_USERNAME = os.getenv("AZURE_SQL_USERNAME")
-AZURE_SQL_PASSWORD = os.getenv("AZURE_SQL_PASSWORD")
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,6 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 REPORT_DIR = BASE_DIR.parent / "data" / "reports"
 CSV_DIR = BASE_DIR.parent / "data" / "csv"
 DB_BACKUP_DIR = BASE_DIR.parent / "data" / "db-backup"
+
+
+AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+AZURE_STORAGE_CONTAINER_NAME = os.getenv("AZURE_STORAGE_CONTAINER_NAME")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -110,6 +107,23 @@ DATABASES = {
         },
     },
 }
+
+# conf. for future if wanted to store static files or any files in general
+
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.azure_storage.AzureStorage",
+#         "OPTIONS": {
+#             "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
+#             "azure_container": os.getenv("AZURE_STORAGE_CONTAINER_NAME"),
+#             "account_key": os.getenv("AZURE_STORAGE_ACCOUNT_KEY"),
+#             "timeout": 60,
+#         },
+#     },
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#     },
+# }
 
 
 # Caching

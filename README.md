@@ -14,6 +14,13 @@ MSSQL_PASSWORD=""
 MSSQL_PORT=""
 MSSQL_DRIVER="ODBC Driver 17 for SQL Server"
 
+AZURE_STORAGE_CONNECTION_STRING=""
+AZURE_STORAGE_CONTAINER_NAME=""
+
+# AZURE_STORAGE_ACCOUNT_NAME=""
+# AZURE_STORAGE_ACCOUNT_KEY=""
+# AZURE_STORAGE_CONTAINER_NAME=""
+
 ```
 ```python
 from django.core.management.utils import get_random_secret_key  
