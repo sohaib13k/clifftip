@@ -104,6 +104,7 @@ DATABASES = {
         "PORT": os.getenv("MSSQL_PORT", "1433"),  # Default port- 1433
         "OPTIONS": {
             "driver": os.getenv("MSSQL_DRIVER"),
+            "extra_params": "TrustServerCertificate=yes;Encrypt=yes",
         },
     },
 }
