@@ -10,12 +10,9 @@ body {
 }
 
 #spreadsheet {
-  height: calc(50vh - 40px); /* 100% of the viewport height minus some margin */
-  width: 98%; /* Full width of the viewport */
-  overflow: auto; /* Add scrollbars when content overflows */
-  margin: 20px; /* Margin around the spreadsheet */
   border: solid;
   border-width: thin;
+  border-radius: 8px;
 }
 
 .custom-report-true {

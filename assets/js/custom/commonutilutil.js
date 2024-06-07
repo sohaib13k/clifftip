@@ -42,6 +42,7 @@ function handsontableManager(containerId) {
                 dropdownMenu: true,
                 manualColumnResize: true,
                 manualRowResize: true,
+                height: '50vh',
                 colWidths: 150,
                 columnSorting: true,
                 renderAllRows: false,
