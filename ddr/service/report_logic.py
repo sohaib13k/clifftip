@@ -159,7 +159,7 @@ def all_parties_with_sale(request, report):
         counts[column] = difference if difference >= 0 else 0
 
     result = {
-        "data": df_parties.to_json(orient="records"),
+        "data": parties_with_sale.to_json(orient="records"),
         "selected_columns": selected_columns,
         "counts": counts,
         "threshold": thresholds,

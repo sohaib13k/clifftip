@@ -12,6 +12,11 @@ function downloadExcel(jsonData) {
 }
 
 
+document.addEventListener('dataUpdated', function () {
+    if (window.handsontableManagerInstance) {
+        window.handsontableManagerInstance.initOrUpdateHandsontable(window.reportExcelJson);
+    }
+});
 
 function handsontableManager(containerId) {
     this.container = document.getElementById(containerId);
@@ -54,7 +59,7 @@ function handsontableManager(containerId) {
     this.initOrUpdateHandsontable(initialData);
 
 
-
+    window.handsontableManagerInstance = this;
     // Usage:
     // In your HTML, after including this script, instantiate the manager:
     // new handsontableManager('spreadsheet');

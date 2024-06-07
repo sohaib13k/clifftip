@@ -92,7 +92,7 @@
                                 <td class="report-column" data-column="{{ column }}" style="padding: 0.6em; border: 1px solid white; {% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
                                   {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
                                   {% else %} background-color: #ccffcc;
-                                  {% endif %}">
+                                  {% endif %}" onclick="filterData('{{ column }}', '{{ count }}')">
                                   <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
                                     {{ count }}
                                   </a>
@@ -363,10 +363,6 @@
   </div>
   
   <script>
-    window.reportExcelJson = {{ result.all_parties_with_sale.data|safe}};
-    document.addEventListener('DOMContentLoaded', function () {
-      new handsontableManager('spreadsheet')
-    })
     document.addEventListener('DOMContentLoaded', function () {
         var ctx = document.getElementById('bom-chart-percentage-trend').getContext('2d');
         var dataLockPercent = [
@@ -990,6 +986,38 @@
       });
     });
   </script>
+
+  <script>
+    // Function to filter data based on the clicked column
+    window.originalReportExcelJson = {{ result.all_parties_with_sale.data|safe }}; // Keep the original data
+    window.reportExcelJson = [...window.originalReportExcelJson]; // Displayed data
+
+    document.addEventListener('DOMContentLoaded', function () {
+        new handsontableManager('spreadsheet');
+    });
+
+    function filterData(columnName, count) {
+      if (count > 0) {
+          const filteredData = window.originalReportExcelJson.filter(row => row[columnName] === "" || row[columnName] === null);
+          window.reportExcelJson = filteredData;
+      } else {
+          window.reportExcelJson = [...window.originalReportExcelJson];
+      }
+      document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+    }
+
+    // Event listener for table column click
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.getElementById('report-table');
+        table.addEventListener('click', function (e) {
+            if (e.target.tagName === 'TD') {
+                const columnName = e.target.getAttribute('data-column');
+                filterData(columnName);
+            }
+        });
+    });
+  </script>
+
 
 {% endblock %}
   
