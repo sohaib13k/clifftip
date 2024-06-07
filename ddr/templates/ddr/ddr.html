@@ -7,6 +7,7 @@
 
 {% block styles %}
   <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+  <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
   <style>
     /* Basic styling for dropdown and table */
     .dropdown {
@@ -92,7 +93,7 @@
                                   {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
                                   {% else %} background-color: #ccffcc;
                                   {% endif %}">
-                                  <a href="{% url 'report-view' result.all_parties_with_sale.report.id %}" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                  <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
                                     {{ count }}
                                   </a>
                                 </td>
@@ -102,6 +103,29 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="modal fade" id="centeredModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Centered modal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body m-3">
+                        
+
+                        <div id="spreadsheet" class="handsontable" style="display: block"></div>
+
+
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               {% endif %}
           
               {% if "sale_register" in accessible_reports %}
@@ -339,6 +363,10 @@
   </div>
   
   <script>
+    window.reportExcelJson = {{ result.all_parties_with_sale.data|safe}};
+    document.addEventListener('DOMContentLoaded', function () {
+      new handsontableManager('spreadsheet')
+    })
     document.addEventListener('DOMContentLoaded', function () {
         var ctx = document.getElementById('bom-chart-percentage-trend').getContext('2d');
         var dataLockPercent = [
@@ -965,3 +993,8 @@
 
 {% endblock %}
   
+
+{% block script %}
+  <script src="{% static 'js/handsontable.full.min.js' %}"></script>
+  <script src="{% static 'js/xlsx.full.min.js' %}"></script>
+{% endblock %}
