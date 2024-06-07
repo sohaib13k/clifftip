@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 @login_required
 def ddr(request):
 
-    cursor = connections['mssql'].cursor()
-    cursor.execute("SELECT GETDATE()")
-    current_time = cursor.fetchone()
-    logger.error(f"Current Date and Time: {current_time}")
+    # cursor = connections['mssql'].cursor()
+    # cursor.execute("SELECT GETDATE()")
+    # current_time = cursor.fetchone()
+    # logger.error(f"Current Date and Time: {current_time}")
 
     accessible_reports = Report.get_accessible_reportlist(request.user)
 
