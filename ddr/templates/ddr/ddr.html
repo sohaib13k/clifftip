@@ -112,11 +112,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body m-3">
-                        
-
-                        <div id="spreadsheet" class="handsontable" style="display: block"></div>
-
-
+                        <div id="spreadsheet" class="handsontable"></div>
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -988,15 +984,23 @@
   </script>
 
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      $('#centeredModalPrimary').on('shown.bs.modal', function () {
+        var container = document.getElementById('spreadsheet');
+
+        if (!window.handsontableManagerInstance) {
+          window.handsontableManagerInstance = new handsontableManager('spreadsheet');
+        } else {
+          window.handsontableManagerInstance.initOrUpdateHandsontable(window.reportExcelJson);
+        }
+      });
+    });
+
     // Function to filter data based on the clicked column
     window.originalReportExcelJson = {{ result.all_parties_with_sale.data|safe }}; // Keep the original data
     window.reportExcelJson = [...window.originalReportExcelJson]; // Displayed data
 
-    document.addEventListener('DOMContentLoaded', function () {
-        new handsontableManager('spreadsheet');
-    });
-
-    function filterData(columnName, count) {
+     function filterData(columnName, count) {
       if (count > 0) {
           const filteredData = window.originalReportExcelJson.filter(row => row[columnName] === "" || row[columnName] === null);
           window.reportExcelJson = filteredData;
