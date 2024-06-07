@@ -273,7 +273,7 @@
         <div class="card mb-3">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="card-title mb-0">All Parties (global threshold)</h6>
-            <button class="btn btn-success" id="save-values">Save</button>
+              <button class="btn btn-success" id="save-values">Save</button>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -546,6 +546,7 @@
         success: function(response) {
           // Update the table cells dynamically
           updateTable(response.threshold);
+          window.location.href = "{% url 'ddr-home' %}?cached=false";
         },
         error: function(error) {
           console.error('Error:', error);
@@ -588,6 +589,7 @@
         success: function(response) {
           // Update the table cells dynamically
           updateTable(response.threshold);
+          window.location.href = "{% url 'ddr-home' %}?cached=false";
         },
         error: function(error) {
           console.error('Error:', error);
@@ -615,6 +617,7 @@
         success: function(response) {
           // Update the table cells dynamically
           updateTable(response.threshold);
+          window.location.href = "{% url 'ddr-home' %}?cached=false";
         },
         error: function(error) {
           console.error('Error:', error);
@@ -653,6 +656,7 @@
             methodName: 'save_all_parties_ddr_selected_columns',
           }),
           success: function(response) {
+            window.location.href = "{% url 'ddr-home' %}?cached=false";
             // Optionally handle the response from the backend
           }
         });
