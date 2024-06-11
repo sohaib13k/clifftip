@@ -28,3 +28,7 @@ def bom_report(excel_path):
 
 def sale_purchase(excel_path):
     return read_excel_or_html(excel_path)
+
+
+def invoice_report(excel_path):
+    return read_excel_or_html(excel_path, skiprows=3)
