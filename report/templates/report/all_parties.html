@@ -45,18 +45,7 @@
     });  
 </script>
 
-  <script>
-    document.getElementById('toggleButton').addEventListener('click', function() {
-        var content = document.getElementById('spreadsheet');
-        if (content.style.display === 'none') {
-            content.style.display = 'block';
-        } else {
-            content.style.display = 'none';
-        }
-    });
-</script>
-
-  <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-  <script src="{% static 'js/handsontable.full.min.js' %}"></script>
-  <script src="{% static 'js/xlsx.full.min.js' %}"></script>
+<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/handsontable.full.min.js' %}"></script>
+<script src="{% static 'js/xlsx.full.min.js' %}"></script>
 {% endblock %}

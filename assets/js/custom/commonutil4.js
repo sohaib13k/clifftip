@@ -143,3 +143,13 @@ document.addEventListener('DOMContentLoaded', function () {
         scrollAlert.style.display = 'none';
     });
   });
+
+
+  document.getElementById('toggleButton').addEventListener('click', function() {
+      var content = document.getElementById('spreadsheet');
+      if (content.style.display === 'none') {
+          content.style.display = 'block';
+      } else {
+          content.style.display = 'none';
+      }
+  });
