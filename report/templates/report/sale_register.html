@@ -42,7 +42,7 @@
     </div>
   </div>
   <script>
-    var apiUrl = '{% url 'report-datefilter-api' result.report.id %}';
+    var apiUrl = '{% url 'report-datefilter-excel-api' result.report.id %}';
     window.reportExcelJson
     document.addEventListener('DOMContentLoaded', function () {
       new handsontableManager('spreadsheet')

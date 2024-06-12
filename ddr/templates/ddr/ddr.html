@@ -687,7 +687,7 @@
 
 
   <script>
-    var apiUrl = '{% url 'report-datefilter-api' result.sale_register.report.id|default:"0" %}';
+    var apiUrl = '{% url 'report-datefilter-excel-api' result.sale_register.report.id|default:"0" %}';
     var requestData = {};
     var currentDate = new Date();
     var lastYearDate = new Date();

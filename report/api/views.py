@@ -10,7 +10,7 @@ from django.http import Http404
 
 
 @login_required
-def view_filtered_report(request, report_id=None):
+def view_filtered_excel(request, report_id=None):
     report = Report.objects.filter(
         Q(access_users=request.user) | Q(access_groups__in=request.user.groups.all()),
         id=report_id,
