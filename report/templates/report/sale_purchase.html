@@ -27,10 +27,15 @@
         <h2 class="mt-5">Excel Data</h2>
 
         <div class="d-flex justify-content-between mb-2">
-          <button class="btn btn-primary" id="toggleButton">Show/Hide Excel Data</button>
-          {% include 'commonutil/time_interval_select.html' %}
-          <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
+          <div class="d-flex me-auto">
+            <button class="btn btn-primary me-1" id="toggleButton">Show/Hide Excel Data</button>
+            <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
+          </div>
+          <div>
+            {% include 'commonutil/time_interval_select.html' %}
+          </div>
         </div>
+        
         <div id="spreadsheet" class="handsontable" style="display: block"></div>
         <hr />
         <div class="table-responsive">{{ result.sales_analysis|safe }}</div>
