@@ -1,0 +1,47 @@
+<div class="w-100">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title">All Parties data completion</h5>
+    </div>
+    <div style="overflow-x: auto; margin: 0; padding: 0;">
+      <table id="report-table" class="table" style="border-collapse: collapse; width: 100%; margin: 0; padding: 0;">
+          <tr>
+              {% for column, count in result.all_parties_with_sale.counts.items %}
+                <th class="report-column" style="padding: 0.6em; white-space: nowrap; border: 1px solid white; background-color: #96D4D4; text-align: left;" data-column="{{ column }}">{{ column }}</th>
+              {% endfor %}
+            </tr>
+            <tr id="report-row">
+              {% for column, count in result.all_parties_with_sale.counts.items %}
+                <td class="report-column" data-column="{{ column }}" style="padding: 0.6em; border: 1px solid white; {% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
+                  {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
+                  {% else %} background-color: #ccffcc;
+                  {% endif %}" onclick="filterData('{{ column }}', '{{ count }}')">
+                  <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                    {{ count }}
+                  </a>
+                </td>
+              {% endfor %}
+            </tr>
+        </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="centeredModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">All Parties data completion</h5> 
+        <a class="ms-2" href={% url 'report-view' result.all_parties_with_sale.report.id %} target="_blank">Full report<i class="fas fa-fw fa-external-link-alt"></i></a>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body m-3">
+        <div id="spreadsheet" class="handsontable"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
+      </div>
+    </div>
+  </div>
+</div>

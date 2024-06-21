@@ -32,15 +32,15 @@ def sale_register(request, report):
     # latest_file = max(file_path.glob("*.xlsx"), key=lambda x: x.stat().st_mtime)
     # return temp(request, latest_file)
 
-    latest_file = commonutil.get_latest_csv_from_dir(report)
+    # latest_file = commonutil.get_latest_csv_from_dir(report)
 
-    df = pd.DataFrame()
-    if latest_file is not None:
-        df = pd.read_csv(latest_file)
+    # df = pd.DataFrame()
+    # if latest_file is not None:
+    #     df = pd.read_csv(latest_file)
 
     result = {
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
-        "data": df.to_json(orient="records"),
+        # "data": df.to_json(orient="records"),
         "report": report,
     }
 

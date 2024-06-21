@@ -8,53 +8,7 @@
 {% block styles %}
   <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
   <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
-  <style>
-    /* Basic styling for dropdown and table */
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #f9f9f9;
-      min-width: 160px;
-      max-height: 200px; /* Approx 6-7 items */
-      overflow-y: auto;
-      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-      z-index: 1;
-      padding: 10px;
-    }
-
-    .dropdown-content .form-check {
-      margin: 5px 0;
-    }
-
-    .show {
-      display: block;
-    }
-
-    .dropdown-footer {
-      position: sticky;
-      bottom: 0;
-      background-color: #f9f9f9;
-      padding: 10px;
-      box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.1);
-    }
-
-    .number-input-group-danger {
-      background-color: #ffcccc;
-    }
-
-    .number-input-group-action {
-      background-color: #ffffcc;
-    }
-
-    .number-input-group-acceptable {
-      background-color: #ccffcc;
-    }
-  </style>
+  
 {% endblock %}
 
 {% block content %}
@@ -75,80 +29,11 @@
 
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex flex-column">
               {% if "all_parties_with_sale" in accessible_reports %}
-                <div class="w-100">
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="card-title">All Parties data completion</h5>
-                    </div>
-                    <div style="overflow-x: auto; margin: 0; padding: 0;">
-                      <table id="report-table" class="table" style="border-collapse: collapse; width: 100%; margin: 0; padding: 0;">
-                          <tr>
-                              {% for column, count in result.all_parties_with_sale.counts.items %}
-                                <th class="report-column" style="padding: 0.6em; white-space: nowrap; border: 1px solid white; background-color: #96D4D4; text-align: left;" data-column="{{ column }}">{{ column }}</th>
-                              {% endfor %}
-                            </tr>
-                            <tr id="report-row">
-                              {% for column, count in result.all_parties_with_sale.counts.items %}
-                                <td class="report-column" data-column="{{ column }}" style="padding: 0.6em; border: 1px solid white; {% if count > result.all_parties_with_sale.threshold.danger %} background-color: #ffcccc;
-                                  {% elif count >= result.all_parties_with_sale.threshold.action and count <= result.all_parties_with_sale.threshold.danger %} background-color: #ffffcc;
-                                  {% else %} background-color: #ccffcc;
-                                  {% endif %}" onclick="filterData('{{ column }}', '{{ count }}')">
-                                  <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                                    {{ count }}
-                                  </a>
-                                </td>
-                              {% endfor %}
-                            </tr>
-                        </table>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="modal fade" id="centeredModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">All Parties data completion</h5> 
-                        <a class="ms-2" href={% url 'report-view' result.all_parties_with_sale.report.id %} target="_blank">Full report<i class="fas fa-fw fa-external-link-alt"></i></a>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body m-3">
-                        <div id="spreadsheet" class="handsontable"></div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+                {% include "ddr/report/all_parties_with_sale.html" %}
               {% endif %}
           
               {% if "sale_register" in accessible_reports %}
-                <div class="w-100">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                      <h5 class="card-title">Sale Register (Net Total)</h5>
-                      <div class="btn-group btn-group-sm mb-4" role="group" aria-label="Time Period Selection">
-                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('day')">Day</button>
-                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('week')">Week</button>
-                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('month')">Month</button>
-                        <button type="button" class="btn btn-secondary" onclick="populateLineChart('year')">Year</button>
-                      </div>
-                    </div>
-                    <div class="card-body">
-                      <div class="chart w-100">
-                        <div id="apexcharts-line"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="card">
-                    {% comment %} next card {% endcomment %}
-                  </div>
-
-                </div>
+                {% include "ddr/report/sale_register.html" %}
               {% endif %}
             </div>
           
@@ -156,92 +41,13 @@
               <div class="w-100">
 
                 {% if "bom_report" in accessible_reports %}
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="card-title">Bom Report</h5>
-                    </div>
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                      <table class="table table-striped table-bordered table-sm">
-                          <tr>
-                            <th>Date</th>
-                            {% for item in result.bom_report.items%}
-                              <td class="text-end" style="white-space: nowrap;">{{ item.report_upload_date }}</td>
-                            {% endfor %}
-                          </tr>
-                          <tr>
-                            <th>Lock/Total</th>
-                            {% for item in result.bom_report.items%}
-                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
-                            {% endfor %}
-                          </tr>
-                          <tr>
-                            <th>Percentage</th>
-                            {% for item in result.bom_report.items%}
-                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock_percent|floatformat:2 }}%</td>
-                            {% endfor %}
-                            <td>
-                              <div style="height:25px;">
-                                  <canvas id="bom-chart-percentage-trend"></canvas>
-                              </div>
-                          </td>
-                          </tr>
-                      </table>
-                    </div>
-                  </div>
+                  {% include "ddr/report/bom_report.html" %}
                 {% endif %}  
 
                 {% if "routing_report" in accessible_reports %}
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="card-title">Routing Report</h5>
-                    </div>
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                      <table class="table table-striped table-bordered table-sm">
-                          <tr>
-                            <th>Date</th>
-                            {% for item in result.routing_report.items%}
-                              <td class="text-end" style="white-space: nowrap;">{{ item.report_upload_date }}</td>
-                            {% endfor %}
-                          </tr>
-                          <tr>
-                            <th>Lock/Total</th>
-                            {% for item in result.routing_report.items%}
-                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
-                            {% endfor %}
-                          </tr>
-                          <tr>
-                            <th>Percentage</th>
-                            {% for item in result.routing_report.items%}
-                              <td class="text-end" style="white-space: nowrap;">{{ item.data_lock_percent|floatformat:2 }}%</td>
-                            {% endfor %}
-                            <td>
-                              <div style="height:25px;">
-                                  <canvas id="routing-chart-percentage-trend"></canvas>
-                              </div>
-                          </td>
-                          </tr>
-                      </table>
-                    </div>
-                  </div>
+                  {% include "ddr/report/routing_report.html" %}
                 {% endif %}
 
-                {% comment %} <div class="card">
-                  <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Sale register (Net total)</h5>
-                    <div class="btn-group btn-group-sm mb-4" role="group" aria-label="Time Period Selection">
-                      <button type="button" class="btn btn-secondary" onclick="updateChart('day')">Day</button>
-                      <button type="button" class="btn btn-secondary" onclick="updateChart('week')">Week</button>
-                      <button type="button" class="btn btn-secondary" onclick="updateChart('month')">Month</button>
-                      <button type="button" class="btn btn-secondary" onclick="updateChart('year')">Year</button>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="chart">
-                      <canvas id="sale-register-total-sales"></canvas>
-                    </div>
-                  </div>
-                </div> {% endcomment %}
-                
                 <div class="card">
                   {% comment %} next card {% endcomment %}
                 </div>
@@ -264,89 +70,15 @@
     <div class="offcanvas-body">
   
       {% if "all_parties_with_sale" in accessible_reports %}
-        <div class="card mb-3">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="card-title mb-0">All Parties (global threshold)</h6>
-              <button class="btn btn-success" id="save-values">Save</button>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">Danger</label>
-              <div class="input-group">
-                <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
-                <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
-                <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Action</label>
-              <div class="input-group">
-                <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
-                <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
-                <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Acceptable</label>
-              <div class="input-group">
-                <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
-                <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
-                <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-      
-      {% if "all_parties_with_sale" in accessible_reports %}
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">All Parties (choose columns)</h5>
-            <button id="save-columns" class="btn btn-success">Save</button>
-          </div>
-          <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-            <div class="checkbox-list p-2 rounded border">
-              {% for column, count in result.all_parties_with_sale.counts.items %}
-                <div class="form-check mb-2">
-                  <input class="form-check-input column-checkbox" type="checkbox" value="{{ column }}" id="check{{ forloop.counter }}" />
-                  <label class="form-check-label" for="check{{ forloop.counter }}">{{ column }}</label>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
+        {% include "ddr/configuration/all_parties_with_sale.html" %}
       {% endif %}
       
       {% if "bom_report" in accessible_reports %}
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Bom Report (Visibility count)</h5>
-            <button id="save-bom-visibility" class="btn btn-success">Save</button>
-          </div>
-          <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-            <div class="input-group">
-              <button class="btn btn-outline-secondary" type="button" onclick="decrement('bom-visibility-value')">-</button>
-              <input type="text" class="form-control text-center" id="bom-visibility-value" value="{{ result.bom_report.visibility_count|default:7 }}">
-              <button class="btn btn-outline-secondary" type="button" onclick="increment('bom-visibility-value')">+</button>
-            </div>
-          </div>
-        </div>
+        {% include "ddr/configuration/bom_report.html" %}
       {% endif %}
 
       {% if "routing_report" in accessible_reports %}
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Routing Report (Visibility count)</h5>
-            <button id="save-routing-visibility" class="btn btn-success">Save</button>
-          </div>
-          <div class="card-body" style="max-height: 15em; overflow-y: auto;">
-            <div class="input-group">
-              <button class="btn btn-outline-secondary" type="button" onclick="decrement('routing-visibility-value')">-</button>
-              <input type="text" class="form-control text-center" id="routing-visibility-value" value="{{ result.routing_report.visibility_count|default:7 }}">
-              <button class="btn btn-outline-secondary" type="button" onclick="increment('routing-visibility-value')">+</button>
-            </div>
-          </div>
-        </div>
+        {% include "ddr/configuration/routing_report.html" %}
       {% endif %}
       
     </div>
@@ -506,6 +238,25 @@
       return cookieValue;
     }
 
+    function saveEntity(data, successCallback) {
+      const csrftoken = getCookie('csrftoken');
+      $.ajax({
+        url: "{% url 'ddr-api-saveEntity' %}",
+        method: "POST",
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(data),
+        success: function(response) {
+          successCallback(response);
+        },
+        error: function(error) {
+          console.error('Error:', error);
+        }
+      });
+    }
+    
     function increment(id) {
       let input = document.getElementById(id);
       input.value = parseInt(input.value) + 1;
@@ -519,7 +270,6 @@
     }
 
     document.getElementById('save-values').addEventListener('click', function() {
-      const csrftoken = getCookie('csrftoken');
       const data = {
         threshold: {
           danger: document.getElementById('danger-value').value,
@@ -529,22 +279,9 @@
         methodName: 'save_all_parties_ddr_threshold',
       };
 
-      $.ajax({
-        url: "{% url 'ddr-api-saveEntity' %}",
-        method: "POST",
-        headers: {
-          'X-CSRFToken': csrftoken,
-          'Content-Type': 'application/json'
-        },
-        data: JSON.stringify(data),
-        success: function(response) {
-          // Update the table cells dynamically
-          updateTable(response.threshold);
-          window.location.href = "{% url 'ddr-home' %}?cached=false";
-        },
-        error: function(error) {
-          console.error('Error:', error);
-        }
+      saveEntity(data, function(response) {
+        updateTable(response.threshold);
+        window.location.href = "{% url 'ddr-home' %}?cached=false";
       });
     });
 
@@ -566,64 +303,32 @@
   
   <script>
     document.getElementById('save-bom-visibility').addEventListener('click', function() {
-      const csrftoken = getCookie('csrftoken');
       const data = {
         visibility_count: document.getElementById('bom-visibility-value').value,
         methodName: 'save_bom_report_visibility_count',
       };
 
-      $.ajax({
-        url: "{% url 'ddr-api-saveEntity' %}",
-        method: "POST",
-        headers: {
-          'X-CSRFToken': csrftoken,
-          'Content-Type': 'application/json'
-        },
-        data: JSON.stringify(data),
-        success: function(response) {
-          // Update the table cells dynamically
-          updateTable(response.threshold);
-          window.location.href = "{% url 'ddr-home' %}?cached=false";
-        },
-        error: function(error) {
-          console.error('Error:', error);
-        }
+      saveEntity(data, function(response) {
+        window.location.href = "{% url 'ddr-home' %}?cached=false";
       });
     });
   </script>
 
   <script>
     document.getElementById('save-routing-visibility').addEventListener('click', function() {
-      const csrftoken = getCookie('csrftoken');
       const data = {
         visibility_count: document.getElementById('routing-visibility-value').value,
         methodName: 'save_routing_report_visibility_count',
       };
 
-      $.ajax({
-        url: "{% url 'ddr-api-saveEntity' %}",
-        method: "POST",
-        headers: {
-          'X-CSRFToken': csrftoken,
-          'Content-Type': 'application/json'
-        },
-        data: JSON.stringify(data),
-        success: function(response) {
-          // Update the table cells dynamically
-          updateTable(response.threshold);
-          window.location.href = "{% url 'ddr-home' %}?cached=false";
-        },
-        error: function(error) {
-          console.error('Error:', error);
-        }
+      saveEntity(data, function(response) {
+        window.location.href = "{% url 'ddr-home' %}?cached=false";
       });
     });
   </script>
 
   <script>
     $(document).ready(function() {
-      const csrftoken = getCookie('csrftoken');
-
       // Pre-select checkboxes based on selected_columns and then clear it
       var selectedColumns = {{ result.all_parties_with_sale.selected_columns|safe }};
       selectedColumns.forEach(function(column) {
@@ -636,26 +341,18 @@
         $('.column-checkbox:checked').each(function() {
           selectedColumns.push($(this).val());
         });
-  
-        $.ajax({
-          url: "{% url 'ddr-api-saveEntity' %}",
-          method: "POST",
-          headers: {
-            'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json'
-          },
-          data: JSON.stringify({
-            columns: selectedColumns,
-            report_id: {{result.all_parties_with_sale.report.id}},
-            methodName: 'save_all_parties_ddr_selected_columns',
-          }),
-          success: function(response) {
-            window.location.href = "{% url 'ddr-home' %}?cached=false";
-            // Optionally handle the response from the backend
-          }
+
+        const data = {
+          columns: selectedColumns,
+          report_id: {{result.all_parties_with_sale.report.id}},
+          methodName: 'save_all_parties_ddr_selected_columns',
+        }
+
+        saveEntity(data, function(response) {
+          window.location.href = "{% url 'ddr-home' %}?cached=false";
         });
       });
-  
+
       // Handle column checkbox change
       $('.column-checkbox').change(function() {
         var selectedColumns = [];
@@ -698,83 +395,7 @@
       end_date: formatDate(currentDate),
       columns: "Net Total"
     };
-
-    {% comment %} function updateChart(view) {
-      var labels = [];
-      var data = [];
-      var aggregatedData = {};
-    
-      window.reportData.forEach(item => {
-        var date = new Date(item["Invoice Date"]);
-        var label;
-    
-        if (view === 'day') {
-          label = date.toISOString().split('T')[0];
-        } else if (view === 'week') {
-          var weekStart = new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
-          label = weekStart;
-        } else if (view === 'month') {
-          label = date.getFullYear() + '-' + ("0" + (date.getMonth() + 1)).slice(-2);
-        } else if (view === 'year') {
-          label = date.getFullYear().toString();
-        }
-    
-        if (!aggregatedData[label]) {
-          aggregatedData[label] = 0;
-        }
-        aggregatedData[label] += item["Net Total"];
-      });
-    
-      labels = Object.keys(aggregatedData);
-      data = Object.values(aggregatedData).map(value => Math.round(value)); // Round to nearest whole number
-    
-      var chartData = {
-        labels: labels,
-        datasets: [{
-          label: "Total Sales",
-          backgroundColor: window.theme.primary,
-          borderColor: window.theme.primary,
-          hoverBackgroundColor: window.theme.primary,
-          hoverBorderColor: window.theme.primary,
-          data: data,
-          barPercentage: .75,
-          categoryPercentage: .5
-        }]
-      };
-    
-      var ctx = document.getElementById("sale-register-total-sales").getContext('2d');
-      if (window.salesChart) {
-        window.salesChart.destroy();
-      }
-      window.salesChart = new Chart(ctx, {
-        type: 'bar',
-        data: chartData,
-        options: {
-          maintainAspectRatio: false,
-          legend: {
-            display: false
-          },
-          scales: {
-            yAxes: [{
-              gridLines: {
-                display: false
-              },
-              stacked: false,
-              ticks: {
-                stepSize: 20
-              }
-            }],
-            xAxes: [{
-              stacked: false,
-              gridLines: {
-                color: "transparent"
-              }
-            }]
-          }
-        }
-      });
-    } {% endcomment %}
-    
+  
     function populateLineChart(view) {
       var labels = [];
       var data = [];
@@ -854,106 +475,6 @@
       chart.render();
     }
     
-
-    // Showing 3 trends... can be useful later
-
-    {% comment %} function populateLineChart() {
-      var labels = [];
-      var data1 = [];
-      var data2 = [];
-      var data3 = [];
-      var aggregatedData1 = {};
-      var aggregatedData2 = {};
-      var aggregatedData3 = {};
-  
-      window.reportData.forEach(item => {
-        var date = new Date(item["Invoice Date"]);
-        var label = date.toISOString().split('T')[0];
-  
-        if (!aggregatedData1[label]) {
-          aggregatedData1[label] = 0;
-          aggregatedData2[label] = 0;
-          aggregatedData3[label] = 0;
-        }
-  
-        aggregatedData1[label] += item["Net Total"];
-        aggregatedData2[label] += item["Net Total"] / 2; // Example transformation
-        aggregatedData3[label] += item["Net Total"] / 3; // Example transformation
-      });
-  
-      labels = Object.keys(aggregatedData1);
-      data1 = Object.values(aggregatedData1).map(value => Math.round(value)); // Round to nearest whole number
-      data2 = Object.values(aggregatedData2).map(value => Math.round(value)); // Round to nearest whole number
-      data3 = Object.values(aggregatedData3).map(value => Math.round(value)); // Round to nearest whole number
-  
-      var options = {
-        chart: {
-          height: 350,
-          type: "line",
-          zoom: {
-            enabled: false
-          },
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          width: [5, 7, 5],
-          curve: "straight",
-          dashArray: [0, 8, 5]
-        },
-        series: [{
-            name: "Session Duration",
-            data: data1
-          },
-          {
-            name: "Page Views",
-            data: data2
-          },
-          {
-            name: "Total Visits",
-            data: data3
-          }
-        ],
-        markers: {
-          size: 0,
-          style: "hollow", // full, hollow, inverted
-        },
-        xaxis: {
-          categories: labels,
-        },
-        tooltip: {
-          y: [{
-            title: {
-              formatter: function(val) {
-                return val + " (mins)"
-              }
-            }
-          }, {
-            title: {
-              formatter: function(val) {
-                return val + " per session"
-              }
-            }
-          }, {
-            title: {
-              formatter: function(val) {
-                return val;
-              }
-            }
-          }]
-        },
-        grid: {
-          borderColor: "#f1f1f1",
-        }
-      }
-      var chart = new ApexCharts(
-        document.querySelector("#apexcharts-line"),
-        options
-      );
-      chart.render();
-    } {% endcomment %}
-
     document.addEventListener("DOMContentLoaded", function() {
       $.ajax({
         url: apiUrl,
