@@ -48,6 +48,10 @@
                   {% include "ddr/report/routing_report.html" %}
                 {% endif %}
 
+                {% if "sale_purchase" in accessible_reports %}
+                  {% include "ddr/report/sale_purchase.html" %}
+                {% endif %}
+
                 <div class="card">
                   {% comment %} next card {% endcomment %}
                 </div>

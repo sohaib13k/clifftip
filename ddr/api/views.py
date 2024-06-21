@@ -14,6 +14,7 @@ logger = logging.getLogger("__name__")
 
 @login_required
 def saveEntity(request):
+    # TODO: add authorisation check, like report/api/views.py/view_filtered_excel(...)
     if request.method != "POST":
         return JsonResponse({"status": "error"}, status=405)
 
