@@ -1,10 +1,61 @@
 <div class="card">
     <div class="card-header">
+        <h5 class="card-title">Sales Person</h5>
+    </div>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-striped table-bordered table-sm" id="sales-table">
+            <tbody>
+                <!-- Content will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Branch Sales</h5>
+    </div>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-striped table-bordered table-sm" id="branch-sales-table">
+            <tbody>
+                <!-- Content will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
         <h5 class="card-title">Item Type Sales</h5>
     </div>
     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
         <table class="table table-striped table-bordered table-sm" id="item-type-sales-table">
-         
+            <tbody>
+                <!-- Content will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Sales Person by Item Type</h5>
+    </div>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-striped table-bordered table-sm" id="individual-by-item-type-sales-table">
+            <tbody>
+                <!-- Content will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Branch by Item Type</h5>
+    </div>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-striped table-bordered table-sm" id="branch-by-item-type-sales-table">
             <tbody>
                 <!-- Content will be populated by JavaScript -->
             </tbody>
@@ -19,22 +70,22 @@
         var currentDate = new Date();
         var lastYearDate = new Date();
         lastYearDate.setFullYear(currentDate.getFullYear() - 1);
-        
+
         function formatDate(date) {
-          var day = ("0" + date.getDate()).slice(-2);
-          var month = ("0" + (date.getMonth() + 1)).slice(-2);
-          var year = date.getFullYear();
-          return year + '-' + month + '-' + day;
+            var day = ("0" + date.getDate()).slice(-2);
+            var month = ("0" + (date.getMonth() + 1)).slice(-2);
+            var year = date.getFullYear();
+            return year + '-' + month + '-' + day;
         }
-    
+
         requestData = {
-          start_date: formatDate(lastYearDate),
-          end_date: formatDate(currentDate),
+            start_date: formatDate(lastYearDate),
+            end_date: formatDate(currentDate),
         };
 
-        function populateTable(data) {
-            const tableBody = document.querySelector("#item-type-sales-table tbody");
-            tableBody.innerHTML = data.item_type_analysis;
+        function populateTable(tableId, data) {
+            const tableBody = document.querySelector(`#${tableId} tbody`);
+            tableBody.innerHTML = data;
         }
 
         $.ajax({
@@ -43,14 +94,26 @@
             data: requestData,
             dataType: 'json',
             success: function(response) {
-                if (response.data && response.data.item_type_analysis) {
-                    populateTable(response.data);
+                if (response.data) {
+                    populateTable("sales-table", response.data.sales_analysis || '<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    populateTable("branch-sales-table", response.data.branch_analysis || '<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    populateTable("item-type-sales-table", response.data.item_type_analysis || '<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    populateTable("individual-by-item-type-sales-table", response.data.individual_by_item_type_analysis || '<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    populateTable("branch-by-item-type-sales-table", response.data.branch_by_item_type_analysis || '<tr><td colspan="3" class="text-center">No data available</td></tr>');
                 } else {
+                    $('#sales-table tbody').html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    $('#branch-sales-table tbody').html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
                     $('#item-type-sales-table tbody').html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    $('#individual-by-item-type-sales-table tbody').html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                    $('#branch-by-item-type-sales-table tbody').html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
                 }
             },
             error: function(xhr, status, error) {
+                $('#sales-table tbody').html('<tr><td colspan="3" class="text-center text-danger">Error fetching data</td></tr>');
+                $('#branch-sales-table tbody').html('<tr><td colspan="3" class="text-center text-danger">Error fetching data</td></tr>');
                 $('#item-type-sales-table tbody').html('<tr><td colspan="3" class="text-center text-danger">Error fetching data</td></tr>');
+                $('#individual-by-item-type-sales-table tbody').html('<tr><td colspan="3" class="text-center text-danger">Error fetching data</td></tr>');
+                $('#branch-by-item-type-sales-table tbody').html('<tr><td colspan="3" class="text-center text-danger">Error fetching data</td></tr>');
             }
         });
     });
