@@ -139,6 +139,9 @@ def all_parties_with_sale(request, report):
 
     parties_with_sale = parties_with_sale.drop_duplicates(subset=["Company Name"])
     parties_with_sale = parties_with_sale.drop(columns=["Customer Name"])
+    
+    from report.views import save_as_csv
+    save_as_csv(report, None, parties_with_sale)
 
     selected_columns_record = AllPartiesSelectedColumns.objects.filter(
         user=request.user

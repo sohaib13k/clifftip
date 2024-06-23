@@ -181,26 +181,6 @@ def temp(request, report):
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
     # df_sales.insert(gstn_index, 'Item Type', '0')
 
-
-    # saving data for DDR view (temporary code)===============================
-    # TODO: remove
-    parties_with_sale = pd.merge(
-            df_parties,
-            df_sales[["Customer Name"]],
-            left_on="Company Name",
-            right_on="Customer Name",
-            how="inner",
-        )
-    parties_with_sale = parties_with_sale.drop_duplicates(subset=['Company Name'])
-    
-    parties_with_sale = parties_with_sale.drop(columns=['Customer Name'])
-    
-    parties_with_sale_report = Report.objects.get(service_name="all_parties_with_sale")
-    from report.views import save_as_csv
-
-    save_as_csv(parties_with_sale_report, None, parties_with_sale)
-    # =======================================================================
-
     df_parties.rename(columns={"Branch":"Branch_duplicate"}, inplace=True)
     df_parties.rename(columns={"Branch.1":"Branch"}, inplace=True)
 
@@ -228,6 +208,7 @@ def temp(request, report):
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
     updated_sales = updated_sales[updated_sales["Sales Person"] != "General ID"]
 
+    from report.views import save_as_csv
     save_as_csv(report, None, updated_sales)
 
     # report_excel = updated_sales.to_html(
