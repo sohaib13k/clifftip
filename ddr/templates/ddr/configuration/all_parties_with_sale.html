@@ -47,3 +47,82 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.getElementById('save-values').addEventListener('click', function() {
+    const data = {
+      threshold: {
+        danger: document.getElementById('danger-value').value,
+        action: document.getElementById('action-value').value,
+        acceptable: document.getElementById('acceptable-value').value
+      },
+      methodName: 'save_all_parties_ddr_threshold',
+    };
+
+    saveEntity(data, function(response) {
+      updateTable(response.threshold);
+      window.location.href = "{% url 'ddr-home' %}?cached=false";
+    });
+  });
+
+  function updateTable(thresholds) {
+    $('#report-row .report-column').each(function() {
+      const column = $(this).data('column');
+      let value = parseInt($(this).find('a').text());
+
+      if (value > thresholds.danger) {
+        $(this).css('background-color', '#ffcccc');
+      } else if (value >= thresholds.action && value <= thresholds.danger) {
+        $(this).css('background-color', '#ffffcc');
+      } else {
+        $(this).css('background-color', '#ccffcc');
+      }
+    });
+  }
+  
+  $(document).ready(function() {
+    // Pre-select checkboxes based on selected_columns and then clear it
+    var selectedColumns = {{ result.all_parties_with_sale.selected_columns|safe }};
+    selectedColumns.forEach(function(column) {
+      $('.column-checkbox[value="' + column + '"]').prop('checked', true);
+    });
+
+    // Handle save button click for columns
+    $('#save-columns').click(function() {
+      var selectedColumns = [];
+      $('.column-checkbox:checked').each(function() {
+        selectedColumns.push($(this).val());
+      });
+
+      const data = {
+        columns: selectedColumns,
+        report_id: {{result.all_parties_with_sale.report.id}},
+        methodName: 'save_all_parties_ddr_selected_columns',
+      }
+
+      saveEntity(data, function(response) {
+        window.location.href = "{% url 'ddr-home' %}?cached=false";
+      });
+    });
+
+    // Handle column checkbox change
+    $('.column-checkbox').change(function() {
+      var selectedColumns = [];
+      $('.column-checkbox:checked').each(function() {
+        selectedColumns.push($(this).val());
+      });
+
+      $('.report-column').each(function() {
+        var column = $(this).data('column');
+        if (selectedColumns.includes(column)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+
+    // Initially hide columns based on default selections (if needed)
+    $('.column-checkbox').change();
+  });
+</script>

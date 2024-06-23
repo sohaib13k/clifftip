@@ -30,3 +30,72 @@
     </table>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var ctx = document.getElementById('bom-chart-percentage-trend').getContext('2d');
+    var dataLockPercent = [
+        {% for item in result.bom_report.items %}
+            {{ item.data_lock_percent|floatformat:2 }},
+        {% endfor %}
+    ];
+
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dataLockPercent.map((_, index) => index + 1), // Adding labels to avoid undefined issue
+            datasets: [{
+                data: dataLockPercent,
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1,
+                fill: false,
+                pointBackgroundColor: 'rgba(120, 120, 120, 1)', // Color for highlighted points
+                pointBorderColor: 'rgba(255, 0, 0, 0)', // Border color for highlighted points
+                pointRadius: 2 // Size of highlighted points
+            }]
+        },
+        options: {
+          legend: {
+            display: false
+         },
+         tooltips: {
+            enabled: false
+         },
+          scales: {
+            xAxes: [{
+              ticks: {
+                display: false //this will remove only the label
+            },
+                gridLines: {
+                    display:false
+                }
+            }],
+            yAxes: [{
+              ticks: {
+                display: false //this will remove only the label
+            },
+                gridLines: {
+                    display:false
+                }   
+              }]
+            },
+            plugins: {
+                legend: {
+                    display: false // Hide the legend
+                }
+            },
+            elements: {
+                point: {
+                    radius: 0 // Highlight data points
+                },
+                line: {
+                    tension: 0 // Add some curve to the line
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false
+        }
+    });
+  });
+</script>

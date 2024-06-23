@@ -43,3 +43,43 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    $('#centeredModalPrimary').on('shown.bs.modal', function () {
+      var container = document.getElementById('spreadsheet');
+
+      if (!window.handsontableManagerInstance) {
+        window.handsontableManagerInstance = new handsontableManager('spreadsheet');
+      } else {
+        window.handsontableManagerInstance.initOrUpdateHandsontable(window.reportExcelJson);
+      }
+    });
+  });
+
+  // Function to filter data based on the clicked column
+  window.originalReportExcelJson = {{ result.all_parties_with_sale.data|safe }}; // Keep the original data
+  window.reportExcelJson = [...window.originalReportExcelJson]; // Displayed data
+
+   function filterData(columnName, count) {
+    if (count > 0) {
+        const filteredData = window.originalReportExcelJson.filter(row => row[columnName] === "" || row[columnName] === null);
+        window.reportExcelJson = filteredData;
+    } else {
+        window.reportExcelJson = [...window.originalReportExcelJson];
+    }
+    document.getElementById('modalTitle').innerText = `All Parties: ${columnName}`;
+    document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+  }
+
+  // Event listener for table column click
+  document.addEventListener('DOMContentLoaded', function () {
+      const table = document.getElementById('report-table');
+      table.addEventListener('click', function (e) {
+          if (e.target.tagName === 'TD') {
+              const columnName = e.target.getAttribute('data-column');
+              filterData(columnName);
+          }
+      });
+  });
+</script>

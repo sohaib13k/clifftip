@@ -11,3 +11,16 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.getElementById('save-routing-visibility').addEventListener('click', function() {
+    const data = {
+      visibility_count: document.getElementById('routing-visibility-value').value,
+      methodName: 'save_routing_report_visibility_count',
+    };
+
+    saveEntity(data, function(response) {
+      window.location.href = "{% url 'ddr-home' %}?cached=false";
+    });
+  });
+</script>
