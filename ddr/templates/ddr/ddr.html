@@ -8,6 +8,11 @@
 {% block styles %}
   <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
   <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
+  <style>
+    .form-group label {
+      display:none;
+    }
+  </style>
   
 {% endblock %}
 
@@ -28,13 +33,17 @@
           <div class="row">
 
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex flex-column">
-              {% if "all_parties_with_sale" in accessible_reports %}
-                {% include "ddr/report/all_parties_with_sale.html" %}
-              {% endif %}
-          
-              {% if "sale_register" in accessible_reports %}
-                {% include "ddr/report/sale_register.html" %}
-              {% endif %}
+              <div class="w-100">
+                
+                {% if "all_parties_with_sale" in accessible_reports %}
+                  {% include "ddr/report/all_parties_with_sale.html" %}
+                {% endif %}
+            
+                {% if "sale_register" in accessible_reports %}
+                  {% include "ddr/report/sale_register.html" %}
+                {% endif %}
+
+              </div>
             </div>
           
             <div class="col-lg-6 col-xl-6 col-xxl-6 d-flex">
@@ -51,10 +60,6 @@
                 {% if "sale_purchase" in accessible_reports %}
                   {% include "ddr/report/sale_purchase.html" %}
                 {% endif %}
-
-                <div class="card">
-                  {% comment %} next card {% endcomment %}
-                </div>
 
               </div>
             </div>
@@ -89,6 +94,9 @@
   </div>
   
   <script>
+    var chart;
+    var apiUrl = '{% url 'report-datefilter-excel-api' result.sale_register.report.id|default:"0" %}';
+    var pageType = 'ddr';
     document.addEventListener('DOMContentLoaded', function () {
         var ctx = document.getElementById('bom-chart-percentage-trend').getContext('2d');
         var dataLockPercent = [
@@ -381,25 +389,6 @@
 
 
   <script>
-    var apiUrl = '{% url 'report-datefilter-excel-api' result.sale_register.report.id|default:"0" %}';
-    var requestData = {};
-    var currentDate = new Date();
-    var lastYearDate = new Date();
-    lastYearDate.setFullYear(currentDate.getFullYear() - 1);
-    
-    function formatDate(date) {
-      var day = ("0" + date.getDate()).slice(-2);
-      var month = ("0" + (date.getMonth() + 1)).slice(-2);
-      var year = date.getFullYear();
-      return year + '-' + month + '-' + day;
-    }
-
-    requestData = {
-      start_date: formatDate(lastYearDate),
-      end_date: formatDate(currentDate),
-      columns: "Net Total"
-    };
-  
     function populateLineChart(view) {
       var labels = [];
       var data = [];
@@ -472,38 +461,17 @@
         }
       };
     
-      var chart = new ApexCharts(
+      if (chart) {
+        chart.destroy();
+        document.querySelector("#apexcharts-line").innerHTML = ""; // Clear the chart container
+      }
+      
+      chart = new ApexCharts(
         document.querySelector("#apexcharts-line"),
         options
       );
       chart.render();
     }
-    
-    document.addEventListener("DOMContentLoaded", function() {
-      $.ajax({
-        url: apiUrl,
-        type: 'GET',
-        data: requestData,
-        dataType: 'json',
-        success: function (data) {
-          if ($.isEmptyObject(data)) {
-            $('#spreadsheet').html('<div class="alert alert-warning">No data available.</div>');
-            return;
-          }
-          if (typeof data === 'string') {
-            data = JSON.parse(data);
-          }
-          if (Array.isArray(data)) {
-            window.reportData = data;
-            {% comment %} updateChart('week'); {% endcomment %}
-            populateLineChart('week');
-          }
-        },
-        error: function (xhr, status, error) {
-          $('#spreadsheet').html('<div class="alert alert-danger">Error fetching data.</div>');
-        }
-      });
-    });
   </script>
 
   <script>
@@ -553,4 +521,5 @@
 {% block script %}
   <script src="{% static 'js/handsontable.full.min.js' %}"></script>
   <script src="{% static 'js/xlsx.full.min.js' %}"></script>
+  <script src="{% static 'js/custom/datePickerSettings.js' %}"></script>
 {% endblock %}

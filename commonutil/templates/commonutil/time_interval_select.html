@@ -1,4 +1,4 @@
-<div class="form-group d-flex align-items-center">
+<div class="form-group d-flex flex-column flex-md-row align-items-center">
     <label for="timeInterval" class="me-3 mb-0">Time Interval</label>
     <select id="timeInterval" class="form-select" style="width: auto;">
       <option value="day">This Day</option>
@@ -7,8 +7,7 @@
       <option value="year">This Year</option>
       <option value="custom">Custom</option>
     </select>
-    <div class="mb-0 ms-1" id="dateRangeContainer" style="display: none;">
+    <div class="mb-0 ms-0 ms-md-1 mt-2 mt-md-0" id="dateRangeContainer" style="display: none;">
       <input type="text" id="datePicker" class="form-control flatpickr-range" placeholder="Select date or date range" style="width: auto;" />
     </div>
-  </div>
-  
+</div>

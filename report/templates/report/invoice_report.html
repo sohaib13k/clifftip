@@ -44,6 +44,7 @@
     </div>
   </div>
   <script>
+    var pageType = 'report';
     var apiUrl = '{% url 'report-datefilter-excel-api' result.report.id %}';
     window.reportExcelJson
     document.addEventListener('DOMContentLoaded', function () {

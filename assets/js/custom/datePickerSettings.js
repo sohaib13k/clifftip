@@ -68,8 +68,17 @@ document.addEventListener("DOMContentLoaded", function() {
             }
   
             if (Array.isArray(data)) {
-              window.reportExcelJson = data;
-              new handsontableManager('spreadsheet');
+              if (typeof pageType !== 'undefined') {
+                if (pageType === 'report') {
+                  window.reportExcelJson = data;
+                  new handsontableManager('spreadsheet');
+                } else if (pageType === 'ddr') {
+                  window.reportData = data;
+                  populateLineChart(document.querySelector('#timeIntervalView').value);
+                }
+              } else {
+                console.error('pageIdentifier is not defined');
+              }
             }
           },
           error: function (xhr, status, error) {

@@ -1,22 +1,18 @@
-<div class="w-100">
-    <div class="card">
+<div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title">Sale Register (Net Total)</h5>
-        <div class="btn-group btn-group-sm mb-4" role="group" aria-label="Time Period Selection">
-        <button type="button" class="btn btn-secondary" onclick="populateLineChart('day')">Day</button>
-        <button type="button" class="btn btn-secondary" onclick="populateLineChart('week')">Week</button>
-        <button type="button" class="btn btn-secondary" onclick="populateLineChart('month')">Month</button>
-        <button type="button" class="btn btn-secondary" onclick="populateLineChart('year')">Year</button>
+        <div class="d-flex justify-content-end align-items-center">
+            <div class="me-1">
+                {% include 'commonutil/time_interval_select.html' %}
+            </div>
+            <div>
+                {% include 'commonutil/time_interval_view.html' %}
+            </div>
         </div>
     </div>
     <div class="card-body">
         <div class="chart w-100">
-        <div id="apexcharts-line"></div>
+            <div id="apexcharts-line"></div>
         </div>
-    </div>
-    </div>
-
-    <div class="card">
-    {% comment %} next card {% endcomment %}
     </div>
 </div>
