@@ -72,12 +72,10 @@ def read_excel_or_html(excel_path, skiprows=None):
     :return: A DataFrame containing the data.
     """
     if is_file_html(excel_path):
-        # Convert HTML to DataFrame if the file is HTML
-        return convert_html_to_dataframe(excel_path)
-    # Otherwise, read as Excel file
+        return pd.read_html(excel_path), True
     return pd.read_excel(
         excel_path, engine=get_excel_read_engine(excel_path), skiprows=skiprows
-    )
+    ), False
 
 
 def is_file_html(file_path):
@@ -90,18 +88,6 @@ def is_file_html(file_path):
             )
     except Exception as e:
         return False
-
-
-def convert_html_to_dataframe(html_path):
-    """Convert an HTML file to a DataFrame and return it.
-
-    This function reads an HTML file, assuming it contains at least one table,
-    and returns the first table as a DataFrame.
-    """
-    # Use Pandas to read the HTML file
-    df_list = pd.read_html(html_path)
-    # Assuming the first table is what you need
-    return df_list[0]  # Return the DataFrame of the first table directly
 
 
 def get_excel_read_engine(excel_path):
@@ -133,3 +119,12 @@ def get_latest_csv_from_dir(report):
         return None
 
     return latest_file
+
+
+def remove_trailing_non_numeric(df):
+    """Removed extra rows at the end of an excel, like 'Total' or 'Amount in words:'
+    """
+    for idx in range(len(df) - 1, -1, -1):
+        if pd.notna(pd.to_numeric(df.iloc[idx, 0], errors='coerce')):
+            break
+    return df.iloc[:idx + 1]

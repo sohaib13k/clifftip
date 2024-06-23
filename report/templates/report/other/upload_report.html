@@ -52,7 +52,9 @@
                           <td>
                             <strong>{{ report.id }}</strong>
                           </td>
-                          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ report.name }}</td>
+                          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <a class="text-decoration-none" href="{% url 'report-view' report.id %}?cached=true">{{ report.name }}</a>
+                          </td>
                           {% if report.report_last_updated_tmstmp %}
                             <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}&nbsp;&nbsp;({{ report.report_last_updated_tmstmp|time_elapsed }})</td>
                           {% else %}
@@ -79,7 +81,9 @@
                           <td>
                             <strong>{{ report.id }}</strong>
                           </td>
-                          <td>{{ report.name }}</td>
+                          <td>
+                            <a class="text-decoration-none" href="{% url 'report-view' report.id %}?cached=true">{{ report.name }}</a>
+                          </td>
                           <td>{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}</td>
                           <td class="py-0">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#defaultModalPrimary">Click here to enter data</a>
