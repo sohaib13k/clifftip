@@ -100,48 +100,7 @@ def routing_report(request, report):
 
 
 def all_parties_with_sale(request, report):
-    associated_reports = report.reports.filter(
-        service_name__in=["sale_register", "all_parties"]
-    )
-
-    if len(associated_reports) < 2:
-        return {report.service_name: "No associated data present"}
-
-    df_sales = pd.DataFrame()
-    df_parties = pd.DataFrame()
-
-    sale_reg_csv_dir = settings.CSV_DIR / "sale_register"
-
-    try:
-        for filename in os.listdir(sale_reg_csv_dir):
-            if filename.endswith(".csv"):
-                file_path = os.path.join(sale_reg_csv_dir, filename)
-                df = pd.read_csv(file_path)
-                df_sales = pd.concat([df_sales, df], ignore_index=True)
-
-    except FileNotFoundError:
-        raise Http404("File not found.")
-
-    all_parties_csv = commonutil.get_latest_csv_from_dir(
-        Report.objects.get(service_name="all_parties")
-    )
-
-    if all_parties_csv is not None:
-        df_parties = pd.read_csv(all_parties_csv, low_memory=False)
-
-    parties_with_sale = pd.merge(
-        df_parties,
-        df_sales[["Customer Name"]],
-        left_on="Company Name",
-        right_on="Customer Name",
-        how="inner",
-    )
-
-    parties_with_sale = parties_with_sale.drop_duplicates(subset=["Company Name"])
-    parties_with_sale = parties_with_sale.drop(columns=["Customer Name"])
-    
-    from report.views import save_as_csv
-    save_as_csv(report, None, parties_with_sale)
+    parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")["df"]
 
     selected_columns_record = AllPartiesSelectedColumns.objects.filter(
         user=request.user

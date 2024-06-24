@@ -376,7 +376,7 @@ def sale_purchase(request, report):
     return temp(request, report)
 
 
-def all_parties_with_sale(request, report):
+def all_parties_with_sale(request, report, *args):
     associated_reports = report.reports.filter(
         service_name__in=["sale_register", "all_parties"]
     )
@@ -419,6 +419,9 @@ def all_parties_with_sale(request, report):
     
     from report.views import save_as_csv
     save_as_csv(report, None, parties_with_sale)
+
+    if args and args[0] == "ddr":
+        return {"df": parties_with_sale}
 
     result = {
         "data": parties_with_sale.to_json(orient="records"),
