@@ -205,14 +205,23 @@ def all_parties_with_sale(request, report):
     gst_multiple_items = gst_item_counts[gst_item_counts > 1].index
     # Collect rows corresponding to these GST numbers
     parties_with_sale_cross_sales = sale_pur_df[sale_pur_df['Customer GSTN'].isin(gst_multiple_items)]
-    parties_with_sale_cross_sales = parties_with_sale_cross_sales.sort_values(by='Customer Name')
+
+
+    # TODO: Temp code, until below todo getting fixed.
+    filtered_parties_with_sale = parties_with_sale[parties_with_sale['GST No.'].isin(parties_with_sale_cross_sales['Customer GSTN'])]
+    unique_parties_with_sale = filtered_parties_with_sale.drop_duplicates(subset='GST No.')
+    unique_parties_with_sale = unique_parties_with_sale.sort_values(by='Company Name')
     
-    # Reorder columns to place 'Item Type' beside 'Customer GSTN'
-    columns = list(parties_with_sale_cross_sales.columns)
-    columns.insert(columns.index('Customer GSTN') + 1, columns.pop(columns.index('Item Type')))
-    parties_with_sale_cross_sales = parties_with_sale_cross_sales[columns]
+
+    # TODO: Fix handsontable issue, where 2 different structure on same page causing issue. Until then below code commented
+    # parties_with_sale_cross_sales = parties_with_sale_cross_sales.sort_values(by='Customer Name')
     
-    parties_with_sale_cross_sales_count = parties_with_sale_cross_sales['Customer GSTN'].nunique()
+    # # Reorder columns to place 'Item Type' beside 'Customer GSTN'
+    # columns = list(parties_with_sale_cross_sales.columns)
+    # columns.insert(columns.index('Customer GSTN') + 1, columns.pop(columns.index('Item Type')))
+    # parties_with_sale_cross_sales = parties_with_sale_cross_sales[columns]
+
+    # parties_with_sale_cross_sales_count = parties_with_sale_cross_sales['Customer GSTN'].nunique()
 
 
 
@@ -250,8 +259,8 @@ def all_parties_with_sale(request, report):
         "parties_with_sale_regular_count": parties_with_sale_regular_count,
         "parties_with_sale_regular" : parties_with_sale_regular.to_json(orient="records"),
 
-        "parties_with_sale_cross_sales": parties_with_sale_cross_sales.to_json(orient="records"),
-        "parties_with_sale_cross_sales_count" : parties_with_sale_cross_sales_count,
+        "parties_with_sale_cross_sales": unique_parties_with_sale.to_json(orient="records"),
+        "parties_with_sale_cross_sales_count" : len(unique_parties_with_sale),
     }
 
     return result
