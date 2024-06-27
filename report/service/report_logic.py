@@ -256,24 +256,33 @@ def temp(request, report):
 
     # formatting numbers as per locale
     # format_currency
-    individual_sales["Net Total"] = individual_sales["Net Total"].apply(
-        commonutil.format_rupees
+    individual_sales["Net Total"] = (
+        individual_sales["Net Total"]
+        .round()
+        .astype(int)
+        .apply(commonutil.format_rupees)
     )
-    branch_sales["Net Total"] = branch_sales["Net Total"].apply(
-        commonutil.format_rupees
+    branch_sales["Net Total"] = (
+        branch_sales["Net Total"].round().astype(int).apply(commonutil.format_rupees)
     )
-    item_type_sales["Net Total"] = item_type_sales["Net Total"].apply(
-        commonutil.format_rupees
+    item_type_sales["Net Total"] = (
+        item_type_sales["Net Total"].round().astype(int).apply(commonutil.format_rupees)
     )
 
     for column in individual_by_item_type_sales.columns:  # Skip the first column
-        individual_by_item_type_sales[column] = individual_by_item_type_sales[
-            column
-        ].apply(commonutil.format_rupees)
+        individual_by_item_type_sales[column] = (
+            individual_by_item_type_sales[column]
+            .round()
+            .astype(int)
+            .apply(commonutil.format_rupees)
+        )
 
     for column in branch_by_item_type_sales.columns:  # Skip the first column
-        branch_by_item_type_sales[column] = branch_by_item_type_sales[column].apply(
-            commonutil.format_rupees
+        branch_by_item_type_sales[column] = (
+            branch_by_item_type_sales[column]
+            .round()
+            .astype(int)
+            .apply(commonutil.format_rupees)
         )
 
     # Convert to HTML for displaying in the template
