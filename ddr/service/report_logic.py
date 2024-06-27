@@ -141,11 +141,11 @@ def all_parties_with_sale(request, report):
     
     if not filtered_df.empty:
         common_gst_no = filtered_df['Customer GSTN'].unique()
-        filtered_parties_with_sale = parties_with_sale[~parties_with_sale['GST No.'].isin(common_gst_no)]
+        parties_with_sale_dead = parties_with_sale[~parties_with_sale['GST No.'].isin(common_gst_no)]
     else:
-        filtered_parties_with_sale = parties_with_sale
+        parties_with_sale_dead = parties_with_sale
 
-    filtered_parties_count = filtered_parties_with_sale.shape[0]
+    parties_with_sale_dead_count = parties_with_sale_dead.shape[0]
 
 
 
@@ -174,16 +174,13 @@ def all_parties_with_sale(request, report):
 
 
     parties_with_sale_on_off = parties_with_sale[~parties_with_sale['GST No.'].isin(gst_numbers)]
-    parties_with_sale_on_off = parties_with_sale_on_off[~parties_with_sale_on_off['GST No.'].isin(filtered_parties_with_sale['GST No.'])]
+    parties_with_sale_on_off = parties_with_sale_on_off[~parties_with_sale_on_off['GST No.'].isin(parties_with_sale_dead['GST No.'])]
     
     parties_with_sale_regular = parties_with_sale[parties_with_sale['GST No.'].isin(gst_numbers)]
 
     parties_with_sale_on_off_count = parties_with_sale_on_off.shape[0]
     parties_with_sale_regular_count = parties_with_sale_regular.shape[0]
 
-
-
-    # Now parties_with_sale_on_off does not contain any GST numbers from filtered_parties_with_sale
 
 
 
@@ -213,8 +210,8 @@ def all_parties_with_sale(request, report):
         "threshold": thresholds,
         "report": report,
 
-        "filtered_parties_count": filtered_parties_count,
-        "filtered_parties_with_sale": filtered_parties_with_sale.to_json(orient="records"),
+        "parties_with_sale_dead_count": parties_with_sale_dead_count,
+        "parties_with_sale_dead": parties_with_sale_dead.to_json(orient="records"),
 
         "parties_with_sale_on_off_count":parties_with_sale_on_off_count,
         "parties_with_sale_on_off" : parties_with_sale_on_off.to_json(orient="records"),
