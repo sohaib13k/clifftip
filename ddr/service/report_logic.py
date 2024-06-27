@@ -183,6 +183,30 @@ def all_parties_with_sale(request, report):
 
 
 
+    sale_pur_csv_dir = settings.CSV_DIR / "sale_purchase"
+
+    current_date = datetime.now()
+    current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
+    
+    sale_pur_df = pd.DataFrame()
+
+    # Merge CSV files for the last four months
+    for _ in range(4):
+        file_path = sale_pur_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        if os.path.exists(file_path):
+            df = pd.read_csv(file_path)
+            sale_pur_df = pd.concat([sale_pur_df, df], ignore_index=True)
+        current_date -= relativedelta(months=1)
+
+
+    # Group by 'Customer GSTN' and count unique 'Item_type'
+    gst_item_counts = sale_pur_df.groupby('Customer GSTN')['Item Type'].nunique()
+    # Filter GST numbers with more than one unique 'Item_type'
+    gst_multiple_items = gst_item_counts[gst_item_counts > 1].index
+    # Collect rows corresponding to these GST numbers
+    parties_with_sale_cross_sales = sale_pur_df[sale_pur_df['Customer GSTN'].isin(gst_multiple_items)]
+    parties_with_sale_cross_sales_count = parties_with_sale_cross_sales.shape[0] 
+
 
 
     selected_columns_record = AllPartiesSelectedColumns.objects.filter(
@@ -217,6 +241,9 @@ def all_parties_with_sale(request, report):
         "parties_with_sale_on_off" : parties_with_sale_on_off.to_json(orient="records"),
         "parties_with_sale_regular_count": parties_with_sale_regular_count,
         "parties_with_sale_regular" : parties_with_sale_regular.to_json(orient="records"),
+
+        "parties_with_sale_cross_sales": parties_with_sale_cross_sales,
+        "parties_with_sale_cross_sales_count" : parties_with_sale_cross_sales_count,
     }
 
     return result

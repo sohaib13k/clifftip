@@ -1,6 +1,6 @@
 <div class="card">
   <div class="card-header">
-    <h5 class="card-title">ECD Report</h5>
+    <h5 class="card-title">ECD Report (last 4 months)</h5>
   </div>
 
 
@@ -42,12 +42,12 @@
           </a>
         </td>
 
-        <td class="{% if result.all_parties_with_sale.parties_with_sale_dead_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
-        {% elif result.all_parties_with_sale.parties_with_sale_dead_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.parties_with_sale_dead_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        <td class="{% if result.all_parties_with_sale.parties_with_sale_cross_sales_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.parties_with_sale_cross_sales_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.parties_with_sale_cross_sales_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
         {% else %} bg-success text-light
-        {% endif %}" onclick="filterDataSale2('Cross-sales')">
+        {% endif %}" onclick="ecdReportCrossSale('Cross-sales')">
           <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-            {% comment %} {{ result.all_parties_with_sale.parties_with_sale_dead_count }} {% endcomment %}
+            {{ result.all_parties_with_sale.parties_with_sale_cross_sales_count }}
           </a>
         </td>
       </tr>
@@ -60,6 +60,7 @@
   window.ecdReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_dead|safe }}; // Keep the original data
   window.ecdOnOffReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_on_off|safe }}; // Keep the original data
   window.ecdRegularReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_regular|safe }}; // Keep the original data
+  window.ecdCrossSaleReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_cross_sales|safe }}; // Keep the original data
 
   window.reportExcelJson = [...window.ecdReportExcelJson]; // Displayed data
 
@@ -77,6 +78,12 @@
 
   function ecdReportRegular(columnName) {
     window.reportExcelJson = [...window.ecdRegularReportExcelJson];
+    document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
+    document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+  }
+
+  function ecdReportCrossSale(columnName) {
+    window.reportExcelJson = [...window.ecdCrossSaleReportExcelJson];
     document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
     document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
   }
