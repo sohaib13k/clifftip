@@ -1,4 +1,3 @@
-from django.db import IntegrityError
 from django.http import HttpResponse, Http404
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -12,7 +11,7 @@ from commonutil import commonutil
 from report.commonutil import append_total, add_percentage_column
 from report.service import report_logic
 from django.conf import settings
-from report.models import Report, Parties
+from report.models import Report
 from ddr.models import (
     AllPartiesSelectedColumns,
     AllPartiesThreshold,
@@ -246,37 +245,6 @@ def all_parties_with_sale(request, report):
 
     # ==========================================================================================================
 
-    df_sales = report_logic.all_parties_with_sale(request, report, "ddr")["df_sales"]
-    df_sales['Invoice Date'] = pd.to_datetime(df_sales['Invoice Date'])
-
-    parties_to_create = []
-    existing_gst_no = set(Parties.objects.values_list('gst_no', flat=True))
-
-    for index, row in parties_with_sale.iterrows():
-        customer_name = row['Company Name']
-        gst_no = row['GST No.']
-
-        sales_data = df_sales[df_sales['Customer GSTN'] == gst_no]
-
-        if not sales_data.empty:
-            first_sale = sales_data['Invoice Date'].min()
-            # last_sale = sales_data['Invoice Date'].max()
-
-            if gst_no not in existing_gst_no:
-                party = Parties(
-                    customer_name=customer_name,
-                    gst_no=gst_no,
-                    first_sale=first_sale,
-                    # last_sale=last_sale
-                )
-                parties_to_create.append(party)
-                existing_gst_no.add(gst_no)
-
-    # Bulk create new parties
-    if parties_to_create:
-        Parties.objects.bulk_create(parties_to_create)
-
-    # ==========================================================================================================
 
     result = {
         "data": parties_with_sale.to_json(orient="records"),
