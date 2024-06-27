@@ -153,7 +153,39 @@ def all_parties_with_sale(request, report):
     current_date = datetime.now()
     current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
 
+    # Open the CSV file for the previous month and get unique GST numbers
+    file_path = sale_reg_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
+        gst_numbers = set(df['Customer GSTN'].unique())
+    else:
+        gst_numbers = set()
+
+    # Iterate through the previous three months
+    for _ in range(3):
+        current_date -= relativedelta(months=1)
+        file_path = sale_reg_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        if os.path.exists(file_path):
+            df = pd.read_csv(file_path)
+            previous_gst_numbers = set(df['Customer GSTN'].unique())
+            gst_numbers = gst_numbers.intersection(previous_gst_numbers)
     
+
+
+    parties_with_sale_on_off = parties_with_sale[~parties_with_sale['GST No.'].isin(gst_numbers)]
+    parties_with_sale_on_off = parties_with_sale_on_off[~parties_with_sale_on_off['GST No.'].isin(filtered_parties_with_sale['GST No.'])]
+    
+    parties_with_sale_regular = parties_with_sale[parties_with_sale['GST No.'].isin(gst_numbers)]
+
+    parties_with_sale_on_off_count = parties_with_sale_on_off.shape[0]
+    parties_with_sale_regular_count = parties_with_sale_regular.shape[0]
+
+
+
+    # Now parties_with_sale_on_off does not contain any GST numbers from filtered_parties_with_sale
+
+
 
 
     selected_columns_record = AllPartiesSelectedColumns.objects.filter(
@@ -183,6 +215,11 @@ def all_parties_with_sale(request, report):
 
         "filtered_parties_count": filtered_parties_count,
         "filtered_parties_with_sale": filtered_parties_with_sale.to_json(orient="records"),
+
+        "parties_with_sale_on_off_count":parties_with_sale_on_off_count,
+        "parties_with_sale_on_off" : parties_with_sale_on_off.to_json(orient="records"),
+        "parties_with_sale_regular_count": parties_with_sale_regular_count,
+        "parties_with_sale_regular" : parties_with_sale_regular.to_json(orient="records"),
     }
 
     return result

@@ -18,27 +18,27 @@
         <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
         {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
         {% else %} bg-success text-light
-        {% endif %}" onclick="filterDataSale2('Dead')">
+        {% endif %}" onclick="ecdReportDead('Dead')">
           <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
             {{ result.all_parties_with_sale.filtered_parties_count }}
           </a>
         </td>
 
-        <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
-        {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        <td class="{% if result.all_parties_with_sale.parties_with_sale_on_off_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.parties_with_sale_on_off_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.parties_with_sale_on_off_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
         {% else %} bg-success text-light
-        {% endif %}" onclick="filterDataSale2('On/Off')">
+        {% endif %}" onclick="ecdReportOnOff('On/Off')">
           <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-            {{ result.all_parties_with_sale.filtered_parties_count }}
+            {{ result.all_parties_with_sale.parties_with_sale_on_off_count }}
           </a>
         </td>
 
-        <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
-        {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        <td class="{% if result.all_parties_with_sale.parties_with_sale_regular_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.parties_with_sale_regular_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.parties_with_sale_regular_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
         {% else %} bg-success text-light
-        {% endif %}" onclick="filterDataSale2('Regular')">
+        {% endif %}" onclick="ecdReportRegular('Regular')">
           <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-            {{ result.all_parties_with_sale.filtered_parties_count }}
+            {{ result.all_parties_with_sale.parties_with_sale_regular_count }}
           </a>
         </td>
 
@@ -47,7 +47,7 @@
         {% else %} bg-success text-light
         {% endif %}" onclick="filterDataSale2('Cross-sales')">
           <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-            {{ result.all_parties_with_sale.filtered_parties_count }}
+            {% comment %} {{ result.all_parties_with_sale.filtered_parties_count }} {% endcomment %}
           </a>
         </td>
       </tr>
@@ -58,10 +58,25 @@
 <script>
   // Function to filter data based on the clicked column
   window.ecdReportExcelJson = {{ result.all_parties_with_sale.filtered_parties_with_sale|safe }}; // Keep the original data
+  window.ecdOnOffReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_on_off|safe }}; // Keep the original data
+  window.ecdRegularReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_regular|safe }}; // Keep the original data
+
   window.reportExcelJson = [...window.ecdReportExcelJson]; // Displayed data
 
-  function filterDataSale2(columnName) {
+  function ecdReportDead(columnName) {
     window.reportExcelJson = [...window.ecdReportExcelJson];
+    document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
+    document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+  }
+
+  function ecdReportOnOff(columnName) {
+    window.reportExcelJson = [...window.ecdOnOffReportExcelJson];
+    document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
+    document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+  }
+
+  function ecdReportRegular(columnName) {
+    window.reportExcelJson = [...window.ecdRegularReportExcelJson];
     document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
     document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
   }
