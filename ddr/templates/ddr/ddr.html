@@ -36,7 +36,7 @@
               <div class="w-100">
                 
                 {% if "all_parties_with_sale" in accessible_reports %}
-                  {% include "ddr/report/all_parties_with_sale_1.html" %}
+                  {% include "ddr/report/all_parties_with_sale_data_completion.html" %}
                 {% endif %}
             
                 {% if "sale_register" in accessible_reports %}
@@ -44,7 +44,11 @@
                 {% endif %}
 
                 {% if "all_parties_with_sale" in accessible_reports %}
-                  {% include "ddr/report/all_parties_with_sale_2.html" %}
+                  {% include "ddr/report/all_parties_with_sale_ecd.html" %}
+                {% endif %}
+
+                {% if "all_parties_with_sale" in accessible_reports %}
+                  {% include "ddr/report/all_parties_with_sale_new_parties.html" %}
                 {% endif %}
 
               </div>

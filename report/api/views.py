@@ -103,10 +103,19 @@ def view_filtered_data(request, report_id=None):
         raise Http404("Invalid input provided.")
 
     if report.is_masterdata:
-        return JsonResponse(
-            {"error": "Masterdata cannot be filtered, since date column missing."},
-            status=406,
-        )
+        func = getattr(report_logic, report.service_name, None)
+
+        if func is None:
+            func = getattr(report_logic, "default", None)
+
+        latest_file = commonutil.get_latest_csv_from_dir(report)
+        df = pd.DataFrame()
+        if latest_file is not None:
+            df = pd.read_csv(latest_file, low_memory=False)
+
+        report_data = func(request, report, df)
+        return JsonResponse({"data": {report.service_name: report_data}}, safe=False)
+
 
     interval = request.GET.get("interval")
 
