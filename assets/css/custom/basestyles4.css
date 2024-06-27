@@ -27,15 +27,3 @@ body {
   font-size: 1.8rem;
   text-decoration: none;
 }
-
-.number-input-group-danger {
-  background-color: #ffcccc !important;
-}
-
-.number-input-group-action {
-  background-color: #ffffcc !important;
-}
-
-.number-input-group-acceptable {
-  background-color: #ccffcc !important;
-}

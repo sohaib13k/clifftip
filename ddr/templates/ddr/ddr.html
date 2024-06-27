@@ -36,11 +36,15 @@
               <div class="w-100">
                 
                 {% if "all_parties_with_sale" in accessible_reports %}
-                  {% include "ddr/report/all_parties_with_sale.html" %}
+                  {% include "ddr/report/all_parties_with_sale_1.html" %}
                 {% endif %}
             
                 {% if "sale_register" in accessible_reports %}
                   {% include "ddr/report/sale_register.html" %}
+                {% endif %}
+
+                {% if "all_parties_with_sale" in accessible_reports %}
+                  {% include "ddr/report/all_parties_with_sale_2.html" %}
                 {% endif %}
 
               </div>

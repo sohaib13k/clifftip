@@ -1,0 +1,68 @@
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title">ECD Report</h5>
+  </div>
+
+
+  <table class="table table-bordered table-sm" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Dead</th>
+        <th>On/Off</th>
+        <th>Regular</th>
+        <th>Cross-sales</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        {% else %} bg-success text-light
+        {% endif %}" onclick="filterDataSale2('Dead')">
+          <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+            {{ result.all_parties_with_sale.filtered_parties_count }}
+          </a>
+        </td>
+
+        <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        {% else %} bg-success text-light
+        {% endif %}" onclick="filterDataSale2('On/Off')">
+          <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+            {{ result.all_parties_with_sale.filtered_parties_count }}
+          </a>
+        </td>
+
+        <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        {% else %} bg-success text-light
+        {% endif %}" onclick="filterDataSale2('Regular')">
+          <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+            {{ result.all_parties_with_sale.filtered_parties_count }}
+          </a>
+        </td>
+
+        <td class="{% if result.all_parties_with_sale.filtered_parties_count > result.all_parties_with_sale.threshold.danger %} bg-danger text-light
+        {% elif result.all_parties_with_sale.filtered_parties_count >= result.all_parties_with_sale.threshold.action and result.all_parties_with_sale.filtered_parties_count <= result.all_parties_with_sale.threshold.danger %} bg-warning text-dark
+        {% else %} bg-success text-light
+        {% endif %}" onclick="filterDataSale2('Cross-sales')">
+          <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+            {{ result.all_parties_with_sale.filtered_parties_count }}
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Function to filter data based on the clicked column
+  window.ecdReportExcelJson = {{ result.all_parties_with_sale.filtered_parties_with_sale|safe }}; // Keep the original data
+  window.reportExcelJson = [...window.ecdReportExcelJson]; // Displayed data
+
+  function filterDataSale2(columnName) {
+    window.reportExcelJson = [...window.ecdReportExcelJson];
+    document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
+    document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+  }
+</script>

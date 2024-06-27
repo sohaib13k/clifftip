@@ -1,3 +1,6 @@
+from django.http import HttpResponse, Http404
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from django.http import Http404
 from django.shortcuts import render
 import pandas as pd
@@ -101,6 +104,57 @@ def routing_report(request, report):
 
 def all_parties_with_sale(request, report):
     parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")["df"]
+    sale_register_report = Report.objects.filter(service_name="sale_register").first()
+
+    current_date = datetime.now()
+    start_date = current_date - relativedelta(months=4)
+    start_date = start_date.replace(day=1)
+
+    merged_df = pd.DataFrame()
+    count = 0
+    sale_reg_csv_dir = settings.CSV_DIR / "sale_register"
+
+    try:
+        for filename in os.listdir(sale_reg_csv_dir):
+            if filename.endswith(".csv") and count < 4:
+                file_date = datetime.strptime(filename, "%Y_%m.csv")
+                if start_date <= file_date <= current_date:
+                    file_path = os.path.join(sale_reg_csv_dir, filename)
+                    df = pd.read_csv(file_path)
+                    merged_df = pd.concat([merged_df, df], ignore_index=True)
+                    count += 1
+
+    except Exception as e:
+        return HttpResponse("", status=500)
+
+    filtered_df = pd.DataFrame()
+
+    if not merged_df.empty:
+        # Convert the date column to datetime
+        merged_df['Invoice Date'] = pd.to_datetime(merged_df['Invoice Date'])
+        # Filter the DataFrame to include only the data from the last four months
+        filtered_df = merged_df[
+            (merged_df[sale_register_report.date_col] >= start_date)
+            & (merged_df[sale_register_report.date_col] <= current_date)
+        ]
+
+    
+    if not filtered_df.empty:
+        common_gst_no = filtered_df['Customer GSTN'].unique()
+        filtered_parties_with_sale = parties_with_sale[~parties_with_sale['GST No.'].isin(common_gst_no)]
+    else:
+        filtered_parties_with_sale = parties_with_sale
+
+    filtered_parties_count = filtered_parties_with_sale.shape[0]
+
+
+
+
+    current_date = datetime.now()
+    current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
+
+    
+
 
     selected_columns_record = AllPartiesSelectedColumns.objects.filter(
         user=request.user
@@ -126,6 +180,9 @@ def all_parties_with_sale(request, report):
         "counts": counts,
         "threshold": thresholds,
         "report": report,
+
+        "filtered_parties_count": filtered_parties_count,
+        "filtered_parties_with_sale": filtered_parties_with_sale.to_json(orient="records"),
     }
 
     return result

@@ -8,7 +8,7 @@
       <label class="form-label">Danger</label>
       <div class="input-group">
         <button class="btn btn-outline-secondary" type="button" onclick="decrement('danger-value')">-</button>
-        <input type="text" class="form-control text-center number-input-group-danger" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
+        <input type="text" class="form-control text-center bg-danger text-light" id="danger-value" value="{{ result.all_parties_with_sale.threshold.danger|default:0 }}">
         <button class="btn btn-outline-secondary" type="button" onclick="increment('danger-value')">+</button>
       </div>
     </div>
@@ -16,7 +16,7 @@
       <label class="form-label">Action</label>
       <div class="input-group">
         <button class="btn btn-outline-secondary" type="button" onclick="decrement('action-value')">-</button>
-        <input type="text" class="form-control text-center number-input-group-action" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
+        <input type="text" class="form-control text-center bg-warning text-dark" id="action-value" value="{{ result.all_parties_with_sale.threshold.action|default:0 }}">
         <button class="btn btn-outline-secondary" type="button" onclick="increment('action-value')">+</button>
       </div>
     </div>
@@ -24,7 +24,7 @@
       <label class="form-label">Acceptable</label>
       <div class="input-group">
         <button class="btn btn-outline-secondary" type="button" onclick="decrement('acceptable-value')">-</button>
-        <input type="text" class="form-control text-center number-input-group-acceptable" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
+        <input type="text" class="form-control text-center bg-success text-light" id="acceptable-value" value="{{ result.all_parties_with_sale.threshold.acceptable|default:0 }}">
         <button class="btn btn-outline-secondary" type="button" onclick="increment('acceptable-value')">+</button>
       </div>
     </div>
@@ -60,26 +60,10 @@
     };
 
     saveEntity(data, function(response) {
-      updateTable(response.threshold);
       window.location.href = "{% url 'ddr-home' %}?cached=false";
     });
   });
 
-  function updateTable(thresholds) {
-    $('#report-row .report-column').each(function() {
-      const column = $(this).data('column');
-      let value = parseInt($(this).find('a').text());
-
-      if (value > thresholds.danger) {
-        $(this).css('background-color', '#ffcccc');
-      } else if (value >= thresholds.action && value <= thresholds.danger) {
-        $(this).css('background-color', '#ffffcc');
-      } else {
-        $(this).css('background-color', '#ccffcc');
-      }
-    });
-  }
-  
   $(document).ready(function() {
     // Pre-select checkboxes based on selected_columns and then clear it
     var selectedColumns = {{ result.all_parties_with_sale.selected_columns|safe }};
