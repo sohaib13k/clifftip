@@ -18,6 +18,7 @@
 </div>
 
 <script>
+  var apiUrl = '{% url 'report-datefilter-excel-api' result.sale_register.report.id|default:"0" %}';
   var chart;
 
   function populateLineChart(view) {
