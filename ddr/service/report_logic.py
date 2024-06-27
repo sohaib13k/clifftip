@@ -205,7 +205,15 @@ def all_parties_with_sale(request, report):
     gst_multiple_items = gst_item_counts[gst_item_counts > 1].index
     # Collect rows corresponding to these GST numbers
     parties_with_sale_cross_sales = sale_pur_df[sale_pur_df['Customer GSTN'].isin(gst_multiple_items)]
-    parties_with_sale_cross_sales_count = parties_with_sale_cross_sales.shape[0] 
+    parties_with_sale_cross_sales = parties_with_sale_cross_sales.sort_values(by='Customer Name')
+    
+    # Reorder columns to place 'Item Type' beside 'Customer GSTN'
+    columns = list(parties_with_sale_cross_sales.columns)
+    columns.insert(columns.index('Customer GSTN') + 1, columns.pop(columns.index('Item Type')))
+    parties_with_sale_cross_sales = parties_with_sale_cross_sales[columns]
+    
+    parties_with_sale_cross_sales_count = parties_with_sale_cross_sales['Customer GSTN'].nunique()
+
 
 
 
@@ -242,7 +250,7 @@ def all_parties_with_sale(request, report):
         "parties_with_sale_regular_count": parties_with_sale_regular_count,
         "parties_with_sale_regular" : parties_with_sale_regular.to_json(orient="records"),
 
-        "parties_with_sale_cross_sales": parties_with_sale_cross_sales,
+        "parties_with_sale_cross_sales": parties_with_sale_cross_sales.to_json(orient="records"),
         "parties_with_sale_cross_sales_count" : parties_with_sale_cross_sales_count,
     }
 
