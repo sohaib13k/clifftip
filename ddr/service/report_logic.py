@@ -105,7 +105,6 @@ def routing_report(request, report):
 
 def all_parties_with_sale(request, report):
     parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")["df_parties_with_sale"]
-    print(parties_with_sale.head())
     sale_register_report = Report.objects.filter(service_name="sale_register").first()
 
     current_date = datetime.now()
