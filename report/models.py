@@ -231,3 +231,21 @@ def extract_and_upload_to_azure(file_path, blob_name):
     temp_folder = Path(file_path).parent
     if os.path.exists(temp_folder):
         shutil.rmtree(temp_folder)
+
+
+class Parties(models.Model):
+    customer_name = models.CharField(max_length=127, unique=True)
+    gst_no = models.CharField(max_length=127, unique=True)
+    first_sale = models.DateField(null=True, blank=True)
+    last_sale = models.DateField(null=True, blank=True)
+    created_tmstmp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.customer_name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['customer_name']),
+            models.Index(fields=['gst_no']),
+            models.Index(fields=['customer_name', 'gst_no']),
+        ]

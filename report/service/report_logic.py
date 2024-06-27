@@ -421,7 +421,7 @@ def all_parties_with_sale(request, report, *args):
     save_as_csv(report, None, parties_with_sale)
 
     if args and args[0] == "ddr":
-        return {"df": parties_with_sale}
+        return {"df_parties_with_sale": parties_with_sale, "df_sales": df_sales}
 
     result = {
         "data": parties_with_sale.to_json(orient="records"),

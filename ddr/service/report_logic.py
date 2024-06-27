@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.http import HttpResponse, Http404
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -11,7 +12,7 @@ from commonutil import commonutil
 from report.commonutil import append_total, add_percentage_column
 from report.service import report_logic
 from django.conf import settings
-from report.models import Report
+from report.models import Report, Parties
 from ddr.models import (
     AllPartiesSelectedColumns,
     AllPartiesThreshold,
@@ -103,7 +104,8 @@ def routing_report(request, report):
 
 
 def all_parties_with_sale(request, report):
-    parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")["df"]
+    parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")["df_parties_with_sale"]
+    print(parties_with_sale.head())
     sale_register_report = Report.objects.filter(service_name="sale_register").first()
 
     current_date = datetime.now()
@@ -147,8 +149,7 @@ def all_parties_with_sale(request, report):
 
     parties_with_sale_dead_count = parties_with_sale_dead.shape[0]
 
-
-
+    # ==========================================================================================================
 
     current_date = datetime.now()
     current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
@@ -181,7 +182,7 @@ def all_parties_with_sale(request, report):
     parties_with_sale_on_off_count = parties_with_sale_on_off.shape[0]
     parties_with_sale_regular_count = parties_with_sale_regular.shape[0]
 
-
+    # ==========================================================================================================
 
     sale_pur_csv_dir = settings.CSV_DIR / "sale_purchase"
 
@@ -224,7 +225,7 @@ def all_parties_with_sale(request, report):
     # parties_with_sale_cross_sales_count = parties_with_sale_cross_sales['Customer GSTN'].nunique()
 
 
-
+    # ==========================================================================================================
 
     selected_columns_record = AllPartiesSelectedColumns.objects.filter(
         user=request.user
@@ -243,6 +244,40 @@ def all_parties_with_sale(request, report):
         ].count()  # Count of non-null values in the column
         difference = total_entries - column_count  # Difference from total entries
         counts[column] = difference if difference >= 0 else 0
+
+    # ==========================================================================================================
+
+    df_sales = report_logic.all_parties_with_sale(request, report, "ddr")["df_sales"]
+    df_sales['Invoice Date'] = pd.to_datetime(df_sales['Invoice Date'])
+
+    parties_to_create = []
+    existing_gst_no = set(Parties.objects.values_list('gst_no', flat=True))
+
+    for index, row in parties_with_sale.iterrows():
+        customer_name = row['Company Name']
+        gst_no = row['GST No.']
+
+        sales_data = df_sales[df_sales['Customer GSTN'] == gst_no]
+
+        if not sales_data.empty:
+            first_sale = sales_data['Invoice Date'].min()
+            # last_sale = sales_data['Invoice Date'].max()
+
+            if gst_no not in existing_gst_no:
+                party = Parties(
+                    customer_name=customer_name,
+                    gst_no=gst_no,
+                    first_sale=first_sale,
+                    # last_sale=last_sale
+                )
+                parties_to_create.append(party)
+                existing_gst_no.add(gst_no)
+
+    # Bulk create new parties
+    if parties_to_create:
+        Parties.objects.bulk_create(parties_to_create)
+
+    # ==========================================================================================================
 
     result = {
         "data": parties_with_sale.to_json(orient="records"),
