@@ -308,6 +308,5 @@ def invoice_report(request, report):
         current_date -= relativedelta(months=1)
 
     result = {"data": report_data, "report": report}
-    print(result)
 
     return result
