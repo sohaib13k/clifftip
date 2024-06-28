@@ -69,6 +69,14 @@
                   {% include "ddr/report/sale_purchase.html" %}
                 {% endif %}
 
+                {% if "invoice_report" in accessible_reports %}
+                  {% include "ddr/report/invoice_report_detailed.html" %}
+                {% endif %}
+
+                {% if "invoice_report" in accessible_reports %}
+                  {% include "ddr/report/invoice_report_concise.html" %}
+                {% endif %}
+
               </div>
             </div>
           </div>

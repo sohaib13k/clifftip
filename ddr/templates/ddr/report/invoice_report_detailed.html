@@ -1,0 +1,182 @@
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+
+    <h5 class="card-title">Delay Delivery Detailed</h5>
+    <div class="form-group d-flex flex-column flex-md-row align-items-center">
+      <label for="timeInterval01" class="me-3 mb-0">Time Interval</label>
+      <select id="timeInterval01" class="form-select" style="width: auto;">
+        <option value="day">This Day</option>
+        <option value="week">This Week</option>
+        <option value="month" selected>This Month</option>
+        <option value="year">This Year</option>
+        <option value="custom">Custom</option>
+      </select>
+      <div class="mb-0 ms-0 ms-md-1 mt-2 mt-md-0" id="dateRangeContainer01" style="display: none;">
+        <input type="text" id="datePicker01" class="form-control flatpickr-range" placeholder="Select date or date range" style="width: auto;" />
+      </div>
+  </div>
+  
+  </div>
+  <table class="table table-bordered table-sm" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Period</th>
+        <th colspan="2">Net Shipment Delay</th>
+        <th>Cond 1</th>
+        <th>Cond 2</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>&lt;0</td>
+        <td id="less-than-zero-count"></td>
+        <td id="less-than-zero-percentage"></td>
+        <td id="cond-1-top" rowspan="2"></td>
+        <td id="cond-2-top" rowspan="3"></td>
+      </tr>
+      <tr>
+        <td>0</td>
+        <td id="zero-count"></td>
+        <td id="zero-percentage"></td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td id="one-count"></td>
+        <td id="one-percentage"></td>
+        <td id="cond-1-bottom" rowspan="2"></td>
+      </tr>
+      <tr>
+        <td>&gt;1</td>
+        <td id="more-than-one-count"></td>
+        <td id="more-than-one-percentage"></td>
+        <td id="cond-2-bottom"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const apiUrlInvoiceReport = '{% url "report-datefilter-data-api" result.invoice_report.report.id|default:"0" %}';
+
+  document.addEventListener("DOMContentLoaded", function() {  
+
+    var choicesMultiple = document.querySelector(".choices-multiple");
+    if (choicesMultiple) {
+      new Choices(choicesMultiple);
+    }
+  
+    // Flatpickr
+    flatpickr(".flatpickr-minimum");
+    flatpickr(".flatpickr-datetime", {
+      enableTime: true,
+      dateFormat: "d-m-Y H:i",
+    });
+    flatpickr(".flatpickr-human", {
+      altInput: true,
+      altFormat: "F j, Y",
+      dateFormat: "d-m-Y",
+    });
+    flatpickr(".flatpickr-multiple", {
+      mode: "multiple",
+      dateFormat: "d-m-Y"
+    });
+    flatpickr(".flatpickr-range", {
+      mode: "range",
+      dateFormat: "d-m-Y",
+      allowInput: true,
+    });
+    flatpickr(".flatpickr-time", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+    });
+    
+    // Date filter AJAX
+    $(document).ready(function () {
+      // Function to fetch and display data based on interval
+      function fetchAndDisplayData(interval, startDate = null, endDate = null) {
+        var requestData = {};
+
+        if (interval === 'custom') {
+          requestData = {
+            start_date: startDate,
+            end_date: endDate
+          };
+          $('#dateRangeContainer01').show(); // Show date range input when custom is selected
+        } else {
+          $('#dateRangeContainer01').hide();
+          requestData = {
+            interval: interval
+          };
+        }
+
+        $.ajax({
+          url: apiUrlInvoiceReport,
+          type: 'GET',
+          data: requestData,
+          dataType: 'json',
+          success: function (data) {
+            $('#less-than-zero-count').text(data.data.less_than_zero.count);
+            $('#less-than-zero-percentage').text(data.data.less_than_zero.percentage.toFixed(2) + '%');
+    
+            $('#zero-count').text(data.data.zero.count);
+            $('#zero-percentage').text(data.data.zero.percentage.toFixed(2) + '%');
+    
+            $('#one-count').text(data.data.one.count);
+            $('#one-percentage').text(data.data.one.percentage.toFixed(2) + '%');
+    
+            $('#more-than-one-count').text(data.data.more_than_one.count);
+            $('#more-than-one-percentage').text(data.data.more_than_one.percentage.toFixed(2) + '%');
+    
+            $('#cond-1-top').text((data.data.cond_1.top).toFixed(2) + '%');
+            $('#cond-1-bottom').text((data.data.cond_1.bottom).toFixed(2) + '%');
+    
+            $('#cond-2-top').text((data.data.cond_2.top).toFixed(2) + '%');
+            $('#cond-2-bottom').text((data.data.cond_2.bottom).toFixed(2) + '%');
+          },
+          error: function (error) {
+            console.error('Error fetching data:', error);
+          }
+        });
+      }
+
+      function formatDate(dateString) {
+        var parts = dateString.split('-');
+        return parts[2] + '-' + parts[1] + '-' + parts[0];
+      }
+
+      function handleDateChange() {
+        var dateRange = $('#datePicker01').val().split(' to ');
+        if (dateRange.length === 2) {
+          var startDate = formatDate(dateRange[0]);
+          var endDate = formatDate(dateRange[1]);
+          fetchAndDisplayData('custom', startDate, endDate);
+        } else if (dateRange.length === 1) {
+          var singleDate = formatDate(dateRange[0]);
+          fetchAndDisplayData('custom', singleDate, singleDate);
+        }
+      }
+
+      // Trigger fetching and displaying data when the page loads with the default selected interval
+      fetchAndDisplayData($('#timeInterval01').val());
+
+      // Event handler for when the select element's value changes
+      $('#timeInterval01').change(function () {
+        var selectedValue = $(this).val();
+        if (selectedValue === 'custom') {
+          $('#dateRangeContainer01').show();
+          handleDateChange();
+        } else {
+          $('#dateRangeContainer01').hide();
+          fetchAndDisplayData(selectedValue);
+        }
+      });
+
+      // Event handler for date range change
+      $('#datePicker01').change(function () {
+        handleDateChange();
+      });
+    });
+  });
+
+</script>

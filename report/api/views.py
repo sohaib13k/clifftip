@@ -165,12 +165,9 @@ def view_filtered_data(request, report_id=None):
             & (agg_data[report.date_col] <= end_date)
         ]
 
-    if not filtered_data.empty:
-        func = getattr(report_logic, report.service_name, None)
-        if func is None:
-            func = getattr(report_logic, "default", None)
-        report_data = func(request, report, filtered_data)
-    else:
-        report_data = ""
+    func = getattr(report_logic, report.service_name, None)
+    if func is None:
+        func = getattr(report_logic, "default", None)
+    report_data = func(request, report, filtered_data)
 
     return JsonResponse({"data": report_data}, safe=False)

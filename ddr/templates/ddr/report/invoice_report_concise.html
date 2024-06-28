@@ -1,0 +1,29 @@
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title">Delay Delivery Concise</h5>
+  </div>
+  <table class="table table-bordered table-sm" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Month</th>
+        {% for month, data in result.invoice_report.data.items %}
+          <th>{{ month }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>On-time</td>
+        {% for month, data in result.invoice_report.data.items %}
+          <td>{{ data.on_time_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td>Delay</td>
+        {% for month, data in result.invoice_report.data.items %}
+          <td>{{ data.delay_count }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
+  </table>
+</div>

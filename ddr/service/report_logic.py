@@ -103,7 +103,9 @@ def routing_report(request, report):
 
 
 def all_parties_with_sale(request, report):
-    parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")["df_parties_with_sale"]
+    parties_with_sale = report_logic.all_parties_with_sale(request, report, "ddr")[
+        "df_parties_with_sale"
+    ]
     sale_register_report = Report.objects.filter(service_name="sale_register").first()
 
     current_date = datetime.now()
@@ -131,17 +133,18 @@ def all_parties_with_sale(request, report):
 
     if not merged_df.empty:
         # Convert the date column to datetime
-        merged_df['Invoice Date'] = pd.to_datetime(merged_df['Invoice Date'])
+        merged_df["Invoice Date"] = pd.to_datetime(merged_df["Invoice Date"])
         # Filter the DataFrame to include only the data from the last four months
         filtered_df = merged_df[
             (merged_df[sale_register_report.date_col] >= start_date)
             & (merged_df[sale_register_report.date_col] <= current_date)
         ]
 
-    
     if not filtered_df.empty:
-        common_gst_no = filtered_df['Customer GSTN'].unique()
-        parties_with_sale_dead = parties_with_sale[~parties_with_sale['GST No.'].isin(common_gst_no)]
+        common_gst_no = filtered_df["Customer GSTN"].unique()
+        parties_with_sale_dead = parties_with_sale[
+            ~parties_with_sale["GST No."].isin(common_gst_no)
+        ]
     else:
         parties_with_sale_dead = parties_with_sale
 
@@ -157,25 +160,31 @@ def all_parties_with_sale(request, report):
 
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
-        gst_numbers = set(df['Customer GSTN'].unique())
+        gst_numbers = set(df["Customer GSTN"].unique())
     else:
         gst_numbers = set()
 
     # Iterate through the previous three months
     for _ in range(3):
         current_date -= relativedelta(months=1)
-        file_path = sale_reg_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        file_path = (
+            sale_reg_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        )
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
-            previous_gst_numbers = set(df['Customer GSTN'].unique())
+            previous_gst_numbers = set(df["Customer GSTN"].unique())
             gst_numbers = gst_numbers.intersection(previous_gst_numbers)
-    
 
+    parties_with_sale_on_off = parties_with_sale[
+        ~parties_with_sale["GST No."].isin(gst_numbers)
+    ]
+    parties_with_sale_on_off = parties_with_sale_on_off[
+        ~parties_with_sale_on_off["GST No."].isin(parties_with_sale_dead["GST No."])
+    ]
 
-    parties_with_sale_on_off = parties_with_sale[~parties_with_sale['GST No.'].isin(gst_numbers)]
-    parties_with_sale_on_off = parties_with_sale_on_off[~parties_with_sale_on_off['GST No.'].isin(parties_with_sale_dead['GST No.'])]
-    
-    parties_with_sale_regular = parties_with_sale[parties_with_sale['GST No.'].isin(gst_numbers)]
+    parties_with_sale_regular = parties_with_sale[
+        parties_with_sale["GST No."].isin(gst_numbers)
+    ]
 
     parties_with_sale_on_off_count = parties_with_sale_on_off.shape[0]
     parties_with_sale_regular_count = parties_with_sale_regular.shape[0]
@@ -186,42 +195,48 @@ def all_parties_with_sale(request, report):
 
     current_date = datetime.now()
     current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
-    
+
     sale_pur_df = pd.DataFrame()
 
     # Merge CSV files for the last four months
     for _ in range(4):
-        file_path = sale_pur_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        file_path = (
+            sale_pur_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        )
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
             sale_pur_df = pd.concat([sale_pur_df, df], ignore_index=True)
         current_date -= relativedelta(months=1)
 
-
     # Group by 'Customer GSTN' and count unique 'Item_type'
-    gst_item_counts = sale_pur_df.groupby('Customer GSTN')['Item Type'].nunique()
+    gst_item_counts = sale_pur_df.groupby("Customer GSTN")["Item Type"].nunique()
     # Filter GST numbers with more than one unique 'Item_type'
     gst_multiple_items = gst_item_counts[gst_item_counts > 1].index
     # Collect rows corresponding to these GST numbers
-    parties_with_sale_cross_sales = sale_pur_df[sale_pur_df['Customer GSTN'].isin(gst_multiple_items)]
-
+    parties_with_sale_cross_sales = sale_pur_df[
+        sale_pur_df["Customer GSTN"].isin(gst_multiple_items)
+    ]
 
     # TODO: Temp code, until below todo getting fixed.
-    filtered_parties_with_sale = parties_with_sale[parties_with_sale['GST No.'].isin(parties_with_sale_cross_sales['Customer GSTN'])]
-    unique_parties_with_sale = filtered_parties_with_sale.drop_duplicates(subset='GST No.')
-    unique_parties_with_sale = unique_parties_with_sale.sort_values(by='Company Name')
-    
+    filtered_parties_with_sale = parties_with_sale[
+        parties_with_sale["GST No."].isin(
+            parties_with_sale_cross_sales["Customer GSTN"]
+        )
+    ]
+    unique_parties_with_sale = filtered_parties_with_sale.drop_duplicates(
+        subset="GST No."
+    )
+    unique_parties_with_sale = unique_parties_with_sale.sort_values(by="Company Name")
 
     # TODO: Fix handsontable issue, where 2 different structure on same page causing issue. Until then below code commented
     # parties_with_sale_cross_sales = parties_with_sale_cross_sales.sort_values(by='Customer Name')
-    
+
     # # Reorder columns to place 'Item Type' beside 'Customer GSTN'
     # columns = list(parties_with_sale_cross_sales.columns)
     # columns.insert(columns.index('Customer GSTN') + 1, columns.pop(columns.index('Item Type')))
     # parties_with_sale_cross_sales = parties_with_sale_cross_sales[columns]
 
     # parties_with_sale_cross_sales_count = parties_with_sale_cross_sales['Customer GSTN'].nunique()
-
 
     # ==========================================================================================================
 
@@ -245,24 +260,54 @@ def all_parties_with_sale(request, report):
 
     # ==========================================================================================================
 
-
     result = {
         "data": parties_with_sale.to_json(orient="records"),
         "selected_columns": selected_columns,
         "counts": counts,
         "threshold": thresholds,
         "report": report,
-
         "parties_with_sale_dead_count": parties_with_sale_dead_count,
         "parties_with_sale_dead": parties_with_sale_dead.to_json(orient="records"),
-
-        "parties_with_sale_on_off_count":parties_with_sale_on_off_count,
-        "parties_with_sale_on_off" : parties_with_sale_on_off.to_json(orient="records"),
+        "parties_with_sale_on_off_count": parties_with_sale_on_off_count,
+        "parties_with_sale_on_off": parties_with_sale_on_off.to_json(orient="records"),
         "parties_with_sale_regular_count": parties_with_sale_regular_count,
-        "parties_with_sale_regular" : parties_with_sale_regular.to_json(orient="records"),
-
-        "parties_with_sale_cross_sales": unique_parties_with_sale.to_json(orient="records"),
-        "parties_with_sale_cross_sales_count" : len(unique_parties_with_sale),
+        "parties_with_sale_regular": parties_with_sale_regular.to_json(
+            orient="records"
+        ),
+        "parties_with_sale_cross_sales": unique_parties_with_sale.to_json(
+            orient="records"
+        ),
+        "parties_with_sale_cross_sales_count": len(unique_parties_with_sale),
     }
+
+    return result
+
+
+def invoice_report(request, report):
+    invoice_csv_dir = settings.CSV_DIR / report.service_name
+    current_date = datetime.now()
+    current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
+
+    report_data = {}
+
+    for _ in range(4):
+        month_key = current_date.strftime("%b")
+        file_path = (
+            invoice_csv_dir / f"{current_date.year}_{current_date.month:02d}.csv"
+        )
+        if os.path.exists(file_path):
+            df = pd.read_csv(file_path)
+            delay_count = len(df[df["Delay Shipment Days"] > 0])
+            on_time_count = len(df[df["Delay Shipment Days"] <= 0])
+
+            report_data[month_key] = {
+                "delay_count": delay_count,
+                "on_time_count": on_time_count,
+            }
+
+        current_date -= relativedelta(months=1)
+
+    result = {"data": report_data, "report": report}
+    print(result)
 
     return result

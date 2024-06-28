@@ -170,3 +170,47 @@ def all_parties_with_sale(request, report, parties_with_sale):
             )
 
     return result
+
+
+def invoice_report(request, report, filtered_data):
+    if filtered_data.empty or len(filtered_data) == 0:
+        return {
+            "less_than_zero": {"count": 0, "percentage": 0},
+            "zero": {"count": 0, "percentage": 0},
+            "one": {"count": 0, "percentage": 0},
+            "more_than_one": {"count": 0, "percentage": 0},
+            "cond_1": {"top": 0, "bottom": 0},
+            "cond_2": {"top": 0, "bottom": 0},
+        }
+
+    less_than_zero = len(filtered_data[filtered_data["Delay Shipment Days"] < 0])
+    zero = len(filtered_data[filtered_data["Delay Shipment Days"] == 0])
+    one = len(filtered_data[filtered_data["Delay Shipment Days"] == 1])
+    more_than_one = len(filtered_data[filtered_data["Delay Shipment Days"] > 1])
+
+    total_count = len(filtered_data)
+
+    percent_less_than_zero = (less_than_zero / total_count) * 100
+    percent_zero = (zero / total_count) * 100
+    percent_one = (one / total_count) * 100
+    percent_more_than_one = (more_than_one / total_count) * 100
+
+    results = {
+        "less_than_zero": {
+            "count": less_than_zero,
+            "percentage": percent_less_than_zero,
+        },
+        "zero": {"count": zero, "percentage": percent_zero},
+        "one": {"count": one, "percentage": percent_one},
+        "more_than_one": {"count": more_than_one, "percentage": percent_more_than_one},
+        "cond_1": {
+            "top": percent_less_than_zero + percent_zero,
+            "bottom": percent_one + percent_more_than_one,
+        },
+        "cond_2": {
+            "top": percent_less_than_zero + percent_zero + percent_one,
+            "bottom": percent_more_than_one,
+        },
+    }
+
+    return results
