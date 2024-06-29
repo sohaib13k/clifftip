@@ -7,7 +7,7 @@
     <table id="report-table" class="table table-bordered table-sm" style="margin: 0;">
       <tr>
           {% for column, count in result.all_parties_with_sale.counts.items %}
-            <th class="report-column" style="white-space: nowrap; padding-left: 1rem;" data-column="{{ column }}">{{ column }}</th>
+            <th class="report-column" style="white-space: nowrap; padding-left: 1rem; padding-right: 1rem;" data-column="{{ column }}">{{ column }}</th>
           {% endfor %}
         </tr>
         <tr>
