@@ -187,6 +187,8 @@ def invoice_report(request, report, filtered_data):
     zero = len(filtered_data[filtered_data["Delay Shipment Days"] == 0])
     one = len(filtered_data[filtered_data["Delay Shipment Days"] == 1])
     more_than_one = len(filtered_data[filtered_data["Delay Shipment Days"] > 1])
+    delay_sum = filtered_data["Delay Shipment Days"].sum()
+    net_avg = filtered_data["Net Shipment Days"].mean()
 
     total_count = len(filtered_data)
 
@@ -211,6 +213,8 @@ def invoice_report(request, report, filtered_data):
             "top": percent_less_than_zero + percent_zero + percent_one,
             "bottom": percent_more_than_one,
         },
+        "delay_sum": delay_sum,
+        "net_avg": net_avg,
     }
 
     return results
