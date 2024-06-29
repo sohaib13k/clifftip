@@ -169,7 +169,18 @@ def churn_rate(request, report):
 
 def temp(request, report):
     directory_path = settings.REPORT_DIR
-    df_sales = pd.read_excel(directory_path / "sale_register" / "sale_reg.xlsx", skiprows=3)
+    sale_reg_csv_dir = settings.CSV_DIR / "sale_register"
+    df_sales = pd.DataFrame()
+
+    try:
+        for filename in os.listdir(sale_reg_csv_dir):
+            if filename.endswith(".csv"):
+                file_path = os.path.join(sale_reg_csv_dir, filename)
+                df = pd.read_csv(file_path)
+                df_sales = pd.concat([df_sales, df], ignore_index=True)
+    except FileNotFoundError:
+        raise Http404("File not found.")
+    
     df_parties = pd.read_excel(
         directory_path / "all_parties" / "all_parties.xlsx"
     )

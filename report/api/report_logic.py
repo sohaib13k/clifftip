@@ -10,6 +10,9 @@ from report.commonutil import append_total, add_percentage_column
 
 
 def sale_purchase(request, report, filtered_data):
+    if filtered_data.empty or len(filtered_data) == 0:
+        return ""
+    
     # Aggregating sales values
     individual_sales = (
         filtered_data.groupby("Sales Person").agg({"Net Total": "sum"}).reset_index()
@@ -181,6 +184,8 @@ def invoice_report(request, report, filtered_data):
             "more_than_one": {"count": 0, "percentage": 0},
             "cond_1": {"top": 0, "bottom": 0},
             "cond_2": {"top": 0, "bottom": 0},
+            "delay_sum": 0,
+            "net_avg": 0,
         }
 
     less_than_zero = len(filtered_data[filtered_data["Delay Shipment Days"] < 0])
