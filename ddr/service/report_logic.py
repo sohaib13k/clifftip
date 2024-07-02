@@ -1,3 +1,4 @@
+from collections import defaultdict
 from django.http import HttpResponse, Http404
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -260,24 +261,22 @@ def all_parties_with_sale(request, report):
 
     # ==========================================================================================================
 
+    parties_with_sale_dead = parties_with_sale_dead[:100]
+    parties_with_sale_dead['CompanyName'] = parties_with_sale_dead['Company Name']
+    parties_with_sale_dead['GSTNo'] = parties_with_sale_dead['GST No.']
+
+    grouped_by_sales_person = defaultdict(list)
+    grouped_by_branch = defaultdict(list)
+
+    for _, row in parties_with_sale_dead.iterrows():
+        grouped_by_sales_person[row['Sales Person']].append(row['Company Name'])
+
+
+    print(grouped_by_sales_person)
+    # ==========================================================================================================
+
     result = {
-        "data": parties_with_sale.to_json(orient="records"),
-        "selected_columns": selected_columns,
-        "counts": counts,
-        "threshold": thresholds,
-        "report": report,
-        "parties_with_sale_dead_count": parties_with_sale_dead_count,
-        "parties_with_sale_dead": parties_with_sale_dead.to_json(orient="records"),
-        "parties_with_sale_on_off_count": parties_with_sale_on_off_count,
-        "parties_with_sale_on_off": parties_with_sale_on_off.to_json(orient="records"),
-        "parties_with_sale_regular_count": parties_with_sale_regular_count,
-        "parties_with_sale_regular": parties_with_sale_regular.to_json(
-            orient="records"
-        ),
-        "parties_with_sale_cross_sales": unique_parties_with_sale.to_json(
-            orient="records"
-        ),
-        "parties_with_sale_cross_sales_count": len(unique_parties_with_sale),
+        'grouped_by_sales_person': grouped_by_sales_person,
     }
 
     return result
