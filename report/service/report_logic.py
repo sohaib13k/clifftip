@@ -181,40 +181,43 @@ def temp(request, report):
     except FileNotFoundError:
         raise Http404("File not found.")
     
-    df_parties = pd.read_excel(
-        directory_path / "all_parties" / "all_parties.xlsx"
+    all_parties_csv = commonutil.get_latest_csv_from_dir(
+        Report.objects.get(service_name="all_parties")
     )
-    df_itemtype = pd.read_excel(
-                directory_path  / "item_type_finished_goods" / "item_type.xlsx"
+
+    if all_parties_csv is not None:
+        df_parties = pd.read_csv(all_parties_csv, usecols=["Company Name", "Sales Person", "Branch.1"], low_memory=False)
+
+    itemtype_csv = commonutil.get_latest_csv_from_dir(
+        Report.objects.get(service_name="item_type_finished_goods")
     )
+
+    if itemtype_csv is not None:
+        df_itemtype = pd.read_csv(itemtype_csv, usecols=["Item Type", "Item Code"], low_memory=False)
 
     # gstn_index = df_sales.columns.get_loc("Customer GSTN") + 1
     # df_sales.insert(gstn_index, 'Item Type', '0')
 
-    df_parties.rename(columns={"Branch":"Branch_duplicate"}, inplace=True)
     df_parties.rename(columns={"Branch.1":"Branch"}, inplace=True)
 
-    # Remove rows where 'GST No.' is blank or NaN
-    df_parties = df_parties[df_parties['GST No.'].notna() & (df_parties['GST No.'] != '')]
-    # taking first entry incase of duplicate
-    df_parties = df_parties.drop_duplicates(subset='GST No.', keep='first')
+    df_parties_unique = df_parties.drop_duplicates(subset='Company Name', keep='first')
 
     updated_sales = pd.merge(
         df_sales,
-        df_parties[["GST No.", "Sales Person", "Branch"]],
-        left_on="Customer GSTN",
-        right_on="GST No.",
-        how="inner",
+        df_parties_unique,
+        left_on="Customer Name",
+        right_on="Company Name",
+        how="left",
     )
 
     updated_sales = pd.merge(
         updated_sales,
-        df_itemtype[["Item Type", "Item Code"]],
+        df_itemtype,
         on="Item Code",
-        how="inner",
+        how="left",
     )
 
-    updated_sales = updated_sales.drop("GST No.", axis="columns")
+    updated_sales = updated_sales.drop("Company Name", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
     updated_sales = updated_sales[updated_sales["Sales Person"] != "General ID"]
 
