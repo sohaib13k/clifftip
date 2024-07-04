@@ -127,7 +127,6 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const apiUrl = '{% url 'report-datefilter-data-api' result.sale_purchase.report.id|default:"0" %}';
         var requestData = {};
         var currentDate = new Date();
         var lastYearDate = new Date();

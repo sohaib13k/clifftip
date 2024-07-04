@@ -51,6 +51,10 @@
                   {% include "ddr/report/all_parties_with_sale_new_parties.html" %}
                 {% endif %}
 
+                {% if "pending_sales_order" in accessible_reports %}
+                  {% include "ddr/report/pending_sales_order.html" %}
+                {% endif %}
+
               </div>
             </div>
           

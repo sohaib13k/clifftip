@@ -223,3 +223,41 @@ def invoice_report(request, report, filtered_data):
     }
 
     return results
+
+
+def pending_sales_order(request, report, filtered_data):
+    if filtered_data.empty or len(filtered_data) == 0:
+        return ""
+
+    filtered_data["Reason"] = filtered_data["Reason"].str.upper()
+    
+    filtered_data = filtered_data.groupby("Reason").agg(
+        Count=("Reason", "count"),
+        Value=("VALUE.2", "sum")
+    ).reset_index()
+
+    
+    filtered_data = append_total(filtered_data, "Reason", "Value")
+    
+    filtered_data = add_percentage_column(filtered_data, "Value")
+
+    filtered_data["Value"] = (
+        filtered_data["Value"]
+        .round()
+        .astype(int)
+        .apply(commonutil.format_rupees)
+    )
+
+    filtered_data["Count"] = filtered_data["Count"].fillna(0)
+    filtered_data["Count"] = filtered_data["Count"].round().astype(int)
+
+    filtered_data.rename(columns={"Count": "No. of Times"}, inplace=True)
+    filtered_data.rename(columns={"Reason": "Reason for Pending"}, inplace=True)
+
+    pso_concise = filtered_data.to_html(
+        classes="table table-striped", index=False, header=True
+    )
+    
+    return {
+        "pso_concise": pso_concise,
+    }

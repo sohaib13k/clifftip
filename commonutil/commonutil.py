@@ -64,7 +64,7 @@ def get_interval_date_str(interval):
         )
 
 
-def read_excel_or_html(excel_path, skiprows=None):
+def read_excel_or_html(excel_path, skiprows=None, header=None):
     """
     Reads an Excel file or converts an HTML file to a DataFrame.
     :param excel_path: Path of the file to be read.
@@ -72,7 +72,10 @@ def read_excel_or_html(excel_path, skiprows=None):
     :return: A DataFrame containing the data.
     """
     if is_file_html(excel_path):
-        return pd.read_html(excel_path), True
+        if header:
+            return pd.read_html(excel_path, header=[header]), True
+        else:
+            return pd.read_html(excel_path), True
     return pd.read_excel(
         excel_path, engine=get_excel_read_engine(excel_path), skiprows=skiprows
     ), False

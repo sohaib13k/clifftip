@@ -219,7 +219,6 @@ def temp(request, report):
 
     updated_sales = updated_sales.drop("Company Name", axis="columns")
     updated_sales = updated_sales[updated_sales["Branch"] != 0]
-    updated_sales = updated_sales[updated_sales["Sales Person"] != "General ID"]
 
     from report.views import save_as_csv
     save_as_csv(report, None, updated_sales)

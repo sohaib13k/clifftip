@@ -1,0 +1,61 @@
+{% extends 'commonutil/base.html' %}
+{% load static %}
+
+{% block title %}
+  Report | {{ result.report.name }}
+{% endblock %}
+
+{% block styles %}
+  <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+  <link href="{% static 'css/handsontable.full.min.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+  <div class="wrapper">
+    {% include 'commonutil/sidebar.html' %}
+
+    <div class="main">
+      {% include 'commonutil/navbar.html' %}
+      <div class="container mt-4 mb-4">
+        <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Reload without cache</a>
+      </div>
+      <div class="container my-5">
+        <h2 class="mb-4">Summary</h2>
+        <div>Report name: {{ result.report.name }}</div>
+        {% comment %}
+        <div>Threshhold: {{ threshhold }}</div>
+        <div>Total: {{ total }}</div>
+        <div>Average: {{ average }}</div>
+        <div style="color: red">Result: {{ result }}</div>
+        {% endcomment %}
+
+        <h2 class="mt-5">Excel Data</h2>
+        <div class="d-flex justify-content-between mb-2">
+          <div class="d-flex me-auto">
+            <button class="btn btn-primary me-1" id="toggleButton">Show/Hide Excel Data</button>
+            <button class="btn btn-primary" onclick="downloadExcel(window.reportExcelJson)">Download Excel</button>
+          </div>
+          <div>
+            {% include 'commonutil/time_interval_select.html' %}
+          </div>
+        </div>
+        <div id="spreadsheet" class="handsontable" style="display: block"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var pageType = 'report';
+    var apiUrl = '{% url 'report-datefilter-excel-api' result.report.id %}';
+    window.reportExcelJson
+    document.addEventListener('DOMContentLoaded', function () {
+      new handsontableManager('spreadsheet')
+    })
+  </script>
+
+  <script src="{% static 'js/handsontable.full.min.js' %}"></script>
+  <script src="{% static 'js/xlsx.full.min.js' %}"></script>
+  <script>
+    var reportId = {{ result.report.id }};
+  </script>
+  <script src="{% static 'js/custom/datePickerSettings1.js' %}"></script>
+{% endblock %}
