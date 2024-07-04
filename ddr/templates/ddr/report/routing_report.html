@@ -11,7 +11,7 @@
           {% endfor %}
         </tr>
         <tr>
-          <th>Lock/Total</th>
+          <th style="white-space: nowrap;">Lock/Total</th>
           {% for item in result.routing_report.items%}
             <td class="text-end" style="white-space: nowrap;">{{ item.data_lock }} / {{ item.total }}</td>
           {% endfor %}

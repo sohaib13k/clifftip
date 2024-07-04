@@ -1,10 +1,19 @@
 <div class="card">
-  <div class="card-header">
+  <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="card-title">ECD Report (last 4 months)</h5>
+    <div class="d-flex justify-content-end align-items-center">
+      <div class="form-group d-flex flex-column flex-md-row align-items-center">
+        <select id="ecd_report_filter_01" class="form-select" style="width: auto;" onchange="ecdToggleTables(this.value)">
+          <option value="ecd_summary" selected>Summary</option>
+          <option value="ecd_sales_person">Sales Person</option>
+          <option value="ecd_branch_sales">Branch Sales</option>
+        </select>
+      </div>
+    </div>
   </div>
 
-
-  <table class="table table-bordered table-sm" style="width:100%;">
+  <!-- Existing table -->
+  <table id="summary-table" class="table table-bordered table-sm" style="width:100%;">
     <thead>
       <tr>
         <th>Dead</th>
@@ -53,38 +62,184 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- Table for Sales Person -->
+  <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+    <table id="ecd-sales-person-table" class="table table-bordered table-sm" style="width:100%; display: none;">
+      <thead style="position: sticky; top: 0; background-color: white; z-index: 100;">
+        <tr>
+          <th style="white-space: nowrap;">Sales Person</th>
+          <th style="white-space: nowrap;">Dead</th>
+          <th style="white-space: nowrap;">On/Off</th>
+          <th style="white-space: nowrap;">Regular</th>
+          <th style="white-space: nowrap;">Cross-sales</th>
+        </tr>
+      </thead>
+      <tbody id="sales-person-body">
+        <!-- Populated dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Table for Branch Sales -->
+  <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+    <table id="ecd-branch-sales-table" class="table table-bordered table-sm" style="width:100%; display: none;">
+      <thead style="position: sticky; top: 0; background-color: white; z-index: 100;">
+        <tr>
+          <th style="white-space: nowrap;">Sales Person</th>
+          <th style="white-space: nowrap;">Dead</th>
+          <th style="white-space: nowrap;">On/Off</th>
+          <th style="white-space: nowrap;">Regular</th>
+          <th style="white-space: nowrap;">Cross-sales</th>
+        </tr>
+      </thead>
+      <tbody id="branch-sales-body">
+        <!-- Populated dynamically -->
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
-  // Function to filter data based on the clicked column
-  window.ecdReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_dead|safe }}; // Keep the original data
-  window.ecdOnOffReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_on_off|safe }}; // Keep the original data
-  window.ecdRegularReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_regular|safe }}; // Keep the original data
-  window.ecdCrossSaleReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_cross_sales|safe }}; // Keep the original data
+  // Data variables
+  window.ecdReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_dead|safe }};
+  window.ecdOnOffReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_on_off|safe }};
+  window.ecdRegularReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_regular|safe }};
+  window.ecdCrossSaleReportExcelJson = {{ result.all_parties_with_sale.parties_with_sale_cross_sales|safe }};
 
-  window.reportExcelJson = [...window.ecdReportExcelJson]; // Displayed data
-
-  function ecdReportDead(columnName) {
+function ecdReportDead(columnName) {
     window.reportExcelJson = [...window.ecdReportExcelJson];
     document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
     document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
   }
-
   function ecdReportOnOff(columnName) {
     window.reportExcelJson = [...window.ecdOnOffReportExcelJson];
     document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
     document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
   }
-
   function ecdReportRegular(columnName) {
     window.reportExcelJson = [...window.ecdRegularReportExcelJson];
     document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
     document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
   }
-
   function ecdReportCrossSale(columnName) {
     window.reportExcelJson = [...window.ecdCrossSaleReportExcelJson];
     document.getElementById('modalTitleSale1').innerText = `ECD Report: ${columnName}`;
     document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
   }
+
+  // Group data by column function
+  function groupByColumn(data, column, type) {
+    return data.reduce((acc, row) => {
+      const key = row[column];
+      if (key === null || key === undefined) {
+        return acc; // Skip this iteration if the key is null or undefined
+      }
+      if (!acc[key]) acc[key] = { dead: 0, onOff: 0, regular: 0, crossSales: 0 };
+      if (type === 'dead') acc[key].dead += 1;
+      if (type === 'onOff') acc[key].onOff += 1;
+      if (type === 'regular') acc[key].regular += 1;
+      if (type === 'crossSales') acc[key].crossSales += 1;
+      return acc;
+    }, {});
+  }
+
+  // Group each dataset
+  const salesPersonDeadData = groupByColumn(window.ecdReportExcelJson, 'Sales Person', 'dead');
+  const salesPersonOnOffData = groupByColumn(window.ecdOnOffReportExcelJson, 'Sales Person', 'onOff');
+  const salesPersonRegularData = groupByColumn(window.ecdRegularReportExcelJson, 'Sales Person', 'regular');
+  const salesPersonCrossSalesData = groupByColumn(window.ecdCrossSaleReportExcelJson, 'Sales Person', 'crossSales');
+
+  const branchDeadData = groupByColumn(window.ecdReportExcelJson, 'Branch.1', 'dead');
+  const branchOnOffData = groupByColumn(window.ecdOnOffReportExcelJson, 'Branch.1', 'onOff');
+  const branchRegularData = groupByColumn(window.ecdRegularReportExcelJson, 'Branch.1', 'regular');
+  const branchCrossSalesData = groupByColumn(window.ecdCrossSaleReportExcelJson, 'Branch.1', 'crossSales');
+
+  // Merge grouped data for sales person
+  const salesPersonData = {};
+  for (const key in salesPersonDeadData) {
+    salesPersonData[key] = {
+      dead: salesPersonDeadData[key].dead,
+      onOff: salesPersonOnOffData[key] ? salesPersonOnOffData[key].onOff : 0,
+      regular: salesPersonRegularData[key] ? salesPersonRegularData[key].regular : 0,
+      crossSales: salesPersonCrossSalesData[key] ? salesPersonCrossSalesData[key].crossSales : 0,
+    };
+  }
+
+  // Merge grouped data for branch
+  const branchData = {};
+  for (const key in branchDeadData) {
+    branchData[key] = {
+      dead: branchDeadData[key].dead,
+      onOff: branchOnOffData[key] ? branchOnOffData[key].onOff : 0,
+      regular: branchRegularData[key] ? branchRegularData[key].regular : 0,
+      crossSales: branchCrossSalesData[key] ? branchCrossSalesData[key].crossSales : 0,
+    };
+  }
+
+// Populate table function
+function populateTable(data, tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  for (const key in data) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${key}</td>
+      <td onclick="showHandsontable('dead', '${key}', '${tbodyId}')">
+        <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+          ${data[key].dead}
+        </a>
+      </td>
+      <td onclick="showHandsontable('onOff', '${key}', '${tbodyId}')">
+        <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+          ${data[key].onOff}
+        </a>
+      </td>
+      <td onclick="showHandsontable('regular', '${key}', '${tbodyId}')">
+        <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+          ${data[key].regular}
+        </a>
+      </td>
+      <td onclick="showHandsontable('crossSales', '${key}', '${tbodyId}')">
+        <a data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+          ${data[key].crossSales}
+        </a>
+      </td>
+    `;
+    tbody.appendChild(row);
+  }
+}
+
+
+  // Show/hide tables
+  function ecdToggleTables(value) {
+    document.getElementById('summary-table').style.display = value === 'ecd_summary' ? 'table' : 'none';
+    document.getElementById('ecd-sales-person-table').style.display = value === 'ecd_sales_person' ? 'table' : 'none';
+    document.getElementById('ecd-branch-sales-table').style.display = value === 'ecd_branch_sales' ? 'table' : 'none';
+  }
+
+  // Show Handsontable function
+  function showHandsontable(type, key, tableId) {
+    let data;
+    switch(type) {
+      case 'dead':
+        data = (tableId === 'sales-person-body') ? window.ecdReportExcelJson.filter(row => row['Sales Person'] === key) : window.ecdReportExcelJson.filter(row => row['Branch.1'] === key);
+        break;
+      case 'onOff':
+        data = (tableId === 'sales-person-body') ? window.ecdOnOffReportExcelJson.filter(row => row['Sales Person'] === key) : window.ecdOnOffReportExcelJson.filter(row => row['Branch.1'] === key);
+        break;
+      case 'regular':
+        data = (tableId === 'sales-person-body') ? window.ecdRegularReportExcelJson.filter(row => row['Sales Person'] === key) : window.ecdRegularReportExcelJson.filter(row => row['Branch.1'] === key);
+        break;
+      case 'crossSales':
+        data = (tableId === 'sales-person-body') ? window.ecdCrossSaleReportExcelJson.filter(row => row['Sales Person'] === key) : window.ecdCrossSaleReportExcelJson.filter(row => row['Branch.1'] === key);
+        break;
+    }
+    window.reportExcelJson = data;
+    document.dispatchEvent(new Event('dataUpdated')); // Trigger an event to update the table
+  }
+
+  // Initial population
+  populateTable(salesPersonData, 'sales-person-body');
+  populateTable(branchData, 'branch-sales-body');
 </script>
