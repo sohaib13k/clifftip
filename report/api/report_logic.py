@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.core.cache import cache
-from report.models import Report
+from report.models import Report, PendingSalesOrderControl
 import pandas as pd
 from django.http import JsonResponse
 import os
@@ -254,7 +254,22 @@ def pending_sales_order(request, report, filtered_data):
     filtered_data.rename(columns={"Count": "No. of Times"}, inplace=True)
     filtered_data.rename(columns={"Reason": "Reason for Pending"}, inplace=True)
 
-    pso_concise = filtered_data.to_html(
+    # Fetch the controllable factors from the model
+    pso_controls = PendingSalesOrderControl.objects.all().values('reason', 'Controllable')
+    pso_controls_df = pd.DataFrame.from_records(pso_controls)
+
+    merged_data = pd.merge(
+        filtered_data,
+        pso_controls_df,
+        how='left',
+        left_on=filtered_data["Reason for Pending"].str.upper(),
+        right_on=pso_controls_df["reason"].str.upper()
+    )
+
+    merged_data['Controllable'] = merged_data['Controllable'].fillna('')
+    merged_data.drop(columns=['reason', 'key_0'], inplace=True)
+
+    pso_concise = merged_data.to_html(
         classes="table table-striped", index=False, header=True
     )
     

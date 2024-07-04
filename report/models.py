@@ -249,3 +249,17 @@ def extract_and_upload_to_azure(file_path, blob_name):
 #             models.Index(fields=['gst_no']),
 #             models.Index(fields=['customer_name', 'gst_no']),
 #         ]
+
+
+class PendingSalesOrderControl(models.Model):
+    PSO_FACTORS = (
+        ("Yes", "Yes"),
+        ("No", "No"),
+        ("Exceptional", "Exceptional"),
+    )
+        
+    reason = models.CharField(max_length=127, unique=True)
+    Controllable = models.CharField(max_length=127, null=False, blank=False, choices=PSO_FACTORS)
+
+    def __str__(self):
+        return self.reason

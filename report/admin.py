@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Report, Employee, DBBackup
+from .models import Report, Employee, DBBackup, PendingSalesOrderControl
 from .forms import ReportForm
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
@@ -176,6 +176,11 @@ class DBBackupAdmin(admin.ModelAdmin):
     pass
 
 
+class PendingSalesOrderControlAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(DBBackup, DBBackupAdmin)
+admin.site.register(PendingSalesOrderControl, PendingSalesOrderControlAdmin)
