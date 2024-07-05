@@ -235,7 +235,16 @@ def save_as_csv(report, excel_path, df=None):
         df.to_csv(csv_file_path, mode="w", header=True, index=False)
     else:
         try:
-            df[report.date_col] = pd.to_datetime(df[report.date_col])
+            df[report.date_col] = pd.to_datetime(df[report.date_col], dayfirst=True, errors='coerce')
+            unparsed_rows = df[df[report.date_col].isna()]
+            if not unparsed_rows.empty:
+                unparsed_rows_html = unparsed_rows.to_html(border=1, index=False)
+                response_content = (
+                    'Uploaded report contains some dates which are not in correct format. '
+                    'Please use DD/MM/YYYY or MM/DD/YYYY format consistently across the sheet.<br>'
+                    f'{unparsed_rows_html}'
+                )
+                return HttpResponse(response_content, status=404)
         except KeyError:
             return HttpResponse(
                 f'Uploaded report doesn\'t contain "{report.date_col}" column. Kindly upload the right report',
