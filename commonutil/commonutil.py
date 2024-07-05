@@ -142,7 +142,7 @@ def remove_trailing_decimal(value):
     it returns the value unchanged. It also handles NaN values by returning an empty string.
     
     Parameters:
-    value (float): The value to be processed.
+    value (float or int): The value to be processed.
     
     Returns:
     int, float, or str: The integer value if the input was a whole number, 
@@ -152,7 +152,7 @@ def remove_trailing_decimal(value):
         return
     if pd.isna(value):
         return ""
-    elif value.is_integer():
+    if isinstance(value, float) and value.is_integer():
         return int(value)
     else:
         return value
