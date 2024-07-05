@@ -166,6 +166,11 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "ignore_disallowed_host": {
+            "()": 'commonutil.logging_filters.IgnoreDisallowedHost',
+        },
+    },
     "handlers": {
         "file": {
             "level": "WARNING",
@@ -173,7 +178,8 @@ LOGGING = {
             "filename": os.getenv("LOG_LOCATION"),
             "formatter": "simple",
             "maxBytes": 10 * 1024 * 1024,  # 10 MB
-            "backupCount": 50,  # Keep up to 5 backup files
+            "backupCount": 50,  # Keep up to 50 backup files
+            "filters": ["ignore_disallowed_host"],  # Add the custom filter here
         },
     },
     "formatters": {
