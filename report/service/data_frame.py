@@ -67,3 +67,10 @@ def pending_sales_order(excel_path):
     return df.drop(df.index[-1]).drop(
         columns=[df.columns[0], df.columns[-1], df.columns[-2]]
     )
+
+
+def cnf_charges(excel_path):
+    df = read_excel_or_html(excel_path, skiprows=2)[0]
+    df['Date'] = df['Date'].fillna(method='ffill')
+    df.drop(df.index[-1], inplace=True)
+    return df

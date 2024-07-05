@@ -81,6 +81,10 @@
                   {% include "ddr/report/invoice_report_concise.html" %}
                 {% endif %}
 
+                {% if "cnf_charges" in accessible_reports %}
+                  {% include "ddr/report/cnf_charges.html" %}
+                {% endif %}
+
               </div>
             </div>
           </div>

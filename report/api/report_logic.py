@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.core.cache import cache
-from report.models import Report, PendingSalesOrderControl
+from report.models import Report, PendingSalesOrderControl, FreightChargesMaster
 import pandas as pd
 from django.http import JsonResponse
 import os
@@ -275,4 +275,38 @@ def pending_sales_order(request, report, filtered_data):
     
     return {
         "pso_concise": pso_concise,
+    }
+
+
+def cnf_charges(request, report, filtered_data):
+    grouped_df = filtered_data.groupby('Party Name').agg({
+        'Trip': 'sum',
+        'Carriage': 'sum',
+        'Remark': 'last'
+    }).reset_index()
+
+    freight_charges = FreightChargesMaster.objects.all().values('party_name', 'charge_per_trip')
+    freight_charges_df = pd.DataFrame.from_records(freight_charges)
+
+    freight_charges_df['charge_per_trip'] = pd.to_numeric(freight_charges_df['charge_per_trip'], errors='coerce').fillna(0).astype(int)
+
+    merged_df = pd.merge(
+        grouped_df,
+        freight_charges_df,
+        how='left',
+        left_on=grouped_df["Party Name"].str.upper(),
+        right_on=freight_charges_df["party_name"].str.upper()
+    )
+
+    merged_df['Freight Paid'] = merged_df['Carriage'] * merged_df['Trip']
+    merged_df['Correct Freight'] = merged_df['charge_per_trip'] * merged_df['Trip']
+    merged_df['Difference'] = merged_df.apply(lambda row: row['Correct Freight'] - row['Freight Paid'] if row['Freight Paid'] > row['Correct Freight'] else 0, axis=1)
+
+    merged_df.drop(columns=['party_name', 'key_0'], inplace=True)
+
+    cnf_concise = merged_df.to_html(
+        classes="table table-striped", index=False, header=True
+    )
+    return {
+        "cnf_concise": cnf_concise,
     }

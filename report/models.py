@@ -263,3 +263,12 @@ class PendingSalesOrderControl(models.Model):
 
     def __str__(self):
         return self.reason
+
+
+class FreightChargesMaster(models.Model):
+    party_name = models.CharField(max_length=127, unique=True)
+    charge_per_trip = models.CharField(max_length=127, null=False, blank=False)
+
+    
+    def __str__(self):
+        return self.party_name
