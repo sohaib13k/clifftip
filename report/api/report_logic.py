@@ -279,6 +279,9 @@ def pending_sales_order(request, report, filtered_data):
 
 
 def cnf_charges(request, report, filtered_data):
+    if filtered_data.empty or len(filtered_data) == 0:
+        return ""
+     
     grouped_df = (
         filtered_data.groupby("Party Name")
         .agg(
