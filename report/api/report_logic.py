@@ -279,30 +279,64 @@ def pending_sales_order(request, report, filtered_data):
 
 
 def cnf_charges(request, report, filtered_data):
-    grouped_df = filtered_data.groupby('Party Name').agg({
-        'Trip': 'sum',
-        'Carriage': 'sum',
-        'Remark': 'last'
-    }).reset_index()
+    grouped_df = (
+        filtered_data.groupby("Party Name")
+        .agg(
+            {
+                "Trip": "sum",
+                "Carriage": "sum",
+            }
+        )
+        .reset_index()
+    )
 
-    freight_charges = FreightChargesMaster.objects.all().values('party_name', 'charge_per_trip')
+    freight_charges = FreightChargesMaster.objects.all().values(
+        "party_name", "charge_per_trip"
+    )
     freight_charges_df = pd.DataFrame.from_records(freight_charges)
 
-    freight_charges_df['charge_per_trip'] = pd.to_numeric(freight_charges_df['charge_per_trip'], errors='coerce').fillna(0).astype(int)
+    freight_charges_df["Charge per Trip"] = (
+        pd.to_numeric(freight_charges_df["charge_per_trip"], errors="coerce")
+        .fillna(0)
+        .astype(float)
+    )
+    freight_charges_df.drop(columns=["charge_per_trip"], inplace=True)
 
     merged_df = pd.merge(
         grouped_df,
         freight_charges_df,
-        how='left',
+        how="left",
         left_on=grouped_df["Party Name"].str.upper(),
-        right_on=freight_charges_df["party_name"].str.upper()
+        right_on=freight_charges_df["party_name"].str.upper(),
     )
 
-    merged_df['Freight Paid'] = merged_df['Carriage'] * merged_df['Trip']
-    merged_df['Correct Freight'] = merged_df['charge_per_trip'] * merged_df['Trip']
-    merged_df['Difference'] = merged_df.apply(lambda row: row['Correct Freight'] - row['Freight Paid'] if row['Freight Paid'] > row['Correct Freight'] else 0, axis=1)
+    merged_df["Correct Freight"] = merged_df["Charge per Trip"] * merged_df["Trip"]
+    merged_df["Difference"] = merged_df.apply(
+        lambda row: (
+            row["Correct Freight"] - row["Carriage"]
+            if row["Carriage"] > row["Correct Freight"]
+            else 0
+        ),
+        axis=1,
+    )
 
-    merged_df.drop(columns=['party_name', 'key_0'], inplace=True)
+    merged_df.drop(columns=["party_name", "key_0"], inplace=True)
+
+    # Reorder columns to move 'Charge per Trip' to the second column
+    cols = merged_df.columns.tolist()
+    cols.insert(1, cols.pop(cols.index("Charge per Trip")))
+    merged_df = merged_df[cols]
+
+    merged_df[
+        ["Trip", "Charge per Trip", "Carriage", "Correct Freight", "Difference"]
+    ] = merged_df[
+        ["Trip", "Charge per Trip", "Carriage", "Correct Freight", "Difference"]
+    ].applymap(
+        commonutil.remove_trailing_decimal
+    )
+    merged_df.rename(
+        columns={"Trip": "No. of Trip", "Carriage": "Freight Paid"}, inplace=True
+    )
 
     cnf_concise = merged_df.to_html(
         classes="table table-striped", index=False, header=True

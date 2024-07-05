@@ -131,3 +131,28 @@ def remove_trailing_non_numeric(df):
         if pd.notna(pd.to_numeric(df.iloc[idx, 0], errors='coerce')):
             break
     return df.iloc[:idx + 1]
+
+
+def remove_trailing_decimal(value):
+    """
+    Remove the trailing decimal from a value if it is an integer.
+    
+    This function checks if the provided value is an integer (i.e., has a .0 decimal part).
+    If so, it returns the value as an integer. If the value has a non-zero decimal part,
+    it returns the value unchanged. It also handles NaN values by returning an empty string.
+    
+    Parameters:
+    value (float): The value to be processed.
+    
+    Returns:
+    int, float, or str: The integer value if the input was a whole number, 
+                        otherwise the original float value or an empty string for NaN.
+    """
+    if isinstance(value, str):
+        return
+    if pd.isna(value):
+        return ""
+    elif value.is_integer():
+        return int(value)
+    else:
+        return value

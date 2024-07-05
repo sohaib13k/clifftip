@@ -246,6 +246,7 @@ def save_as_csv(report, excel_path, df=None):
                 )
                 return HttpResponse(response_content, status=404)
         except KeyError:
+            # TODO: Log the error
             return HttpResponse(
                 f'Uploaded report doesn\'t contain "{report.date_col}" column. Kindly upload the right report',
                 status=404,
