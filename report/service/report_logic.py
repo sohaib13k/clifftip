@@ -1,3 +1,4 @@
+import numpy as np
 from django.http import Http404
 from django.shortcuts import render
 import pandas as pd
@@ -218,7 +219,11 @@ def temp(request, report):
     )
 
     updated_sales = updated_sales.drop("Company Name", axis="columns")
-    updated_sales = updated_sales[updated_sales["Branch"] != 0]
+    # updated_sales = updated_sales[updated_sales["Branch"] != 0]
+
+    updated_sales["Sales Person"] = updated_sales["Sales Person"].replace(np.nan, "(blank)").replace("", "(blank)")
+    updated_sales["Branch"] = updated_sales["Branch"].replace(np.nan, "(blank)").replace("", "(blank)")
+    updated_sales["Item Type"] = updated_sales["Item Type"].replace(np.nan, "(blank)").replace("", "(blank)")
 
     from report.views import save_as_csv
     save_as_csv(report, None, updated_sales)

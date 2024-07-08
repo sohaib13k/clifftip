@@ -234,7 +234,12 @@ def save_as_csv(report, excel_path, df=None):
 
         df.to_csv(csv_file_path, mode="w", header=True, index=False)
     else:
+        if report.date_col not in df.columns:
+            return HttpResponse(f'Uploaded report doesn\'t contain "{report.date_col}" column. Kindly upload the right report',status=404,)
+            
         try:
+            df[report.date_col] = pd.to_datetime(df[report.date_col])
+        except ValueError:
             df[report.date_col] = pd.to_datetime(df[report.date_col], dayfirst=True, errors='coerce')
             unparsed_rows = df[df[report.date_col].isna()]
             if not unparsed_rows.empty:
@@ -245,12 +250,7 @@ def save_as_csv(report, excel_path, df=None):
                     f'{unparsed_rows_html}'
                 )
                 return HttpResponse(response_content, status=404)
-        except KeyError:
-            # TODO: Log the error
-            return HttpResponse(
-                f'Uploaded report doesn\'t contain "{report.date_col}" column. Kindly upload the right report',
-                status=404,
-            )
+            
         df["Year"] = df[report.date_col].dt.year
         df["Month"] = df[report.date_col].dt.month
 
