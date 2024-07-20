@@ -22,8 +22,12 @@ def sale_register(excel_path):
 
 
 def all_parties(excel_path):
-    return read_excel_or_html(excel_path)[0]
+    df, is_html = read_excel_or_html(excel_path)
 
+    if not is_html:
+        return df
+
+    return df[0]
 
 def item_type_finished_goods(excel_path):
     return read_excel_or_html(excel_path)[0]
