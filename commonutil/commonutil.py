@@ -1,3 +1,4 @@
+import numpy as np
 import random
 import string
 from datetime import datetime, timedelta
@@ -156,3 +157,12 @@ def remove_trailing_decimal(value):
         return int(value)
     else:
         return value
+    
+def convert_numpy_types(d):
+    for key, value in d.items():
+        if isinstance(value, dict):
+            convert_numpy_types(value)
+        elif isinstance(value, np.int64):
+            d[key] = int(value)
+        elif isinstance(value, np.float64):
+            d[key] = float(value)

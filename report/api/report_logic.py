@@ -222,6 +222,8 @@ def invoice_report(request, report, filtered_data):
         "net_avg": net_avg,
     }
 
+    commonutil.convert_numpy_types(results)
+    
     return results
 
 
@@ -342,8 +344,12 @@ def cnf_charges(request, report, filtered_data):
     )
 
     cnf_concise = merged_df.to_html(
-        classes="table table-striped", index=False, header=True
+        classes="table table-striped", index=False, header=True,
     )
+
+    cnf_concise = cnf_concise.replace('<th>', '<th style="white-space: nowrap;">')
+    cnf_concise = cnf_concise.replace('<td>', '<td style="white-space: nowrap;">')
+
     return {
         "cnf_concise": cnf_concise,
     }
