@@ -286,7 +286,7 @@ def all_parties_with_sale(request, report):
 def invoice_report(request, report):
     invoice_csv_dir = settings.CSV_DIR / report.service_name
     current_date = datetime.now()
-    current_date = (current_date.replace(day=1) - relativedelta(days=1)).date()
+    # current_date = (current_date.replace(day=1) - relativedelta(days=1)).date() # un comment if current month to be skipped
 
     report_data = {}
 

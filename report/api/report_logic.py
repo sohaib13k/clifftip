@@ -117,8 +117,8 @@ def all_parties_with_sale(request, report, parties_with_sale):
     sale_reg_csv_dir = settings.CSV_DIR / "sale_register"
     sale_register_model = Report.objects.get(service_name='sale_register')
     all_parties_model = Report.objects.get(service_name='all_parties') # TODO: replace this with all_parties_with_sale
-    cache_key = 'all_parties_with_sale_cache222'
-    cache_tmstmp_key = 'all_parties_with_sale_cache_tmstmpqwqw'
+    cache_key = 'all_parties_with_sale_cache'
+    cache_tmstmp_key = 'all_parties_with_sale_cache_tmstmp'
     cache_exist = False
 
     # Check if the result is already cached and if the cache is up-to-date
