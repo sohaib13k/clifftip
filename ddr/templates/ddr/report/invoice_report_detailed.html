@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
 
-    <h5 class="card-title">Net Shipment Days</h5>
+    <h5 class="card-title mb-0">Net Shipment Days</h5>
     <div class="form-group d-flex flex-column flex-md-row align-items-center">
       <label for="timeInterval01" class="me-3 mb-0">Time Interval</label>
       <select id="timeInterval01" class="form-select" style="width: auto;">
@@ -11,6 +11,7 @@
         <option value="year">This Year</option>
         <option value="custom">Custom</option>
       </select>
+      <a class="ms-2" href={% url 'report-view' result.invoice_report.report.id %} target="_blank">View/Update<i class="fas fa-fw fa-external-link-alt"></i></a>
       <div class="mb-0 ms-0 ms-md-1 mt-2 mt-md-0" id="dateRangeContainer01" style="display: none;">
         <input type="text" id="datePicker01" class="form-control flatpickr-range" placeholder="Select date or date range" style="width: auto;" />
       </div>

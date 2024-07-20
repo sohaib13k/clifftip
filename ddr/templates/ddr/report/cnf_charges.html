@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
 
-    <h5 class="card-title">C&F Charges</h5>
+    <h5 class="card-title mb-0">C&F Charges</h5>
     <div class="form-group d-flex flex-column flex-md-row align-items-center">
       <label for="timeInterval04" class="me-3 mb-0">Time Interval</label>
       <select id="timeInterval04" class="form-select" style="width: auto;">
@@ -11,6 +11,7 @@
         <option value="year">This Year</option>
         <option value="custom">Custom</option>
       </select>
+      <a class="ms-2" href={% url 'report-view' result.cnf_charges.report.id %} target="_blank">View/Update<i class="fas fa-fw fa-external-link-alt"></i></a>
       <div class="mb-0 ms-0 ms-md-1 mt-2 mt-md-0" id="dateRangeContainer04" style="display: none;">
         <input type="text" id="datePicker04" class="form-control flatpickr-range" placeholder="Select date or date range" style="width: auto;" />
       </div>

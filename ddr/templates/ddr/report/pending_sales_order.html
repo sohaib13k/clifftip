@@ -11,6 +11,7 @@
         <option value="year">This Year</option>
         <option value="custom">Custom</option>
       </select>
+      <a class="ms-2" href={% url 'report-view' result.pending_sales_order.report.id %} target="_blank">View/Update<i class="fas fa-fw fa-external-link-alt"></i></a>
       <div class="mb-0 ms-0 ms-md-1 mt-2 mt-md-0" id="dateRangeContainer03" style="display: none;">
         <input type="text" id="datePicker03" class="form-control flatpickr-range" placeholder="Select date or date range" style="width: auto;" />
       </div>

@@ -1,6 +1,7 @@
 <div class="card">
-  <div class="card-header">
-    <h5 class="card-title">Net Shipment Days (Concise)</h5>
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">Net Shipment Days (Concise)</h5>
+    <a class="ms-2" href={% url 'report-view' result.invoice_report.report.id %} target="_blank">View/Update<i class="fas fa-fw fa-external-link-alt"></i></a>
   </div>
   <table class="table table-bordered table-sm" style="width:100%;">
     <thead>

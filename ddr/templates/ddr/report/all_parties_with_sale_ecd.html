@@ -1,6 +1,6 @@
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="card-title">ECD Report (last 4 months)</h5>
+    <h5 class="card-title mb-0">ECD Report (last 4 months)</h5>
     <div class="d-flex justify-content-end align-items-center">
       <div class="form-group d-flex flex-column flex-md-row align-items-center">
         <select id="ecd_report_filter_01" class="form-select" style="width: auto;" onchange="ecdToggleTables(this.value)">
@@ -9,6 +9,7 @@
           <option value="ecd_branch_sales">Branch Sales</option>
         </select>
       </div>
+      <a class="ms-2" href={% url 'report-view' result.all_parties_with_sale.report.id %} target="_blank">View/Update<i class="fas fa-fw fa-external-link-alt"></i></a>
     </div>
   </div>
 
