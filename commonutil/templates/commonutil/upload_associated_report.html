@@ -1,0 +1,118 @@
+{% load custom_filters %}
+{% load static %}
+
+<table id="datatables-orders" class="table table-responsive table-striped" width="100%">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Report Name</th>
+        <th>Last Upload Date</th>
+        <th>Upload Report</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in result.related_reports %}
+        {% if not report.is_custom_report %}
+          {% if 'EXCEL' in report.data_source %}
+            <tr>
+              <td>
+                <strong>{{ report.id }}</strong>
+              </td>
+              <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <a class="text-decoration-none" href="{% url 'report-view' report.id %}?cached=true">{{ report.name }}</a>
+              </td>
+              {% if report.report_last_updated_tmstmp %}
+                <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}&nbsp;&nbsp;({{ report.report_last_updated_tmstmp|time_elapsed }})</td>
+              {% else %}
+                <td></td>
+              {% endif %}
+              <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="py-0">
+                <form action="{% url 'report-upload' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <input type="hidden" name="form_type" value="excel_upload" />
+                  <input type="hidden" name="report_id" value="{{ report.id }}" />
+                  <div class="row">
+                      <div class="input-group">
+                        <input type="file" class="form-control" type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" >
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </div>
+                  </div>
+                </form>
+                {% comment %} <a href="#" class="btn btn-primary btn-sm">View</a>
+                <a href="#" class="btn btn-primary btn-sm">Edit</a> {% endcomment %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td>
+                <strong>{{ report.id }}</strong>
+              </td>
+              <td>
+                <a class="text-decoration-none" href="{% url 'report-view' report.id %}?cached=true">{{ report.name }}</a>
+              </td>
+              <td>{{ report.report_last_updated_tmstmp|date:'d-m-Y g:i A' }}</td>
+              <td class="py-0">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#defaultModalPrimary">Click here to enter data</a>
+                <div class="modal fade" id="defaultModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Form</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body m-3">
+                        <form method="post" action="{% url 'report-upload' %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="form_entry" />
+                          <input type="hidden" name="report" value="ageing_report" />
+                          <div class="form-row mb-3">
+                            <div class="col-md-4">
+                              <label for="reportDate">Select Date:</label>
+                            </div>
+                            <div class="col-md-8">
+                              <input type="date" class="form-control" id="reportDate" name="reportDate" />
+                            </div>
+                          </div>
+                          {% for person in sales_person %}
+                            <div class="form-row">
+                              <div class="col-md-4">
+                                <label for="{{ person.id }}">{{ person }}</label>
+                              </div>
+                              <div class="col-md-8">
+                                <input type="text" class="form-control" id="{{ person.id }}" name="{{ person.id }}" />
+                              </div>
+                            </div>
+                          {% endfor %}
+                          <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function() {
+      $('#datatables-orders').DataTable().destroy();  // Destroy the previous instance
+        $('#datatables-orders').DataTable({
+          responsive: true,
+          searching: false,  // Disable search box
+          paging: false,     // Disable pagination
+          aoColumnDefs: [
+            {
+              bSortable: false,
+              aTargets: [-1]
+            }
+          ]
+        });
+    });
+</script>

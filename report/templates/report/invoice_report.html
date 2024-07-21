@@ -18,6 +18,7 @@
       {% include 'commonutil/navbar.html' %}
       <div class="container mt-4 mb-4">
         <a href="{% url 'report-view' result.report.id %}?cached=false" class="btn btn-secondary">Refresh</a>
+        {% include 'commonutil/upload_associated_report.html' %}
       </div>
       <div class="container my-5">
         <h2 class="mb-4">Summary</h2>

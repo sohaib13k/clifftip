@@ -1,3 +1,5 @@
+from typing import List, Union
+from django.db.models.query import QuerySet
 import numpy as np
 import random
 import string
@@ -7,7 +9,7 @@ import os
 from babel.numbers import format_decimal
 import pandas as pd
 from pathlib import Path
-
+from report.models import Report
 
 def uploaded_excel(f, location):
     """
@@ -166,3 +168,31 @@ def convert_numpy_types(d):
             d[key] = int(value)
         elif isinstance(value, np.float64):
             d[key] = float(value)
+
+
+def extract_upload_from_custom_report(
+    param1: Union["Report", QuerySet["Report"]], 
+    result_list: List["Report"]
+) -> List["Report"]:
+    """
+    Extracts all non-custom Report instances from a report queryset and appends them to a result list.
+
+    Args:
+        param1: A report queryset which could be a single Report instance or a QuerySet of Report instances.
+        result_list: A list to which non-custom Report instances will be appended.
+
+    Returns:
+        list: The result_list with appended non-custom Report instances.
+    """
+    if isinstance(param1, Report):
+        if not param1.is_custom_report:
+            if param1 not in result_list:
+                result_list.append(param1)
+            return result_list
+        else:
+            return extract_upload_from_custom_report(param1.reports.all(), result_list)
+
+    for report in param1:
+        result_list = extract_upload_from_custom_report(report, result_list)
+
+    return result_list

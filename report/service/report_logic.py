@@ -22,6 +22,7 @@ def default(request, report):
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
         "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
     }
 
     return result
@@ -42,6 +43,7 @@ def sale_register(request, report):
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         # "data": df.to_json(orient="records"),
         "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
     }
 
     return result
@@ -58,6 +60,7 @@ def all_parties(request, report):
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
         "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
     }
 
     return result
@@ -74,6 +77,7 @@ def item_type_finished_goods(request, report):
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": df.to_json(orient="records"),
         "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
     }
 
     return result
@@ -104,6 +108,7 @@ def routing_report(request, report, df=None):
         "data_lock_percent": locked_percent,
         "data_unlock_percent": unlocked_percent,
         "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
     }
 
     return result
@@ -134,6 +139,7 @@ def bom_report(request, report, df=None):
         "data_lock_percent": locked_percent,
         "data_unlock_percent": unlocked_percent,
         "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
     }
 
     return result
@@ -163,6 +169,7 @@ def churn_rate(request, report):
         # "table": df.to_html(classes="table table-striped", index=False, header=False),
         "data": merged_df.to_json(orient="records"),
         "report": report,
+        "related_reports": commonutil.extract_upload_from_custom_report(report.reports.all(), []),
     }
 
     return result
@@ -396,6 +403,7 @@ def temp(request, report):
         "branch_by_item_type_analysis": branch_by_item_type_analysis,
         "all_chart_data_json": all_chart_data_json,
         "myRange": range(1),
+        "related_reports": commonutil.extract_upload_from_custom_report(report.reports.all(), []),
     }
 
 
@@ -452,6 +460,7 @@ def all_parties_with_sale(request, report, *args):
 
     result = {
         "data": parties_with_sale.to_json(orient="records"),
+        "related_reports": commonutil.extract_upload_from_custom_report(report.reports.all(), []),
         "report": report,
     }
 
