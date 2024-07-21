@@ -8,7 +8,7 @@ import os
 from commonutil import commonutil
 from report.commonutil import append_total, add_percentage_column
 from django.conf import settings
-from ..models import Report
+from ..models import Report, Employee
 
 
 def default(request, report):
@@ -462,6 +462,25 @@ def all_parties_with_sale(request, report, *args):
         "data": parties_with_sale.to_json(orient="records"),
         "related_reports": commonutil.extract_upload_from_custom_report(report.reports.all(), []),
         "report": report,
+    }
+
+    return result
+
+
+def ageing_report(request, report):
+    latest_file = commonutil.get_latest_csv_from_dir(report)
+    sales_person = Employee.objects.filter(job_title="SE")
+
+    df = pd.DataFrame()
+    if latest_file is not None:
+        df = pd.read_csv(latest_file)
+
+    result = {
+        # "table": df.to_html(classes="table table-striped", index=False, header=False),
+        "data": df.to_json(orient="records"),
+        "report": report,
+        "related_reports": Report.objects.filter(id=report.id),
+        "sales_person": sales_person,
     }
 
     return result
