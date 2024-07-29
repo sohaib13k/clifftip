@@ -127,3 +127,14 @@ sudo mv ~/projects/clifftip/static/ /var/www/clifftip/
 gunicorn clifftip.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 300 --access-logfile /var/log/gunicorn/clifftip/access.log --error-logfile /var/log/gunicorn/clifftip/error.log &
 sudo systemctl restart nginx
 ```
+
+### Adding a new company/login
+1. Add company enum in account.models.User.Company
+1.1. Create company user model inheriting User. Create model manager
+2. Addin company enum in report.models.Report.Company
+3. Create admin panel and register user model, earlier created
+3.1. Create report admin panel and register in admin panel
+3.2. Add admin panel route in clifftip.urls.py
+4. Create a superuser
+4.1. open shell/db and set user.company="new_company_enum"
+5. In navbar.html and sidebar.html, change company name and route to admin panel
