@@ -3,7 +3,13 @@
     <div class="sidebar-content js-simplebar">
         <a class="sidebar-brand" href={% url 'ddr-home' %}>
             <span class="sidebar-brand-text align-middle">
-                Clifftip
+                {% if user.company == "CLIFFTIP" %}
+                    Clifftip
+                {% elif user.company == "SAILING_CLUB_SOCIETY" %}
+                    Sailing Club Society
+                {% else %}
+                    Company Name
+                {% endif %}
             </span>
             <svg class="sidebar-brand-icon align-middle" width="32px" height="32px" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5"
                 stroke-linecap="square" stroke-linejoin="miter" color="#FFFFFF" style="margin-left: -3px">
@@ -24,7 +30,17 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-start">
                         <a class="dropdown-item" href={% url 'profile' %}><i class="align-middle me-1" data-feather="user"></i> Profile</a>
-                        <a class="dropdown-item" href={% url 'admin:index' %}><i class="align-middle me-1" data-feather="settings"></i> Settings </a>
+
+                        {% if user.is_superuser %}
+                            {% if user.company == "CLIFFTIP" %}
+                                <a class="dropdown-item" href="\clifftip-admin"><i class="align-middle me-1" data-feather="settings"></i> Settings </a>
+                            {% elif user.company == "SAILING_CLUB_SOCIETY" %}
+                                <a class="dropdown-item" href="\sailing-club-society-admin"><i class="align-middle me-1" data-feather="settings"></i> Settings </a>
+                            {% else %}
+                                <a class="nav-icon" href="#"><i class="align-middle me-1" data-feather="settings"></i> Settings </a>
+                            {% endif %}
+                        {% endif %}
+
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href={% url 'logout' %}><i class="align-middle me-1" data-feather="log-out"></i> Log out</a>
                     </div>

@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import Report
 from unittest.mock import patch
 
@@ -8,7 +8,7 @@ from unittest.mock import patch
 class ViewReportTests(TestCase):
     def setUp(self):
         # Set up a user and log them in
-        self.user = User.objects.create_user(username="testuser", password="12345")
+        self.user = get_user_model().objects.create_user(username="testuser", password="12345")
         self.client.login(username="testuser", password="12345")
 
         self.report = Report.objects.create(

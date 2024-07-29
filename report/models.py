@@ -21,6 +21,10 @@ class Report(models.Model):
         ("CUSTOM", "Custom Report"),
     )
 
+    class Company(models.TextChoices):
+        CLIFFTIP = "CLIFFTIP", "Clifftip"
+        SAILING_CLUB_SOCIETY = "SAILING_CLUB_SOCIETY", "Sailing Club Society"
+
     name = models.CharField(max_length=127, unique=True)
     service_name = models.CharField(
         max_length=127,
@@ -61,6 +65,7 @@ class Report(models.Model):
     data_source = models.CharField(
         max_length=127, null=False, blank=False, choices=DATA_SOURCE_CHOICES
     )
+    company = models.TextField(max_length=127, null=False, blank=False, choices=Company.choices)
 
     class Meta:
         verbose_name = "report"

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Report
@@ -12,7 +12,7 @@ def course_access_to_superuser(sender, instance, created, **kwargs):
 
 
 def add_superusers_to_report(report):
-    superusers = User.objects.filter(is_superuser=True)
+    superusers = get_user_model().objects.filter(is_superuser=True, company=report.company)
     report.access_users.add(*superusers)
 
 

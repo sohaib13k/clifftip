@@ -1,11 +1,11 @@
 # models.py
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class AllPartiesSelectedColumns(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     columns = models.TextField()  # Store as JSON
 
     def __str__(self):
@@ -19,10 +19,10 @@ class AllPartiesThreshold(models.Model):
 
 
 class BomReportOldDataVisibility(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     count = models.IntegerField(default=7)
 
 
 class RoutingReportOldDataVisibility(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     count = models.IntegerField(default=7)

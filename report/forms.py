@@ -2,13 +2,19 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Report
 import re
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model 
 
 
 class UserSelectionForm(forms.Form):
     user = forms.ModelChoiceField(
-        queryset=User.objects.all(), required=True, label="Select User"
+        queryset=None, required=True, label="Select User"
     )
+
+    def __init__(self, *args, **kwargs):
+        admin_user = kwargs.pop('admin_user')
+        super().__init__(*args, **kwargs)
+        self.fields['user'].queryset = get_user_model().objects.filter(company=admin_user.company)
+
 
 
 class ReportForm(forms.ModelForm):
